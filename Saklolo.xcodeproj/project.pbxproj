@@ -30,6 +30,7 @@
 		59107513116691F646025721 /* FallbackCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3E961ADF4B0F438BB38983 /* FallbackCardView.swift */; };
 		5C59213974497B9754D180AA /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335B945BC9A9CC4379EF2FB8 /* SetupView.swift */; };
 		6146897C35B128E40F5B825A /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85AE66269B94DC71AF22D7 /* Incident.swift */; };
+		70F1F436C18124ADECD421A7 /* AloneCountdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */; };
 		761DF65147FC93FFBFF39BAE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20852C79EFAC211EBB674769 /* Theme.swift */; };
 		793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */; };
 		7AF899A7B7AD337C19595709 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 006526CC07A9E0135501FE40 /* NetworkMonitor.swift */; };
@@ -49,6 +50,7 @@
 		A5577E6966F0DD21BBFB4F1C /* AlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1794D8176111E9C002443 /* AlertCoordinator.swift */; };
 		AAC176FD2C8931415B589D24 /* VoiceOrb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D25EDF314277981A0534C5F /* VoiceOrb.swift */; };
 		ACF40DC80CD7A5B1EB1254CB /* MessageComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB473FFBEDCEB318365149D /* MessageComposer.swift */; };
+		B1BB52E1A29C8998F7EDF794 /* AloneModePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186EBEE3539D8DDE78B5E339 /* AloneModePolicy.swift */; };
 		B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF01D02FF45927209F625D /* GuideView.swift */; };
 		B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */; };
 		C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88E1D62881EB144522EC182 /* ListeningView.swift */; };
@@ -80,6 +82,7 @@
 		0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertOutcomeChatTests.swift; sourceTree = "<group>"; };
 		14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-SemiBold.ttf"; sourceTree = "<group>"; };
 		175032A4F57AB68F0D29CD0D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		186EBEE3539D8DDE78B5E339 /* AloneModePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AloneModePolicy.swift; sourceTree = "<group>"; };
 		1C9A07C40B442596BA4A9780 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		1D7F0508DC0AE7F2598A75D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1F1554B937169BB45A23EA45 /* TestClock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClock.swift; sourceTree = "<group>"; };
@@ -113,6 +116,7 @@
 		A64B8818017FE64A06380DF4 /* AlertQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertQueue.swift; sourceTree = "<group>"; };
 		A88E1D62881EB144522EC182 /* ListeningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningView.swift; sourceTree = "<group>"; };
 		ABCD2E3944C15032EBD1193E /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AloneCountdownTests.swift; sourceTree = "<group>"; };
 		B698F2A1F50F44028F7AEC7B /* keywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = keywords.json; sourceTree = "<group>"; };
 		C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContactsPage.swift; sourceTree = "<group>"; };
 		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
@@ -157,6 +161,7 @@
 				E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */,
 				0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */,
 				879792E6B537E6E6044316E0 /* AlertQueueTests.swift */,
+				B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */,
 				475570EBBB4C0AF9520B2777 /* ShortcutMessageTests.swift */,
 				1F1554B937169BB45A23EA45 /* TestClock.swift */,
 			);
@@ -215,6 +220,7 @@
 				F6E1794D8176111E9C002443 /* AlertCoordinator.swift */,
 				0630F9C31CC1A4FE2E66E982 /* AlertOutcome+Chat.swift */,
 				A64B8818017FE64A06380DF4 /* AlertQueue.swift */,
+				186EBEE3539D8DDE78B5E339 /* AloneModePolicy.swift */,
 				6D6883DDE67230C7692EDD37 /* ChatReplies.swift */,
 				A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */,
 				E9556F074D68B0F89585AB36 /* LocationService.swift */,
@@ -416,6 +422,7 @@
 				93A3CC98000D9348D82EA438 /* AlertOutcome+Chat.swift in Sources */,
 				23289C889612507F0D53C2CA /* AlertQueue.swift in Sources */,
 				F788017C2E0B18443ED98580 /* AloneDock.swift in Sources */,
+				B1BB52E1A29C8998F7EDF794 /* AloneModePolicy.swift in Sources */,
 				F9B8DBE7261ACCD3C7A6589F /* ChatMessage.swift in Sources */,
 				B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */,
 				91B3A3E2C6A4474C01866E39 /* ChatReplies.swift in Sources */,
@@ -457,6 +464,7 @@
 				2564DDF77EC542E08C336C36 /* AlertCoordinatorTests.swift in Sources */,
 				013FE1728C49B043A08DAFD2 /* AlertOutcomeChatTests.swift in Sources */,
 				EB7F5411641598F76171DDE0 /* AlertQueueTests.swift in Sources */,
+				70F1F436C18124ADECD421A7 /* AloneCountdownTests.swift in Sources */,
 				262E0CBEC3C5B463D2B5BEB9 /* ShortcutMessageTests.swift in Sources */,
 				8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */,
 			);
