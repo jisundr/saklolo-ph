@@ -1,0 +1,3 @@
+docs/tasks/*
+!docs/tasks/.gitkeep
+!docs/tasks/_template/
