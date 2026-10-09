@@ -13,15 +13,22 @@ struct ScriptLoader {
         let source: String
     }
 
-    func loadBundledScripts() throws -> [FirstAidScript] {
-        guard let urls = Bundle.main.urls(forResourcesWithExtension: "json", subdirectory: "Scripts") else {
-            return []
-        }
+    /// Xcode copies the script JSONs into the bundle root, not into a
+    /// `Scripts` folder, so both places are searched. `keywords.json`
+    /// sits next to them and is not a script.
+    func loadBundledScripts(in bundle: Bundle = .main) throws -> [FirstAidScript] {
+        let inFolder = bundle.urls(forResourcesWithExtension: "json", subdirectory: "Scripts") ?? []
+        let atRoot = bundle.urls(forResourcesWithExtension: "json", subdirectory: nil) ?? []
+        let urls = (inFolder + atRoot).filter { $0.lastPathComponent != "keywords.json" }
         let decoder = JSONDecoder()
-        return try urls.map { url in
+        var seen = Set<String>()
+        var scripts: [FirstAidScript] = []
+        for url in urls {
             let data = try Data(contentsOf: url)
             let file = try decoder.decode(ScriptFile.self, from: data)
-            return FirstAidScript(id: file.id, title: file.title, keywords: file.keywords, steps: file.steps, source: file.source)
+            guard seen.insert(file.id).inserted else { continue }
+            scripts.append(FirstAidScript(id: file.id, title: file.title, keywords: file.keywords, steps: file.steps, source: file.source))
         }
+        return scripts
     }
 }
