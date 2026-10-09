@@ -44,11 +44,18 @@ struct ShortcutSMSService {
 
     /// Builds the SMS body per the brief's example:
     /// "SAKLOLO: Papa fell, his head is bleeding, he is awake. 7:42pm. Location: maps.apple.com/?ll=..."
-    func buildMessage(summary: String, timestamp: Date, lat: Double?, lng: Double?) -> String {
+    ///
+    /// `locationNote` says plainly when the location is not live (I4):
+    /// "Last known location (7:31 PM)" replaces "Location" before the link,
+    /// and with no coordinates at all the note is sent on its own
+    /// ("Location unavailable").
+    func buildMessage(summary: String, timestamp: Date, lat: Double?, lng: Double?, locationNote: String? = nil) -> String {
         let time = timestamp.formatted(date: .omitted, time: .shortened)
         var message = "SAKLOLO: \(summary). \(time)."
         if let lat, let lng {
-            message += " Location: maps.apple.com/?ll=\(lat),\(lng)"
+            message += " \(locationNote ?? "Location"): maps.apple.com/?ll=\(lat),\(lng)"
+        } else if let locationNote {
+            message += " \(locationNote)."
         }
         return message
     }
