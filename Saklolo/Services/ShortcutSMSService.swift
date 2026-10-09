@@ -16,18 +16,24 @@ struct ShortcutSMSService {
         case cannotOpenURL
     }
 
-    /// Opens the "Saklolo" Shortcut with the message text as input.
+    /// Opens the "Saklolo" Shortcut with the message text as input, through
+    /// x-callback-url so Shortcuts can report back (`AlertCallback`).
+    /// Returning without throwing does NOT mean the text went out: it only
+    /// means Shortcuts is being opened. The confirmation, if any, arrives
+    /// later as a `saklolo://` URL. `notOpened` runs if iOS reports that
+    /// Shortcuts could not be opened after all.
     /// Fallback per the brief's Risks table: MFMessageComposeViewController
     /// (one tap) if the silent Shortcut send doesn't work on a given device.
     @MainActor
-    func sendViaShortcut(message: String) throws {
-        guard let encoded = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "shortcuts://run-shortcut?name=Saklolo&input=text&text=\(encoded)") else {
+    func sendViaShortcut(message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
+        guard let url = AlertCallback.shortcutURL(message: message, id: id) else {
             throw SendError.invalidURL
         }
         #if canImport(UIKit)
         guard UIApplication.shared.canOpenURL(url) else { throw SendError.cannotOpenURL }
-        UIApplication.shared.open(url)
+        UIApplication.shared.open(url) { opened in
+            if !opened { MainActor.assumeIsolated { notOpened() } }
+        }
         #endif
     }
 

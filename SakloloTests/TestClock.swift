@@ -30,6 +30,8 @@ final class TestClock: Clock, @unchecked Sendable {
     private var sleepers: [Sleeper] = []
 
     var now: Instant { lock.withLock { current } }
+    /// How many sleeps are waiting, so a test can wait for one to start.
+    var sleeperCount: Int { lock.withLock { sleepers.count } }
     var minimumResolution: Duration { .zero }
 
     func sleep(until deadline: Instant, tolerance: Duration?) async throws {

@@ -2,7 +2,8 @@ import SwiftUI
 
 /// A failure as a card in the chat, never a pop-up, so the guide sheet stays
 /// in view (I1 to I4). Reads the latest alert from `AlertQueue`, so a card
-/// turns into "I've told ..." once a retry or the composer gets the text out.
+/// turns into "I've told ..." only once the Shortcut confirms the text went
+/// out (or the composer sends it).
 struct FallbackCardView: View {
     let kind: FallbackKind
     @ObservedObject var queue: AlertQueue = .shared
@@ -12,6 +13,12 @@ struct FallbackCardView: View {
     var body: some View {
         Group {
             switch kind {
+            case .sending:
+                switch entry?.status {
+                case .needsComposer?: sendCard
+                case .sent(let at)?: delivered(at: at)
+                default: sendingCard
+                }
             case .sendFailed:
                 sendCard
             case .composer:
@@ -27,6 +34,31 @@ struct FallbackCardView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Handed to the Shortcut, not confirmed yet
+
+    private var sendingCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                ProgressView()
+                Text(entry?.outcome.sendingLine ?? "Sending the alert\u{2026}")
+                    .font(Typography.body.weight(.semibold))
+            }
+            if let quoted = entry?.outcome.quotedMessage {
+                Text(quoted)
+                    .font(Typography.finePrint)
+                    .foregroundStyle(Palette.textDim)
+            }
+        }
+        .foregroundStyle(Palette.text)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: Metrics.chipRadius, style: .continuous)
+                .strokeBorder(Palette.textDim, lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - I1, I2: the Shortcut could not send it
@@ -119,7 +151,8 @@ struct FallbackCardView: View {
 
     private func delivered(at time: Date) -> some View {
         let line = entry?.outcome.toldLine ?? "I've sent the alert"
-        return Text("\u{2713} \(line) \u{00B7} \(time.formatted(date: .omitted, time: .shortened))")
+        let quoted = entry.map { "\n\($0.outcome.quotedMessage)" } ?? ""
+        return Text("\u{2713} \(line) \u{00B7} \(time.formatted(date: .omitted, time: .shortened))\(quoted)")
             .font(Typography.body.weight(.semibold))
             .foregroundStyle(Palette.delivered)
             .multilineTextAlignment(.center)
@@ -163,6 +196,7 @@ struct FallbackCardView: View {
 
 #Preview {
     VStack(spacing: 10) {
+        FallbackCardView(kind: .sending)
         FallbackCardView(kind: .sendFailed)
         FallbackCardView(kind: .noSignal)
         FallbackCardView(kind: .noLocation)

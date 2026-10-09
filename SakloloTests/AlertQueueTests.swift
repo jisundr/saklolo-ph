@@ -9,11 +9,19 @@ final class AlertQueueTests: XCTestCase {
     private var sender: RecordingSender!
     private var signal: SignalSwitch!
     private var queue: AlertQueue!
+    private var clock: TestClock!
 
     override func setUp() async throws {
         sender = RecordingSender()
         signal = SignalSwitch(on: false)
-        queue = AlertQueue(sender: sender, signal: signal, now: { [sentAt] in sentAt })
+        clock = TestClock()
+        queue = AlertQueue(sender: sender, signal: signal, now: { [sentAt] in sentAt }, sleep: { [clock] in
+            try await clock!.sleep(for: $0)
+        })
+    }
+
+    override func tearDown() async throws {
+        clock.advance(by: .seconds(60))
     }
 
     private func outcome(_ delivery: AlertOutcome.Delivery, text: String = "SAKLOLO: Papa fell. 7:42 PM.") -> AlertOutcome {
@@ -36,18 +44,20 @@ final class AlertQueueTests: XCTestCase {
         XCTAssertEqual(queue.latest?.status, .waiting)
     }
 
-    func testAHeldTextGoesOnceSignalReturnsAndOnlyOnce() {
-        queue.record(outcome(.queued, text: "SAKLOLO: held"))
+    func testAHeldTextIsHandedOverOnceSignalReturnsAndOnlyOnce() {
+        let held = outcome(.queued, text: "SAKLOLO: held")
+        queue.record(held)
 
         signal.hasSignal = true
         queue.retry()
         queue.retry()
 
         XCTAssertEqual(sender.texts, ["SAKLOLO: held"])
-        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
+        XCTAssertEqual(sender.ids, [held.id])
+        XCTAssertEqual(queue.latest?.status, .confirming, "not sent until the Shortcut confirms")
     }
 
-    func testTheUnsentRowsAreStampedWhenTheRetrySucceeds() {
+    func testTheUnsentRowsAreStampedWhenTheRetryIsConfirmed() {
         let held = outcome(.queued)
         queue.record(held)
         var stamped: [Date] = []
@@ -55,6 +65,8 @@ final class AlertQueueTests: XCTestCase {
 
         signal.hasSignal = true
         queue.retry()
+        XCTAssertEqual(stamped, [])
+        queue.resolve(held.id, .sent)
 
         XCTAssertEqual(stamped, [sentAt])
     }
@@ -86,16 +98,123 @@ final class AlertQueueTests: XCTestCase {
         XCTAssertEqual(stamped, [sentAt])
     }
 
-    func testWaitingOnAnAlertAlreadySentRunsAtOnce() {
-        let early = Date(timeIntervalSince1970: 1_800_000_004)
-        var sent = outcome(.sent)
-        sent.records = [AlertOutcome.Record(contactID: UUID(), smsSentAt: early, called: true)]
-        queue.record(sent)
+    func testWaitingOnAnAlertAlreadyConfirmedRunsAtOnce() {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+        queue.resolve(handed.id, .sent)
         var stamped: [Date] = []
 
-        queue.whenSent(sent.id) { stamped.append($0) }
+        queue.whenSent(handed.id) { stamped.append($0) }
 
-        XCTAssertEqual(stamped, [early])
+        XCTAssertEqual(stamped, [sentAt])
+    }
+
+    // MARK: - Confirmation from the Shortcut
+
+    func testAnAlertHandedToTheShortcutIsNotSentUntilConfirmed() {
+        queue.record(outcome(.awaitingConfirmation))
+
+        XCTAssertEqual(queue.latest?.status, .confirming)
+    }
+
+    func testXSuccessMarksTheAlertSent() {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+
+        XCTAssertTrue(queue.handle(AlertCallback.url(.sent, id: handed.id)))
+
+        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
+    }
+
+    func testXErrorAndXCancelMoveTheAlertToTheComposerWithoutResending() {
+        for result in [AlertCallback.Result.failed, .cancelled] {
+            let handed = outcome(.awaitingConfirmation)
+            queue.record(handed)
+            signal.hasSignal = true
+
+            queue.handle(AlertCallback.url(result, id: handed.id))
+            queue.retry()
+
+            XCTAssertEqual(queue.latest?.status, .needsComposer, "\(result)")
+        }
+        XCTAssertTrue(sender.texts.isEmpty)
+    }
+
+    func testACallbackThatArrivesBeforeTheAlertIsRecordedStillCounts() {
+        let handed = outcome(.awaitingConfirmation)
+
+        queue.resolve(handed.id, .sent)
+        queue.record(handed)
+
+        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
+    }
+
+    func testAnotherURLIsNotACallback() {
+        queue.record(outcome(.awaitingConfirmation))
+
+        XCTAssertFalse(queue.handle(URL(string: "https://example.com/alert")!))
+        XCTAssertEqual(queue.latest?.status, .confirming)
+    }
+
+    /// Waits for the confirmation timer to start sleeping on the test clock.
+    private func waitForTimer() async {
+        for _ in 0..<1_000 where clock.sleeperCount == 0 { await Task.yield() }
+        XCTAssertEqual(clock.sleeperCount, 1)
+    }
+
+    private func waitForStatus(_ status: AlertQueue.Entry.Status) async {
+        for _ in 0..<1_000 where queue.latest?.status != status { await Task.yield() }
+    }
+
+    func testNoCallbackSoonAfterComingBackFromShortcutsMovesToTheComposer() async {
+        queue.record(outcome(.awaitingConfirmation))
+
+        queue.appLeft()
+        queue.appReturned()
+        await waitForTimer()
+        clock.advance(by: AlertPolicy.confirmationWait - .milliseconds(1))
+        await Task.yield()
+        XCTAssertEqual(queue.latest?.status, .confirming)
+
+        clock.advance(by: .milliseconds(1))
+        await waitForStatus(.needsComposer)
+
+        XCTAssertEqual(queue.latest?.status, .needsComposer)
+        XCTAssertTrue(sender.texts.isEmpty, "never resent by itself")
+    }
+
+    func testTheWaitOnlyStartsOnceTheAppHasLeftForShortcutsAndComeBack() async {
+        queue.record(outcome(.awaitingConfirmation))
+
+        queue.appReturned()
+        await Task.yield()
+
+        XCTAssertEqual(clock.sleeperCount, 0)
+        XCTAssertEqual(queue.latest?.status, .confirming)
+    }
+
+    func testAConfirmationWithinTheWaitIsKept() async {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+        queue.appLeft()
+        queue.appReturned()
+        await waitForTimer()
+
+        queue.resolve(handed.id, .sent)
+        clock.advance(by: AlertPolicy.confirmationWait)
+        await Task.yield()
+
+        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
+    }
+
+    func testALateXSuccessAfterTheComposerCardStillMarksItSent() {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+        queue.resolve(handed.id, .failed)
+
+        queue.resolve(handed.id, .sent)
+
+        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
     }
 
     // MARK: - Stored rows
@@ -121,6 +240,7 @@ final class AlertQueueTests: XCTestCase {
 
         signal.hasSignal = true
         queue.retry()
+        queue.resolve(held.id, .sent)
 
         XCTAssertEqual(rows.map(\.smsSentAt), [sentAt])
     }
@@ -137,6 +257,7 @@ final class AlertQueueTests: XCTestCase {
         try context.save()
         signal.hasSignal = true
         queue.retry()
+        queue.resolve(held.id, .sent)
 
         XCTAssertEqual(sender.texts.count, 1, "the text itself still goes out")
         XCTAssertFalse(rows[0].isStored)
