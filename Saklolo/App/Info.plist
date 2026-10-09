@@ -24,7 +24,16 @@
 	<string>Saklolo listens for "Tulong" and records what happened so it can alert your contacts and guide first aid.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Saklolo can use motion data to detect a fall and trigger an alert automatically.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BarlowCondensed-SemiBold.ttf</string>
+		<string>BarlowCondensed-Bold.ttf</string>
+		<string>BarlowCondensed-ExtraBold.ttf</string>
+	</array>
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchGround</string>
+	</dict>
 </dict>
 </plist>

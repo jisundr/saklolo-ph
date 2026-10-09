@@ -16,7 +16,12 @@ targets:
     info:
       path: Saklolo/App/Info.plist
       properties:
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchGround
+        UIAppFonts:
+          - BarlowCondensed-SemiBold.ttf
+          - BarlowCondensed-Bold.ttf
+          - BarlowCondensed-ExtraBold.ttf
         NSMicrophoneUsageDescription: "Saklolo listens for \"Tulong\" and records what happened so it can alert your contacts and guide first aid."
         NSLocationWhenInUseUsageDescription: "Saklolo includes your GPS location in the emergency SMS so contacts and responders know where you are."
         NSMotionUsageDescription: "Saklolo can use motion data to detect a fall and trigger an alert automatically."
@@ -31,6 +36,7 @@ targets:
         # beyond what the OS itself allows. Swap in a paid team ID here once
         # one exists.
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
         ENABLE_PREVIEWS: true
 schemes:
