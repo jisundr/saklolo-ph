@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var isListening = false
     @State private var showSetup = false
+    @State private var incident: Incident?
 
     var body: some View {
         NavigationStack {
@@ -15,9 +16,8 @@ struct HomeView: View {
                     .foregroundStyle(.secondary)
 
                 Button {
-                    // TODO: trigger the core loop — check-in prompt (TTS),
-                    // then start listening (WhisperKit), per brief step 1-3.
-                    isListening.toggle()
+                    // TODO: check-in prompt (TTS) and the Shortcut SMS + call, per brief step 1-3.
+                    isListening = true
                 } label: {
                     Text("SAKLOLO")
                         .font(.system(size: 36, weight: .bold))
@@ -37,6 +37,20 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showSetup) {
                 SetupView()
+            }
+            .fullScreenCover(isPresented: $isListening) {
+                // TODO: drop the canned transcript once WhisperKit works (spike 004).
+                ListeningView(fallbackTranscript: "Tulong! May sunog sa bahay namin") { saved in
+                    incident = saved
+                    isListening = false
+                }
+            }
+            .navigationDestination(item: $incident) { saved in
+                if let script = try? ScriptLoader().loadBundledScripts().first(where: { $0.id == saved.scriptID }) {
+                    GuideView(script: script)
+                } else {
+                    IncidentView(incident: saved)
+                }
             }
         }
     }

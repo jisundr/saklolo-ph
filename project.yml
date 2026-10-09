@@ -27,7 +27,7 @@ targets:
         NSMotionUsageDescription: "Saklolo can use motion data to detect a fall and trigger an alert automatically."
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.phitopolis.saklolo
+        PRODUCT_BUNDLE_IDENTIFIER: com.jaysondelosreyes.saklolo
         CODE_SIGN_STYLE: Automatic
         # No DEVELOPMENT_TEAM pinned — Xcode resolves to whichever Apple ID /
         # team is signed in locally when the project is first opened.
