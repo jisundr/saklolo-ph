@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var isListening = false
     @State private var showSetup = false
+    @State private var showLog = false
     @State private var incident: Incident?
 
     var body: some View {
@@ -32,7 +33,13 @@ struct HomeView: View {
             .padding()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Setup") { showSetup = true }
+                    Menu {
+                        Button("Contacts and setup", systemImage: "person.2") { showSetup = true }
+                        Button("Past incidents", systemImage: "clock.arrow.circlepath") { showLog = true }
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Menu")
                 }
             }
             .sheet(isPresented: $showSetup) {
@@ -46,11 +53,10 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(item: $incident) { saved in
-                if let script = try? ScriptLoader().loadBundledScripts().first(where: { $0.id == saved.scriptID }) {
-                    GuideView(script: script)
-                } else {
-                    IncidentView(incident: saved)
-                }
+                IncidentView(incident: saved)
+            }
+            .navigationDestination(isPresented: $showLog) {
+                IncidentLogView()
             }
         }
     }
