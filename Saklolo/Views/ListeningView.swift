@@ -51,7 +51,7 @@ struct ListeningView: View {
         .padding()
         .task {
             // TODO: live countdown and partial transcript while recording.
-            let heard = (try? await SpeechTranscriptionService().transcribe()) ?? ""
+            let heard = (try? await SpeechTranscriptionService.shared.transcribe()) ?? ""
             transcript = heard.isEmpty ? fallbackTranscript : heard
 
             // Keyword result is computed first inside classify(); the LLM can

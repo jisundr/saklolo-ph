@@ -6,6 +6,10 @@ options:
   developmentLanguage: en
 settings:
   SWIFT_VERSION: "6.0"
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/argmax-oss-swift
+    from: 1.1.1
 targets:
   Saklolo:
     type: application
@@ -13,6 +17,9 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: Saklolo
+    dependencies:
+      - package: WhisperKit
+        product: WhisperKit
     info:
       path: Saklolo/App/Info.plist
       properties:

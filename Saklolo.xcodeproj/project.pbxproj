@@ -11,7 +11,9 @@
 		03D27A0B51724FDC37120D9A /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7887C2618CDBF767A0C4BFB0 /* Alert.swift */; };
 		0BC9A7685057102FC430D392 /* keywords.json in Resources */ = {isa = PBXBuildFile; fileRef = B698F2A1F50F44028F7AEC7B /* keywords.json */; };
 		158B1E1112ED6BD3C4336714 /* BarlowCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */; };
+		1AB46C4D598BF4104D975AA8 /* ModelLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2169BE6AA1670BF36813B /* ModelLoader.swift */; };
 		3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1A3C166DBB4BAED919887 /* IncidentView.swift */; };
+		3D1415A08F53C76FA4A780B8 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 37C60B3B2C48EEE5078CFDDB /* WhisperKit */; };
 		3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */; };
 		4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = E571F68D365C23F725BC86F3 /* FirstAidScript.swift */; };
 		48FE238DE91BC3E3AF2197EE /* KeywordDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */; };
@@ -34,6 +36,7 @@
 		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
 		E8AEE9952D5980A31093CDBD /* BarlowCondensed-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */; };
 		ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9556F074D68B0F89585AB36 /* LocationService.swift */; };
+		F47977421B79E005D6EACCDD /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7047F2D1628E0E1EEC75C55B /* LoadingView.swift */; };
 		FBE1FEC241637D7609E10C62 /* bleeding.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B9BDAB0B207650AF0409394 /* bleeding.json */; };
 /* End PBXBuildFile section */
 
@@ -44,11 +47,13 @@
 		20852C79EFAC211EBB674769 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		2DB9528F3641CAE2E08E74C0 /* head_injury.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = head_injury.json; sourceTree = "<group>"; };
 		335B945BC9A9CC4379EF2FB8 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		37E2169BE6AA1670BF36813B /* ModelLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoader.swift; sourceTree = "<group>"; };
 		384B62FB9B9A004977718172 /* fall.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = fall.json; sourceTree = "<group>"; };
 		38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptLoader.swift; sourceTree = "<group>"; };
 		3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSMSService.swift; sourceTree = "<group>"; };
 		5E869EDA2F4B46F098C822F4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		61D7F419EB2C6199DFC88667 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		7047F2D1628E0E1EEC75C55B /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		74CF01D02FF45927209F625D /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
 		7887C2618CDBF767A0C4BFB0 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-Bold.ttf"; sourceTree = "<group>"; };
@@ -66,9 +71,20 @@
 		EF85AE66269B94DC71AF22D7 /* Incident.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incident.swift; sourceTree = "<group>"; };
 		F189DF9000DA76E9609A7B95 /* unconscious.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = unconscious.json; sourceTree = "<group>"; };
 		F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F1EF822BA69E66687F3D78BD /* Saklolo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Saklolo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1EF822BA69E66687F3D78BD /* Saklolo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Saklolo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5070F7F241920F87DF1B525 /* general.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = general.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		76D1F71DBE00FA47BBABB108 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D1415A08F53C76FA4A780B8 /* WhisperKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0905F6D992CE20DDD25579EF = {
@@ -128,6 +144,7 @@
 			children = (
 				A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */,
 				E9556F074D68B0F89585AB36 /* LocationService.swift */,
+				37E2169BE6AA1670BF36813B /* ModelLoader.swift */,
 				38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */,
 				3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */,
 				961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */,
@@ -151,6 +168,7 @@
 				5E869EDA2F4B46F098C822F4 /* HomeView.swift */,
 				9BA1A3C166DBB4BAED919887 /* IncidentView.swift */,
 				A88E1D62881EB144522EC182 /* ListeningView.swift */,
+				7047F2D1628E0E1EEC75C55B /* LoadingView.swift */,
 				335B945BC9A9CC4379EF2FB8 /* SetupView.swift */,
 			);
 			path = Views;
@@ -196,6 +214,7 @@
 			buildPhases = (
 				2CE20331E3FBC415E6E48F2F /* Sources */,
 				CD19C5E10F36329AC7AFD5A0 /* Resources */,
+				76D1F71DBE00FA47BBABB108 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -203,6 +222,7 @@
 			);
 			name = Saklolo;
 			packageProductDependencies = (
+				37C60B3B2C48EEE5078CFDDB /* WhisperKit */,
 			);
 			productName = Saklolo;
 			productReference = F1EF822BA69E66687F3D78BD /* Saklolo.app */;
@@ -215,7 +235,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2700;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					B995F470C08815525017BCBE = {
 						ProvisioningStyle = Automatic;
@@ -231,6 +251,9 @@
 			);
 			mainGroup = 0905F6D992CE20DDD25579EF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E476B0DFE38418928CC06B30 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0A749E47B037DB710A88082A /* Products */;
 			projectDirPath = "";
@@ -276,7 +299,9 @@
 				3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */,
 				48FE238DE91BC3E3AF2197EE /* KeywordDatabase.swift in Sources */,
 				C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */,
+				F47977421B79E005D6EACCDD /* LoadingView.swift in Sources */,
 				ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */,
+				1AB46C4D598BF4104D975AA8 /* ModelLoader.swift in Sources */,
 				D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */,
 				793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */,
 				5C59213974497B9754D180AA /* SetupView.swift in Sources */,
@@ -313,7 +338,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -345,10 +369,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 68X569T2GH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -369,7 +391,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
@@ -399,7 +420,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -431,10 +451,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 68X569T2GH;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -448,7 +466,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -477,6 +494,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E476B0DFE38418928CC06B30 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/argmax-oss-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		37C60B3B2C48EEE5078CFDDB /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E476B0DFE38418928CC06B30 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DD1D85EB928CDD5A7B83DFD7 /* Project object */;
 }
