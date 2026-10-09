@@ -22,12 +22,15 @@ struct ListeningView: View {
     @State private var incident: Incident?
     @State private var script: FirstAidScript?
     @State private var showGuide = false
-    @State private var cancelled = false
+    /// Set by Cancel or Done: the session is over, nothing new is shown.
+    @State private var stopped = false
     @State private var alerts: AlertCoordinator<ContinuousClock>?
     @State private var alertOutcome: AlertOutcome?
     @State private var understood: SituationClassification?
     /// Alone mode, alert not sent yet: the dock decides.
     @State private var awaitingPerson = false
+    /// The alert has started going out; Cancel can no longer unsend it.
+    @State private var alertFired = false
 
     private enum Stage: Equatable {
         /// Recording or transcribing; the orb shows.
@@ -43,7 +46,8 @@ struct ListeningView: View {
     /// Used when transcription fails or hears nothing, so the rest of the flow
     /// can still be exercised (and in the simulator, where there is no mic).
     var fallbackTranscript = ""
-    /// Called once, when the session ends (Done), with the saved incident.
+    /// Called once, when the session ends (Done, or Cancel after the alert
+    /// went out), with the saved incident.
     var onClassified: (Incident) -> Void = { _ in }
 
     var body: some View {
@@ -72,10 +76,16 @@ struct ListeningView: View {
                 .font(Typography.finePrint)
                 .foregroundStyle(Palette.textDim)
             Spacer()
-            if incident != nil {
+            let headerExit = SessionExit.header(
+                incidentSaved: incident != nil,
+                awaitingPerson: awaitingPerson,
+                alertFired: alertFired
+            )
+            if headerExit == .done {
                 Button("Done", action: endSession)
                     .font(.body.bold())
                     .frame(minHeight: Metrics.minTarget)
+                    .accessibilityHint(headerExit.hint)
             } else {
                 Button {
                     cancel()
@@ -85,7 +95,7 @@ struct ListeningView: View {
                 .font(.body)
                 .foregroundStyle(Palette.textDim)
                 .frame(minHeight: Metrics.minTarget)
-                .accessibilityHint("Stops listening. Nothing is saved or sent.")
+                .accessibilityHint(headerExit.hint)
             }
         }
         .padding(.horizontal, Metrics.gutter)
@@ -134,28 +144,61 @@ struct ListeningView: View {
     // MARK: - Session
 
     private func cancel() {
+        // Once the alert is out (or going out) it cannot be taken back, so
+        // Cancel keeps the record of it, like Done.
+        if alerts?.hasFired == true {
+            endSession()
+            return
+        }
         // The view's task is cancelled when it goes away, which stops the
         // recorder; the flag makes sure nothing is saved even if Whisper or
         // the classifier is already past its last cancellation point.
-        cancelled = true
+        stopped = true
         alerts?.cancel()
+        // Alone mode's dock: the incident is in but nothing was sent.
+        if let incident { modelContext.delete(incident) }
         dismiss()
     }
 
-    /// Done, or the guide's last step: the session ends with the incident.
+    /// Done, the guide's last step, "I'm okay", or Cancel after the alert
+    /// went out: the session ends with the incident and its alert rows. A
+    /// send still in its location wait is waited for, so its rows are kept.
     private func endSession() {
-        guard let incident else { return }
+        guard !stopped else { return }
+        stopped = true
         alerts?.cancel()
-        onClassified(incident)
+        Task {
+            let outcome = await alerts?.settledOutcome()
+            let kept = incident ?? saveIncidentSoFar()
+            if alertOutcome == nil, let outcome {
+                alertOutcome = outcome
+                record(outcome, on: kept)
+            }
+            onClassified(kept)
+        }
     }
 
-    private var isStopped: Bool { cancelled || Task.isCancelled }
+    /// The incident when the session ends before understanding finished
+    /// (Cancel after the deadline alert): what was heard, if anything.
+    private func saveIncidentSoFar() -> Incident {
+        let heard = messages.last { $0.role == .user }.flatMap { message -> String? in
+            if case .text(let text) = message.kind { text } else { nil }
+        }
+        let saved = Incident(trigger: trigger, mode: .guide, transcript: heard ?? "", startedAt: startedAt)
+        modelContext.insert(saved)
+        incident = saved
+        if let alertOutcome { record(alertOutcome, on: saved) }
+        return saved
+    }
+
+    private var isStopped: Bool { stopped || Task.isCancelled }
 
     private func runSession() async {
         // The deadline starts at the tap; at 10 s the general text goes out
         // if nothing was understood by then.
         let coordinator = AlertCoordinator(location: location)
         alerts = coordinator
+        coordinator.onFire = { alertFired = true }
         coordinator.begin(at: startedAt, recipients: contacts.map(AlertRecipient.init)) { outcome in
             show(outcome)
         }
@@ -259,7 +302,7 @@ struct ListeningView: View {
 
     /// Puts the alert in the thread and on the incident, once.
     private func show(_ outcome: AlertOutcome) {
-        guard !cancelled, alertOutcome == nil else { return }
+        guard !stopped, alertOutcome == nil else { return }
         alertOutcome = outcome
         messages.append(contentsOf: outcome.chatMessages)
         if let incident { record(outcome, on: incident) }

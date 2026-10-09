@@ -104,6 +104,57 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertEqual(sender.texts.count, 1)
     }
 
+    // MARK: - Cancel and the end of the session
+
+    func testCancelDuringTheLocationWaitStillSendsAndTheOutcomeCanBeAwaited() async throws {
+        var fired = 0
+        coordinator.onFire = { fired += 1 }
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+        locator.parks = true
+
+        let coordinator = self.coordinator!
+        let classification = fall()
+        let sending = Task { await coordinator.send(classification: classification) }
+        while !locator.isParked { await Task.yield() }
+        XCTAssertEqual(fired, 1, "the screen learns the alert is going out before the outcome")
+        XCTAssertTrue(coordinator.hasFired)
+
+        coordinator.cancel()
+        let settled = Task { await coordinator.settledOutcome() }
+        await Task.yield()
+        locator.release()
+
+        let settledOutcome = await settled.value
+        let sentOutcome = await sending.value
+        let outcome = try XCTUnwrap(settledOutcome)
+        XCTAssertEqual(outcome, sentOutcome)
+        XCTAssertEqual(sender.texts.count, 1)
+        XCTAssertEqual(fired, 1)
+    }
+
+    func testNothingSettlesWhenCancelledBeforeTheAlertWent() async {
+        var fired = false
+        coordinator.onFire = { fired = true }
+        coordinator.begin(at: tap, recipients: [ben]) { _ in XCTFail("cancelled") }
+
+        coordinator.cancel()
+        clock.advance(by: AlertPolicy.deadline)
+        await Task.yield()
+
+        let settled = await coordinator.settledOutcome()
+        XCTAssertNil(settled)
+        XCTAssertFalse(fired)
+        XCTAssertTrue(sender.texts.isEmpty)
+    }
+
+    func testTheSettledOutcomeOfASentAlertIsReturnedAtOnce() async throws {
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+        let outcome = try await sent(fall())
+
+        let settled = await coordinator.settledOutcome()
+        XCTAssertEqual(settled, outcome)
+    }
+
     // MARK: - Deadline
 
     func testNothingIsSentBeforeTheDeadline() async throws {
@@ -327,6 +378,10 @@ private final class FakeLocator: AlertLocating {
     var fix: AlertFix?
     /// Suspends before answering, so a second send can run in between.
     var suspends = false
+    /// Parks the send in its location wait until `release()`.
+    var parks = false
+    private var parked: CheckedContinuation<Void, Never>?
+    var isParked: Bool { parked != nil }
     private(set) var started = 0
     private(set) var waits: [Duration] = []
 
@@ -341,6 +396,12 @@ private final class FakeLocator: AlertLocating {
     func fix(waitingUpTo limit: Duration) async -> AlertFix? {
         waits.append(limit)
         if suspends { await Task.yield() }
+        if parks { await withCheckedContinuation { parked = $0 } }
         return fix
+    }
+
+    func release() {
+        parked?.resume()
+        parked = nil
     }
 }

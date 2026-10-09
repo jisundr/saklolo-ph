@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import XCTest
 @testable import Saklolo
 
@@ -95,6 +96,52 @@ final class AlertQueueTests: XCTestCase {
         queue.whenSent(sent.id) { stamped.append($0) }
 
         XCTAssertEqual(stamped, [early])
+    }
+
+    // MARK: - Stored rows
+
+    private func storedIncident() throws -> (ModelContext, Incident) {
+        let container = try ModelContainer(
+            for: Incident.self, Alert.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = ModelContext(container)
+        let incident = Incident(trigger: "button", mode: .guide)
+        context.insert(incident)
+        return (context, incident)
+    }
+
+    func testARetryStampsTheStoredRowsOfAQueuedAlert() throws {
+        let (context, incident) = try storedIncident()
+        let held = outcome(.queued)
+        queue.record(held)
+        let rows = held.alerts(for: incident, queue: queue)
+        rows.forEach(context.insert)
+        try context.save()
+
+        signal.hasSignal = true
+        queue.retry()
+
+        XCTAssertEqual(rows.map(\.smsSentAt), [sentAt])
+    }
+
+    func testARetryAfterTheIncidentIsDeletedLeavesItsRowsAlone() throws {
+        let (context, incident) = try storedIncident()
+        let held = outcome(.queued)
+        queue.record(held)
+        let rows = held.alerts(for: incident, queue: queue)
+        rows.forEach(context.insert)
+        try context.save()
+
+        context.delete(incident)
+        try context.save()
+        signal.hasSignal = true
+        queue.retry()
+
+        XCTAssertEqual(sender.texts.count, 1, "the text itself still goes out")
+        XCTAssertFalse(rows[0].isStored)
+        XCTAssertNil(rows[0].smsSentAt, "nothing is written to a deleted row")
+        XCTAssertEqual(queue.latest?.status, .sent(at: sentAt))
     }
 
     func testTheLatestAlertIsTheOneTheCardsShow() {
