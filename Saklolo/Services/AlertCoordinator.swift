@@ -144,6 +144,11 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
     private var deadlineAt: C.Instant?
     private var recipients: [AlertRecipient] = []
     private var deadlineTask: Task<Void, Never>?
+    private var settling: [CheckedContinuation<AlertOutcome?, Never>] = []
+
+    /// Called once, when a send starts (before the location wait), so the
+    /// screen knows the alert is going out even before the outcome is in.
+    var onFire: (@MainActor () -> Void)?
 
     /// `signal` nil means always try to send. `queue` gets every outcome,
     /// so a held text is retried after this screen is gone (I3).
@@ -173,6 +178,16 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         switch state {
         case .sending, .sent: true
         default: false
+        }
+    }
+
+    /// The outcome of the alert, waiting for a send in progress to finish;
+    /// nil if nothing was sent (not yet, or cancelled first).
+    func settledOutcome() async -> AlertOutcome? {
+        switch state {
+        case .sent(let outcome): return outcome
+        case .sending: return await withCheckedContinuation { settling.append($0) }
+        default: return nil
         }
     }
 
@@ -236,6 +251,7 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         // send sees `.sending` and stops.
         state = .sending
         deadlineTask?.cancel()
+        onFire?()
 
         let fix = await locator.fix(waitingUpTo: locationWait())
 
@@ -283,6 +299,9 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         )
         state = .sent(outcome)
         queue?.record(outcome)
+        let waiting = settling
+        settling = []
+        for waiter in waiting { waiter.resume(returning: outcome) }
         return outcome
     }
 
@@ -311,7 +330,8 @@ extension AlertCoordinator where C == ContinuousClock {
 extension AlertOutcome {
     /// The delivery rows to store on the incident. Rows not sent yet
     /// (`smsSentAt == nil`) are the queue: they are stamped when a retry or
-    /// the composer gets the text out.
+    /// the composer gets the text out. A row whose incident was deleted
+    /// meanwhile is left alone.
     @MainActor
     func alerts(for incident: Incident, queue: AlertQueue = .shared) -> [Alert] {
         let rows = records.map {
@@ -320,11 +340,17 @@ extension AlertOutcome {
         let unsent = rows.filter { $0.smsSentAt == nil }
         if !unsent.isEmpty {
             queue.whenSent(id) { sentAt in
-                for row in unsent { row.smsSentAt = sentAt }
+                for row in unsent where row.isStored { row.smsSentAt = sentAt }
             }
         }
         return rows
     }
+}
+
+extension Alert {
+    /// False once the row is deleted (directly, or with its incident), so a
+    /// late retry never writes to a deleted model.
+    var isStored: Bool { modelContext != nil && !isDeleted }
 }
 
 /// `LocationService` behind `AlertLocating`: asks for a one-shot fix at the

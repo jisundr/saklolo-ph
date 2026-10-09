@@ -31,6 +31,7 @@
 		5C59213974497B9754D180AA /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335B945BC9A9CC4379EF2FB8 /* SetupView.swift */; };
 		6146897C35B128E40F5B825A /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85AE66269B94DC71AF22D7 /* Incident.swift */; };
 		70F1F436C18124ADECD421A7 /* AloneCountdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */; };
+		743BFAAF528D807B8DC37F09 /* SessionExitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */; };
 		761DF65147FC93FFBFF39BAE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20852C79EFAC211EBB674769 /* Theme.swift */; };
 		793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */; };
 		7AF899A7B7AD337C19595709 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 006526CC07A9E0135501FE40 /* NetworkMonitor.swift */; };
@@ -53,6 +54,7 @@
 		B1BB52E1A29C8998F7EDF794 /* AloneModePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186EBEE3539D8DDE78B5E339 /* AloneModePolicy.swift */; };
 		B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF01D02FF45927209F625D /* GuideView.swift */; };
 		B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */; };
+		BF33F2F2C799EDF8B981F80C /* SessionExit.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13517B32F1311EA1F69FDA8 /* SessionExit.swift */; };
 		C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88E1D62881EB144522EC182 /* ListeningView.swift */; };
 		CFA35069439C3A4216474913 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 61D7F419EB2C6199DFC88667 /* OFL.txt */; };
 		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
@@ -76,6 +78,7 @@
 
 /* Begin PBXFileReference section */
 		006526CC07A9E0135501FE40 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExitTests.swift; sourceTree = "<group>"; };
 		0630F9C31CC1A4FE2E66E982 /* AlertOutcome+Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertOutcome+Chat.swift"; sourceTree = "<group>"; };
 		0B9BDAB0B207650AF0409394 /* bleeding.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bleeding.json; sourceTree = "<group>"; };
 		0BB473FFBEDCEB318365149D /* MessageComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposer.swift; sourceTree = "<group>"; };
@@ -120,6 +123,7 @@
 		B698F2A1F50F44028F7AEC7B /* keywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = keywords.json; sourceTree = "<group>"; };
 		C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContactsPage.swift; sourceTree = "<group>"; };
 		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
+		D13517B32F1311EA1F69FDA8 /* SessionExit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExit.swift; sourceTree = "<group>"; };
 		E571F68D365C23F725BC86F3 /* FirstAidScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidScript.swift; sourceTree = "<group>"; };
 		E646B7C4DEABF92883A14158 /* SakloloApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakloloApp.swift; sourceTree = "<group>"; };
 		E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertCoordinatorTests.swift; sourceTree = "<group>"; };
@@ -162,6 +166,7 @@
 				0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */,
 				879792E6B537E6E6044316E0 /* AlertQueueTests.swift */,
 				B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */,
+				05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */,
 				475570EBBB4C0AF9520B2777 /* ShortcutMessageTests.swift */,
 				1F1554B937169BB45A23EA45 /* TestClock.swift */,
 			);
@@ -227,6 +232,7 @@
 				37E2169BE6AA1670BF36813B /* ModelLoader.swift */,
 				006526CC07A9E0135501FE40 /* NetworkMonitor.swift */,
 				38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */,
+				D13517B32F1311EA1F69FDA8 /* SessionExit.swift */,
 				3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */,
 				961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */,
 				C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */,
@@ -444,6 +450,7 @@
 				956F90E50143419085B65E86 /* RootView.swift in Sources */,
 				D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */,
 				793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */,
+				BF33F2F2C799EDF8B981F80C /* SessionExit.swift in Sources */,
 				1562C3D45490BFFD3A81EF10 /* SetupContactsPage.swift in Sources */,
 				7BB049B386E261E0E8C24C3A /* SetupNamePage.swift in Sources */,
 				457F602AFD85EE9EDBA17AFF /* SetupPermissionsPage.swift in Sources */,
@@ -465,6 +472,7 @@
 				013FE1728C49B043A08DAFD2 /* AlertOutcomeChatTests.swift in Sources */,
 				EB7F5411641598F76171DDE0 /* AlertQueueTests.swift in Sources */,
 				70F1F436C18124ADECD421A7 /* AloneCountdownTests.swift in Sources */,
+				743BFAAF528D807B8DC37F09 /* SessionExitTests.swift in Sources */,
 				262E0CBEC3C5B463D2B5BEB9 /* ShortcutMessageTests.swift in Sources */,
 				8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */,
 			);
