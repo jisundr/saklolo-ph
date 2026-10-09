@@ -1,11 +1,14 @@
 {
   "id": "head_injury",
   "title": "Head injury",
-  "keywords": ["tumama ang ulo", "nauntog"],
+  "keywords": [
+    "tumama ang ulo",
+    "nauntog"
+  ],
   "steps": [
-    "Panatilihin siyang tahimik, huwag galawin.",
-    "Kung dumudugo, dahan-dahang pindutin gamit ang malinis na tela.",
-    "Bantayan kung susuka o malilito — sabihin kaagad kapag nangyari."
+    "Keep them still and quiet. Don't move them.",
+    "If bleeding, press gently with a clean cloth.",
+    "Watch for vomiting or confusion — tell someone right away if it happens."
   ],
   "source": "Philippine Red Cross — Basic First Aid (TODO: verify exact wording/order before submission)"
 }

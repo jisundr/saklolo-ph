@@ -43,12 +43,12 @@ struct ShortcutSMSService {
     }
 
     /// Builds the SMS body per the brief's example:
-    /// "SAKLOLO: Si Papa nahulog, dumudugo ang ulo, gising pa. 7:42pm. Lokasyon: maps.apple.com/?ll=..."
+    /// "SAKLOLO: Papa fell, his head is bleeding, he is awake. 7:42pm. Location: maps.apple.com/?ll=..."
     func buildMessage(summary: String, timestamp: Date, lat: Double?, lng: Double?) -> String {
         let time = timestamp.formatted(date: .omitted, time: .shortened)
         var message = "SAKLOLO: \(summary). \(time)."
         if let lat, let lng {
-            message += " Lokasyon: maps.apple.com/?ll=\(lat),\(lng)"
+            message += " Location: maps.apple.com/?ll=\(lat),\(lng)"
         }
         return message
     }

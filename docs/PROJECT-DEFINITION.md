@@ -31,7 +31,7 @@ Apple/Google fall detection, Emergency SOS, and Life360 need a wearable, a butto
 1. Trigger: "Tulong" / "Saklolo" heard, or the big red button. (Proposed extra triggers are listed under Goals.)
 2. Check-in: the phone asks "Ano'ng nangyari?" and listens for up to 15s.
 3. Understand: Whisper transcribes the Taglish. A local LLM returns JSON (mode, situation, matching script, urgency, one-line summary).
-4. Alert, always: SMS to contacts in priority order with summary and GPS, then call contact #1.
+4. Alert, always: one SMS to contacts in priority order with summary and GPS, then call contact #1. It goes out when understanding finishes, or as a general SMS after 10 seconds if nothing was understood. Nothing about alerting is shown before then.
 5. Guide: speak the matched first-aid script one step at a time. The companion says "okay" / "tapos na" to continue or "ulitin" to repeat.
 6. Log: save the incident with transcript, script used, and delivery status.
 

@@ -1,12 +1,16 @@
 {
   "id": "unconscious",
   "title": "Unconscious",
-  "keywords": ["walang malay", "di gumigising", "hindi gumigising"],
+  "keywords": [
+    "walang malay",
+    "di gumigising",
+    "hindi gumigising"
+  ],
   "steps": [
-    "Tapikin at tawagin nang malakas.",
-    "Suriin kung humihinga.",
-    "Kung hindi humihinga, simulan ang CPR — bibilangin ko ang bilis.",
-    "Patuloy hanggang dumating ang tulong o may huminga siya."
+    "Tap them and call out loudly.",
+    "Check whether they are breathing.",
+    "If not breathing, start CPR — I will count the pace.",
+    "Keep going until help arrives or they breathe."
   ],
   "source": "Philippine Red Cross — Basic First Aid (TODO: verify exact wording/order before submission)"
 }

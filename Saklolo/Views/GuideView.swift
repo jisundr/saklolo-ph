@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Guide: one big first-aid step at a time, Next/Repeat, "Na-text na..." banner.
+/// Guide: one big first-aid step at a time, Next/Repeat, "Texted..." banner.
 /// Per the brief's Screens table and MVP "Guide mode" requirement.
 struct GuideView: View {
     let script: FirstAidScript
@@ -10,7 +10,7 @@ struct GuideView: View {
     var body: some View {
         VStack(spacing: 24) {
             if contactsNotifiedBanner {
-                Text("Na-text na sina Kuya at Tita")
+                Text("Kuya and Tita have been texted")
                     .font(.caption)
                     .padding(8)
                     .frame(maxWidth: .infinity)
@@ -19,7 +19,7 @@ struct GuideView: View {
 
             Spacer()
 
-            Text(script.steps.indices.contains(stepIndex) ? script.steps[stepIndex] : "Tapos na ang mga hakbang.")
+            Text(script.steps.indices.contains(stepIndex) ? script.steps[stepIndex] : "All steps done.")
                 .font(.system(size: 28, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .padding()
@@ -27,7 +27,7 @@ struct GuideView: View {
             Spacer()
 
             HStack(spacing: 16) {
-                Button("Ulitin") {
+                Button("Repeat") {
                     // TODO: re-speak current step via AVSpeechSynthesizer
                 }
                 .buttonStyle(.bordered)
@@ -44,7 +44,7 @@ struct GuideView: View {
         }
         .padding()
         .task {
-            // TODO: listen for voice "okay"/"tapos na" (advance) or "ulitin" (repeat)
+            // TODO: listen for voice "okay"/"done" (advance) or "repeat"
             // as an alternative to the buttons, per brief's Guide mode.
         }
     }
@@ -55,7 +55,7 @@ struct GuideView: View {
         id: "fall",
         title: "Fall, can't move",
         keywords: ["nahulog", "nadulas"],
-        steps: ["Huwag galawin.", "Panatilihing tahimik ang ulo.", "Painitin.", "Bantayan ang paghinga."],
+        steps: ["Don't move them.", "Keep the head still.", "Keep them warm.", "Watch their breathing."],
         source: "Philippine Red Cross — Basic First Aid"
     ))
 }

@@ -19,9 +19,9 @@ struct LoadingView: View {
 
         var label: String {
             switch self {
-            case .download: "Kunin ang modelo"
-            case .compile: "Ihanda sa telepono"
-            case .test: "Subukan ang pandinig"
+            case .download: "Get the model"
+            case .compile: "Prepare on this phone"
+            case .test: "Test the listening"
             }
         }
     }
@@ -57,10 +57,10 @@ struct LoadingView: View {
 
             VStack(spacing: Metrics.gap) {
                 if loader.phase == .failed {
-                    Button("Subukan ulit") { Task { await loader.start() } }
+                    Button("Try again") { Task { await loader.start() } }
                         .buttonStyle(SaklaloActionStyle())
                 }
-                Button("May emergency? Tuloy na") { onContinue() }
+                Button("Emergency? Continue now") { onContinue() }
                     .buttonStyle(SaklaloActionStyle(kind: .secondary))
             }
         }
@@ -153,26 +153,26 @@ struct LoadingView: View {
 
     private var title: String {
         switch loader.phase {
-        case .downloading: "Kinukuha ang pandinig"
-        case .compiling: "Inihahanda ang pandinig"
-        case .testing: "Sinusubukan ang pandinig"
-        case .ready: "Handa na"
-        case .failed: "Hindi pa handa ang pandinig"
+        case .downloading: "Getting the listening model"
+        case .compiling: "Preparing the listening model"
+        case .testing: "Testing the listening model"
+        case .ready: "Ready"
+        case .failed: "The listening model isn't ready"
         }
     }
 
     private var note: String {
         switch loader.phase {
         case .downloading:
-            return "Isang beses lang ito at kailangan ng internet. Pagkatapos, gagana na kahit offline."
+            return "One time only, and it needs internet. After that it works offline."
         case .compiling where loader.isFirstRun:
-            return "Unang beses ito. Karaniwang 3 hanggang 4 na minuto. Huwag isara ang app at panatilihing bukas ang screen."
+            return "First time only. Usually 3 to 4 minutes. Don't close the app, and keep the screen on."
         case .compiling, .testing:
-            return "Sandali lang."
+            return "Just a moment."
         case .ready:
             return ""
         case .failed:
-            return "Walang internet o hindi ma-load. Gagana pa rin ang alerto at gabay, pero hindi ka mapapakinggan."
+            return "No internet, or the model can't load. The alert and guide still work, but the phone can't hear you."
         }
     }
 

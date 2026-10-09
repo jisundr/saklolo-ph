@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Home: big red SAKLOLO button + "Nakikinig" status, per the brief's Screens table.
+/// Home: big red SAKLOLO button + "Listening" status, per the brief's Screens table.
 struct HomeView: View {
     @State private var isListening = false
     @State private var showSetup = false
@@ -11,7 +11,7 @@ struct HomeView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                Text(isListening ? "Nakikinig..." : "Handa")
+                Text(isListening ? "Listening..." : "Ready")
                     .font(.title2)
                     .foregroundStyle(.secondary)
 

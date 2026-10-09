@@ -1,12 +1,16 @@
 {
   "id": "bleeding",
   "title": "Heavy bleeding",
-  "keywords": ["dumudugo", "sugat", "maraming dugo"],
+  "keywords": [
+    "dumudugo",
+    "sugat",
+    "maraming dugo"
+  ],
   "steps": [
-    "Hanapin ang pinakamalinis na tela.",
-    "Pisilin at idiin nang mahigpit sa sugat.",
-    "Huwag buhatin ang tela para tingnan — patuloy na pindutin.",
-    "Kung tumagos ang dugo, maglagay pa ng tela sa ibabaw, huwag alisin ang una."
+    "Find the cleanest cloth.",
+    "Press down hard on the wound.",
+    "Don't lift the cloth to check — keep pressing.",
+    "If blood soaks through, add more cloth on top. Don't remove the first one."
   ],
   "source": "Philippine Red Cross — Basic First Aid (TODO: verify exact wording/order before submission)"
 }
