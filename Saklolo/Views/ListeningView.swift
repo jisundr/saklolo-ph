@@ -1,157 +1,208 @@
 import SwiftUI
 import SwiftData
 
-/// Listening: "What happened?" with live transcript, per the brief's Screens table.
-/// Transcribes, classifies with `SituationClassifierService`, and saves an `Incident`.
-/// The SMS and call do not wait on this screen (PRD FR-9): classification only
-/// decides which first-aid script and mode the guide uses.
+/// The one chat screen the red button opens (F1 to F3, F5). The voice orb sits
+/// at the bottom; the transcript becomes the person's bubble; fixed replies
+/// say who and what happened; the first-aid guide opens as a sheet over it.
+/// Nothing is sent at the tap. Classification only picks the script and mode.
+///
+/// Kept the `ListeningView` name and init so Home does not change (plan flag 7).
 struct ListeningView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var transcript: String = ""
-    @State private var stage: Stage = .waiting
-    @State private var level: Float = 0
-    @State private var quietTooLong = false
-    @State private var transcribeStarted: ContinuousClock.Instant?
-    @State private var classification: SituationClassification?
-    /// Spike 004 readout: where the text came from and how long transcription took.
-    @State private var diagnostics = ""
+    @Environment(\.dismiss) private var dismiss
 
-    private enum Stage {
-        /// Recording, nothing loud enough heard yet.
-        case waiting
-        /// Recording, voice picked up.
-        case hearing
-        /// Recording done, Whisper is working.
-        case transcribing
+    @State private var messages: [ChatMessage] = [.saklolo(ChatReplies.opening)]
+    @State private var stage: Stage = .listening(.waiting)
+    @State private var level: Float = 0
+    @State private var startedAt = Date.now
+    @State private var incident: Incident?
+    @State private var script: FirstAidScript?
+    @State private var showGuide = false
+    @State private var cancelled = false
+
+    private enum Stage: Equatable {
+        /// Recording or transcribing; the orb shows.
+        case listening(VoiceOrb.Phase)
+        /// Transcript in; the classifier is choosing.
+        case understanding
+        /// Incident saved; replies shown.
         case done
     }
 
     /// "button" or "voice", stored on the Incident.
     var trigger = "button"
-    /// Used when transcription fails or is not implemented yet (WhisperKit is
-    /// still a stub), so the rest of the flow can be exercised.
+    /// Used when transcription fails or hears nothing, so the rest of the flow
+    /// can still be exercised (and in the simulator, where there is no mic).
     var fallbackTranscript = ""
-    /// Called once with the saved incident, for the parent to navigate to the guide.
+    /// Called once, when the session ends (Done), with the saved incident.
     var onClassified: (Incident) -> Void = { _ in }
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("What happened?")
-                .font(.title)
-                .bold()
-
-            if stage != .done {
-                micIndicator
+        VStack(spacing: 0) {
+            header
+            thread
+            footer
+        }
+        .saklaloGround()
+        .task { await runSession() }
+        .sheet(isPresented: $showGuide) {
+            if let script {
+                GuideView(script: script)
             }
+        }
+    }
 
-            Text(transcript.isEmpty ? "..." : transcript)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(minHeight: 80)
-                .padding()
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+    // MARK: - Layout
 
-            Text(diagnostics)
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("Saklolo")
+                .font(.title2.bold())
+            Spacer()
+            Text(startedAt, format: .dateTime.hour().minute())
                 .font(Typography.finePrint)
                 .foregroundStyle(Palette.textDim)
-
-            if let classification {
-                VStack(spacing: 4) {
-                    Text(classification.summary)
-                        .font(.headline)
-                    Text("\(classification.mode.rawValue) · \(classification.scriptID)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            Spacer()
+            if let incident {
+                Button("Done") { onClassified(incident) }
+                    .font(.body.bold())
+                    .frame(minHeight: Metrics.minTarget)
+            } else {
+                Button {
+                    cancel()
+                } label: {
+                    Label("Cancel", systemImage: "xmark")
                 }
-                .multilineTextAlignment(.center)
+                .font(.body)
+                .foregroundStyle(Palette.textDim)
+                .frame(minHeight: Metrics.minTarget)
+                .accessibilityHint("Stops listening. Nothing is saved or sent.")
             }
         }
-        .padding()
-        .task {
-            var heard = ""
-            var failure = ""
-            do {
-                heard = try await SpeechTranscriptionService.shared.transcribe { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .level(let value): level = value
-                        case .speechDetected: stage = .hearing
-                        case .transcribing:
-                            stage = .transcribing
-                            transcribeStarted = .now
-                            level = 0
-                        }
+        .padding(.horizontal, Metrics.gutter)
+        .padding(.top, 8)
+    }
+
+    private var thread: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: Metrics.gap) {
+                    ForEach(messages) { message in
+                        ChatMessageRow(message: message)
+                            .id(message.id)
+                    }
+                    if stage == .listening(.transcribing) || stage == .understanding {
+                        TypingBubble().id("typing")
                     }
                 }
-            } catch {
-                failure = " (\(error))"
+                .padding(Metrics.gutter)
             }
-            stage = .done
-            let source = heard.isEmpty ? "canned fallback\(failure)" : "heard"
-            let took = transcribeStarted.map { (ContinuousClock.now - $0).formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 1))) }
-            diagnostics = [source, took.map { "transcribe+load \($0)" }].compactMap { $0 }.joined(separator: " · ")
-            print("[004] \(diagnostics) | transcript: \(heard.debugDescription)")
-            transcript = heard.isEmpty ? fallbackTranscript : heard
-
-            // Keyword result is computed first inside classify(); the LLM can
-            // refine it but never delays it past its timeout.
-            let result = await SituationClassifierService().classify(transcript: transcript)
-            classification = result
-
-            let incident = Incident(
-                trigger: trigger,
-                mode: result.mode,
-                transcript: transcript,
-                summary: result.summary,
-                scriptID: result.scriptID
-            )
-            modelContext.insert(incident)
-            onClassified(incident)
+            .onChange(of: messages) {
+                withAnimation { proxy.scrollTo(messages.last?.id, anchor: .bottom) }
+            }
         }
     }
-}
 
-extension ListeningView {
-    /// The mark's rings swell with the voice. Calm: they move with the level, never flash.
-    fileprivate var micIndicator: some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle().fill(Palette.signalRed.opacity(0.9)).frame(width: 56, height: 56)
-                ForEach(Array([Palette.signalOrange, Palette.signalYellow, Palette.signalBlue].enumerated()), id: \.offset) { index, color in
-                    Circle()
-                        .strokeBorder(color.opacity(stage == .hearing ? 0.9 : 0.35), lineWidth: 5)
-                        .frame(width: 56 + CGFloat(index + 1) * 26, height: 56 + CGFloat(index + 1) * 26)
-                        .scaleEffect(1 + CGFloat(level) * 0.12 * CGFloat(index + 1))
+    @ViewBuilder
+    private var footer: some View {
+        switch stage {
+        case .listening(let phase):
+            VoiceOrb(phase: phase, level: level)
+                .padding(.bottom, Metrics.gutter)
+        case .understanding:
+            EmptyView()
+        case .done:
+            if script != nil, !showGuide {
+                Button("Start first aid") { showGuide = true }
+                    .buttonStyle(SaklaloActionStyle())
+                    .padding(Metrics.gutter)
+            }
+        }
+    }
+
+    // MARK: - Session
+
+    private func cancel() {
+        // The view's task is cancelled when it goes away, which stops the
+        // recorder; the flag makes sure nothing is saved even if Whisper or
+        // the classifier is already past its last cancellation point.
+        cancelled = true
+        dismiss()
+    }
+
+    private var isStopped: Bool { cancelled || Task.isCancelled }
+
+    private func runSession() async {
+        var heard = ""
+        var failure = ""
+        do {
+            heard = try await SpeechTranscriptionService.shared.transcribe { event in
+                Task { @MainActor in
+                    switch event {
+                    case .level(let value): level = value
+                    case .speechDetected: stage = .listening(.hearing)
+                    case .transcribing:
+                        stage = .listening(.transcribing)
+                        level = 0
+                    }
                 }
             }
-            .frame(width: 220, height: 220)
-            .animation(.easeOut(duration: 0.1), value: level)
-            .accessibilityHidden(true)
+        } catch {
+            failure = " (\(error))"
+        }
+        guard !isStopped else { return }
+        print("[004] \(heard.isEmpty ? "canned fallback\(failure)" : "heard") | transcript: \(heard.debugDescription)")
 
-            Text(statusText)
-                .font(Typography.body)
-                .foregroundStyle(quietTooLong && stage == .waiting ? Palette.alarmText : Palette.textDim)
-                .accessibilityLabel(statusText)
+        // Empty or failed: say so, carry on with the fallback text (F5).
+        let transcript: String
+        if heard.isEmpty {
+            messages.append(.saklolo(ChatReplies.couldNotUnderstand))
+            transcript = fallbackTranscript
+        } else {
+            transcript = heard
         }
-        .task(id: stage) {
-            quietTooLong = false
-            guard stage == .waiting else { return }
-            try? await Task.sleep(for: .seconds(3))
-            quietTooLong = true
+        if !transcript.isEmpty {
+            messages.append(.user(transcript))
         }
+        stage = .understanding
+
+        // Keyword result is computed first inside classify(); the LLM can
+        // refine it but never delays it past its timeout.
+        let result = await SituationClassifierService().classify(transcript: transcript)
+        guard !isStopped else { return }
+
+        let saved = Incident(
+            trigger: trigger,
+            mode: result.mode,
+            transcript: transcript,
+            summary: result.summary,
+            scriptID: result.scriptID
+        )
+        modelContext.insert(saved)
+        incident = saved
+        script = Self.script(id: result.scriptID)
+        stage = .done
+
+        for reply in ChatReplies.replies(for: result) {
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !isStopped else { return }
+            messages.append(.saklolo(reply))
+        }
+
+        // Guide and alone both open the steps after a short pause (F3 to H1).
+        try? await Task.sleep(for: .seconds(2))
+        guard !isStopped, script != nil else { return }
+        showGuide = true
     }
 
-    fileprivate var statusText: String {
-        switch stage {
-        case .waiting: quietTooLong ? "Can't hear you. Speak louder." : "Listening..."
-        case .hearing: "I can hear you. Keep talking."
-        case .transcribing: "Understanding..."
-        case .done: ""
-        }
+    /// The bundled script for the classifier's pick, else the general one.
+    private static func script(id: String) -> FirstAidScript? {
+        let scripts = (try? ScriptLoader().loadBundledScripts()) ?? []
+        return scripts.first { $0.id == id } ?? scripts.first { $0.id == "general" }
     }
 }
 
 #Preview {
-    ListeningView(fallbackTranscript: "Tulong! Nahulog si Lola sa hagdan, hindi makagalaw")
+    ListeningView(fallbackTranscript: "Help! Papa fell, his head is bleeding.")
         .modelContainer(for: [Incident.self, Alert.self, Contact.self, FirstAidScript.self], inMemory: true)
 }

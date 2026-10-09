@@ -32,16 +32,20 @@
 		7D491DC73CB844AC0A97431A /* general.json in Resources */ = {isa = PBXBuildFile; fileRef = F5070F7F241920F87DF1B525 /* general.json */; };
 		89E9E8C1800E29DDDACA5D36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */; };
 		8C57E20CABD6C296F439D885 /* unconscious.json in Resources */ = {isa = PBXBuildFile; fileRef = F189DF9000DA76E9609A7B95 /* unconscious.json */; };
+		91B3A3E2C6A4474C01866E39 /* ChatReplies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6883DDE67230C7692EDD37 /* ChatReplies.swift */; };
 		940932067281CA0A0FE465A2 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD2E3944C15032EBD1193E /* Contact.swift */; };
 		956F90E50143419085B65E86 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175032A4F57AB68F0D29CD0D /* RootView.swift */; };
 		9C650671D436FF199B7F2DF7 /* BarlowCondensed-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */; };
 		9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */; };
+		AAC176FD2C8931415B589D24 /* VoiceOrb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D25EDF314277981A0534C5F /* VoiceOrb.swift */; };
 		B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF01D02FF45927209F625D /* GuideView.swift */; };
+		B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */; };
 		C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88E1D62881EB144522EC182 /* ListeningView.swift */; };
 		CFA35069439C3A4216474913 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 61D7F419EB2C6199DFC88667 /* OFL.txt */; };
 		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
 		E8AEE9952D5980A31093CDBD /* BarlowCondensed-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */; };
 		ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9556F074D68B0F89585AB36 /* LocationService.swift */; };
+		F9B8DBE7261ACCD3C7A6589F /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9A07C40B442596BA4A9780 /* ChatMessage.swift */; };
 		FBE1FEC241637D7609E10C62 /* bleeding.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B9BDAB0B207650AF0409394 /* bleeding.json */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +53,7 @@
 		0B9BDAB0B207650AF0409394 /* bleeding.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bleeding.json; sourceTree = "<group>"; };
 		14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-SemiBold.ttf"; sourceTree = "<group>"; };
 		175032A4F57AB68F0D29CD0D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		1C9A07C40B442596BA4A9780 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		1D7F0508DC0AE7F2598A75D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		20852C79EFAC211EBB674769 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		2DB9528F3641CAE2E08E74C0 /* head_injury.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = head_injury.json; sourceTree = "<group>"; };
@@ -58,10 +63,13 @@
 		384B62FB9B9A004977718172 /* fall.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = fall.json; sourceTree = "<group>"; };
 		38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptLoader.swift; sourceTree = "<group>"; };
 		3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSMSService.swift; sourceTree = "<group>"; };
+		4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageRow.swift; sourceTree = "<group>"; };
 		5E869EDA2F4B46F098C822F4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		61D7F419EB2C6199DFC88667 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		6D6883DDE67230C7692EDD37 /* ChatReplies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatReplies.swift; sourceTree = "<group>"; };
 		74CF01D02FF45927209F625D /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
 		7887C2618CDBF767A0C4BFB0 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		7D25EDF314277981A0534C5F /* VoiceOrb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceOrb.swift; sourceTree = "<group>"; };
 		8285C90EAF7C72FF22CD0002 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		8F4272ED63C16B1019E34805 /* SetupNamePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupNamePage.swift; sourceTree = "<group>"; };
 		8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-Bold.ttf"; sourceTree = "<group>"; };
@@ -129,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				7887C2618CDBF767A0C4BFB0 /* Alert.swift */,
+				1C9A07C40B442596BA4A9780 /* ChatMessage.swift */,
 				ABCD2E3944C15032EBD1193E /* Contact.swift */,
 				E571F68D365C23F725BC86F3 /* FirstAidScript.swift */,
 				EF85AE66269B94DC71AF22D7 /* Incident.swift */,
@@ -152,6 +161,7 @@
 		7D7793D70E0832F80EA93523 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				6D6883DDE67230C7692EDD37 /* ChatReplies.swift */,
 				A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */,
 				E9556F074D68B0F89585AB36 /* LocationService.swift */,
 				37E2169BE6AA1670BF36813B /* ModelLoader.swift */,
@@ -182,6 +192,7 @@
 				175032A4F57AB68F0D29CD0D /* RootView.swift */,
 				335B945BC9A9CC4379EF2FB8 /* SetupView.swift */,
 				8285C90EAF7C72FF22CD0002 /* SplashView.swift */,
+				F29A421F9D8F1BE1C48F04DA /* Chat */,
 				A4C5365B0C86E9937AD5344C /* Setup */,
 			);
 			path = Views;
@@ -226,6 +237,15 @@
 				E646B7C4DEABF92883A14158 /* SakloloApp.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		F29A421F9D8F1BE1C48F04DA /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */,
+				7D25EDF314277981A0534C5F /* VoiceOrb.swift */,
+			);
+			path = Chat;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,6 +334,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				03D27A0B51724FDC37120D9A /* Alert.swift in Sources */,
+				F9B8DBE7261ACCD3C7A6589F /* ChatMessage.swift in Sources */,
+				B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */,
+				91B3A3E2C6A4474C01866E39 /* ChatReplies.swift in Sources */,
 				940932067281CA0A0FE465A2 /* Contact.swift in Sources */,
 				4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */,
 				B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */,
@@ -337,6 +360,7 @@
 				7CB4A3122EB7E9E39550C002 /* SpeechTranscriptionService.swift in Sources */,
 				113387F028E90048E9BEC791 /* SplashView.swift in Sources */,
 				761DF65147FC93FFBFF39BAE /* Theme.swift in Sources */,
+				AAC176FD2C8931415B589D24 /* VoiceOrb.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
