@@ -64,14 +64,36 @@ actor SpeechTranscriptionService {
         return FileManager.default.fileExists(atPath: encoder.path) ? folder : nil
     }
 
-    /// Records up to `maxDuration` seconds and returns the transcript.
-    func transcribe(maxDuration: TimeInterval = 15) async throws -> String {
+    /// What the recorder is doing, for the Listening screen's mic indicator.
+    enum Event: Sendable {
+        /// Mic level, 0...1, about ten times a second.
+        case level(Float)
+        /// The first loud-enough sound since recording started.
+        case speechDetected
+        /// Recording is finished; Whisper is working.
+        case transcribing
+    }
+
+    /// Dropping below this (dB) counts as quiet; above it, as speech.
+    private static let speechThreshold: Float = -38
+    /// Stop this long after the person goes quiet.
+    private static let trailingSilence: Duration = .milliseconds(1400)
+    /// Give up if nothing loud enough is heard in this long.
+    private static let noSpeechTimeout: Duration = .seconds(8)
+
+    /// Records until the person stops talking (or `maxDuration`) and returns
+    /// the transcript.
+    func transcribe(
+        maxDuration: TimeInterval = 15,
+        onEvent: (@Sendable (Event) -> Void)? = nil
+    ) async throws -> String {
         guard await AVAudioApplication.requestRecordPermission() else {
             throw TranscriptionError.microphoneDenied
         }
-        let url = try await record(for: maxDuration)
+        let url = try await record(upTo: maxDuration, onEvent: onEvent)
         defer { try? FileManager.default.removeItem(at: url) }
 
+        onEvent?(.transcribing)
         try await prepare()
         guard let pipe else { return "" }
         let results = try await pipe.transcribe(
@@ -81,7 +103,7 @@ actor SpeechTranscriptionService {
         return results.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func record(for duration: TimeInterval) async throws -> URL {
+    private func record(upTo maxDuration: TimeInterval, onEvent: (@Sendable (Event) -> Void)?) async throws -> URL {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.record, mode: .measurement)
         try session.setActive(true)
@@ -96,8 +118,34 @@ actor SpeechTranscriptionService {
             AVLinearPCMIsFloatKey: false,
         ]
         let recorder = try AVAudioRecorder(url: url, settings: settings)
-        guard recorder.record(forDuration: duration) else { throw TranscriptionError.recordingFailed }
-        try await Task.sleep(for: .seconds(duration))
+        recorder.isMeteringEnabled = true
+        guard recorder.record(forDuration: maxDuration) else { throw TranscriptionError.recordingFailed }
+
+        let clock = ContinuousClock()
+        let started = clock.now
+        var spoke = false
+        var quietSince: ContinuousClock.Instant?
+        while recorder.isRecording {
+            try await Task.sleep(for: .milliseconds(100))
+            recorder.updateMeters()
+            let power = recorder.averagePower(forChannel: 0)
+            onEvent?(.level(min(max((power + 60) / 60, 0), 1)))
+
+            let now = clock.now
+            if power > Self.speechThreshold {
+                if !spoke {
+                    spoke = true
+                    onEvent?(.speechDetected)
+                }
+                quietSince = nil
+            } else if spoke {
+                let since = quietSince ?? now
+                quietSince = since
+                if now - since >= Self.trailingSilence { break }
+            } else if now - started >= Self.noSpeechTimeout {
+                break
+            }
+        }
         recorder.stop()
         return url
     }

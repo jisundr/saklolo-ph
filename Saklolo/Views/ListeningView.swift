@@ -8,8 +8,23 @@ import SwiftData
 struct ListeningView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var transcript: String = ""
-    @State private var secondsRemaining = 15
+    @State private var stage: Stage = .waiting
+    @State private var level: Float = 0
+    @State private var quietTooLong = false
+    @State private var transcribeStarted: ContinuousClock.Instant?
     @State private var classification: SituationClassification?
+    /// Spike 004 readout: where the text came from and how long transcription took.
+    @State private var diagnostics = ""
+
+    private enum Stage {
+        /// Recording, nothing loud enough heard yet.
+        case waiting
+        /// Recording, voice picked up.
+        case hearing
+        /// Recording done, Whisper is working.
+        case transcribing
+        case done
+    }
 
     /// "button" or "voice", stored on the Incident.
     var trigger = "button"
@@ -25,12 +40,20 @@ struct ListeningView: View {
                 .font(.title)
                 .bold()
 
+            if stage != .done {
+                micIndicator
+            }
+
             Text(transcript.isEmpty ? "..." : transcript)
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .frame(minHeight: 80)
                 .padding()
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+
+            Text(diagnostics)
+                .font(Typography.finePrint)
+                .foregroundStyle(Palette.textDim)
 
             if let classification {
                 VStack(spacing: 4) {
@@ -41,17 +64,32 @@ struct ListeningView: View {
                         .foregroundStyle(.secondary)
                 }
                 .multilineTextAlignment(.center)
-            } else {
-                Text("\(secondsRemaining)s")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
             }
         }
         .padding()
         .task {
-            // TODO: live countdown and partial transcript while recording.
-            let heard = (try? await SpeechTranscriptionService.shared.transcribe()) ?? ""
+            var heard = ""
+            var failure = ""
+            do {
+                heard = try await SpeechTranscriptionService.shared.transcribe { event in
+                    Task { @MainActor in
+                        switch event {
+                        case .level(let value): level = value
+                        case .speechDetected: stage = .hearing
+                        case .transcribing:
+                            stage = .transcribing
+                            transcribeStarted = .now
+                            level = 0
+                        }
+                    }
+                }
+            } catch {
+                failure = " (\(error))"
+            }
+            stage = .done
+            let source = heard.isEmpty ? "canned fallback\(failure)" : "heard"
+            let took = transcribeStarted.map { (ContinuousClock.now - $0).formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 1))) }
+            diagnostics = [source, took.map { "transcribe+load \($0)" }].compactMap { $0 }.joined(separator: " · ")
             transcript = heard.isEmpty ? fallbackTranscript : heard
 
             // Keyword result is computed first inside classify(); the LLM can
@@ -68,6 +106,46 @@ struct ListeningView: View {
             )
             modelContext.insert(incident)
             onClassified(incident)
+        }
+    }
+}
+
+extension ListeningView {
+    /// The mark's rings swell with the voice. Calm: they move with the level, never flash.
+    fileprivate var micIndicator: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle().fill(Palette.signalRed.opacity(0.9)).frame(width: 56, height: 56)
+                ForEach(Array([Palette.signalOrange, Palette.signalYellow, Palette.signalBlue].enumerated()), id: \.offset) { index, color in
+                    Circle()
+                        .strokeBorder(color.opacity(stage == .hearing ? 0.9 : 0.35), lineWidth: 5)
+                        .frame(width: 56 + CGFloat(index + 1) * 26, height: 56 + CGFloat(index + 1) * 26)
+                        .scaleEffect(1 + CGFloat(level) * 0.12 * CGFloat(index + 1))
+                }
+            }
+            .frame(width: 220, height: 220)
+            .animation(.easeOut(duration: 0.1), value: level)
+            .accessibilityHidden(true)
+
+            Text(statusText)
+                .font(Typography.body)
+                .foregroundStyle(quietTooLong && stage == .waiting ? Palette.alarmText : Palette.textDim)
+                .accessibilityLabel(statusText)
+        }
+        .task(id: stage) {
+            quietTooLong = false
+            guard stage == .waiting else { return }
+            try? await Task.sleep(for: .seconds(3))
+            quietTooLong = true
+        }
+    }
+
+    fileprivate var statusText: String {
+        switch stage {
+        case .waiting: quietTooLong ? "Walang marinig. Lakasan ang boses." : "Nakikinig..."
+        case .hearing: "Naririnig ka. Magsalita lang."
+        case .transcribing: "Iniintindi..."
+        case .done: ""
         }
     }
 }
