@@ -11,11 +11,13 @@
 		03D27A0B51724FDC37120D9A /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7887C2618CDBF767A0C4BFB0 /* Alert.swift */; };
 		0BC9A7685057102FC430D392 /* keywords.json in Resources */ = {isa = PBXBuildFile; fileRef = B698F2A1F50F44028F7AEC7B /* keywords.json */; };
 		113387F028E90048E9BEC791 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8285C90EAF7C72FF22CD0002 /* SplashView.swift */; };
+		1562C3D45490BFFD3A81EF10 /* SetupContactsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */; };
 		158B1E1112ED6BD3C4336714 /* BarlowCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */; };
 		1AB46C4D598BF4104D975AA8 /* ModelLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2169BE6AA1670BF36813B /* ModelLoader.swift */; };
 		3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1A3C166DBB4BAED919887 /* IncidentView.swift */; };
 		3D1415A08F53C76FA4A780B8 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 37C60B3B2C48EEE5078CFDDB /* WhisperKit */; };
 		3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */; };
+		457F602AFD85EE9EDBA17AFF /* SetupPermissionsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87A41FBDAFE01B846A16AA3 /* SetupPermissionsPage.swift */; };
 		4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = E571F68D365C23F725BC86F3 /* FirstAidScript.swift */; };
 		48FE238DE91BC3E3AF2197EE /* KeywordDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */; };
 		49484D2FE77D636C96EA6889 /* ModelStatusStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278C25619F1ADD5A7B2F9BC /* ModelStatusStrip.swift */; };
@@ -25,6 +27,7 @@
 		6146897C35B128E40F5B825A /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85AE66269B94DC71AF22D7 /* Incident.swift */; };
 		761DF65147FC93FFBFF39BAE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20852C79EFAC211EBB674769 /* Theme.swift */; };
 		793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */; };
+		7BB049B386E261E0E8C24C3A /* SetupNamePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4272ED63C16B1019E34805 /* SetupNamePage.swift */; };
 		7CB4A3122EB7E9E39550C002 /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */; };
 		7D491DC73CB844AC0A97431A /* general.json in Resources */ = {isa = PBXBuildFile; fileRef = F5070F7F241920F87DF1B525 /* general.json */; };
 		89E9E8C1800E29DDDACA5D36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */; };
@@ -60,6 +63,7 @@
 		74CF01D02FF45927209F625D /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
 		7887C2618CDBF767A0C4BFB0 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		8285C90EAF7C72FF22CD0002 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		8F4272ED63C16B1019E34805 /* SetupNamePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupNamePage.swift; sourceTree = "<group>"; };
 		8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-Bold.ttf"; sourceTree = "<group>"; };
 		95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-ExtraBold.ttf"; sourceTree = "<group>"; };
 		961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SituationClassifierService.swift; sourceTree = "<group>"; };
@@ -68,6 +72,7 @@
 		A88E1D62881EB144522EC182 /* ListeningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningView.swift; sourceTree = "<group>"; };
 		ABCD2E3944C15032EBD1193E /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		B698F2A1F50F44028F7AEC7B /* keywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = keywords.json; sourceTree = "<group>"; };
+		C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContactsPage.swift; sourceTree = "<group>"; };
 		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 		E571F68D365C23F725BC86F3 /* FirstAidScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidScript.swift; sourceTree = "<group>"; };
 		E646B7C4DEABF92883A14158 /* SakloloApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakloloApp.swift; sourceTree = "<group>"; };
@@ -77,6 +82,7 @@
 		F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F1EF822BA69E66687F3D78BD /* Saklolo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Saklolo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5070F7F241920F87DF1B525 /* general.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = general.json; sourceTree = "<group>"; };
+		F87A41FBDAFE01B846A16AA3 /* SetupPermissionsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupPermissionsPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,8 +182,19 @@
 				175032A4F57AB68F0D29CD0D /* RootView.swift */,
 				335B945BC9A9CC4379EF2FB8 /* SetupView.swift */,
 				8285C90EAF7C72FF22CD0002 /* SplashView.swift */,
+				A4C5365B0C86E9937AD5344C /* Setup */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A4C5365B0C86E9937AD5344C /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */,
+				8F4272ED63C16B1019E34805 /* SetupNamePage.swift */,
+				F87A41FBDAFE01B846A16AA3 /* SetupPermissionsPage.swift */,
+			);
+			path = Setup;
 			sourceTree = "<group>";
 		};
 		AAE0DBA751EDF68BB9147D36 /* Resources */ = {
@@ -311,6 +328,9 @@
 				956F90E50143419085B65E86 /* RootView.swift in Sources */,
 				D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */,
 				793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */,
+				1562C3D45490BFFD3A81EF10 /* SetupContactsPage.swift in Sources */,
+				7BB049B386E261E0E8C24C3A /* SetupNamePage.swift in Sources */,
+				457F602AFD85EE9EDBA17AFF /* SetupPermissionsPage.swift in Sources */,
 				5C59213974497B9754D180AA /* SetupView.swift in Sources */,
 				3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */,
 				9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */,

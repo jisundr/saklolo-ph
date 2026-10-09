@@ -1,75 +1,85 @@
 import SwiftUI
-import SwiftData
 
-/// Setup: user name, 1-5 contacts with priority order, per the brief's MVP scope.
+/// First-launch setup (B1 to B3): one question per screen, name, contacts, permissions.
+/// Also used from Home as an edit sheet; finishing always marks setup complete and closes.
 struct SetupView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Contact.priority) private var contacts: [Contact]
+    enum Step: Int, CaseIterable {
+        case name, contacts, permissions
+    }
 
-    @State private var userName: String = ""
-    @State private var newContactName = ""
-    @State private var newContactPhone = ""
-    @State private var newContactRelation = ""
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("setupCompleted") private var setupCompleted = false
+
+    @State private var step: Step = .name
+    /// Captured once so the Close button does not appear the moment the first run finishes.
+    @State private var isEditing = false
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Your name") {
-                    TextField("Name", text: $userName)
-                }
+            VStack(alignment: .leading, spacing: Metrics.gap) {
+                SetupProgressHeader(step: step.rawValue + 1, of: Step.allCases.count)
 
-                Section("Contacts (priority order)") {
-                    ForEach(contacts) { contact in
-                        VStack(alignment: .leading) {
-                            Text(contact.name).bold()
-                            Text("\(contact.relation) · \(contact.phone)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .onDelete(perform: deleteContacts)
-
-                    if contacts.count < 5 {
-                        TextField("Name", text: $newContactName)
-                        TextField("Phone", text: $newContactPhone)
-                        TextField("Relation (e.g. Son, Neighbor)", text: $newContactRelation)
-                        Button("Add contact") { addContact() }
-                            .disabled(newContactName.isEmpty || newContactPhone.isEmpty)
-                    } else {
-                        Text("Max 5 contacts (MVP limit).").font(.caption).foregroundStyle(.secondary)
+                Group {
+                    switch step {
+                    case .name:
+                        SetupNamePage { step = .contacts }
+                    case .contacts:
+                        SetupContactsPage { step = .permissions }
+                    case .permissions:
+                        SetupPermissionsPage(finishTitle: isEditing ? "Done" : "Continue") { finish() }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .navigationTitle("Setup")
+            .padding(.horizontal, Metrics.gutter)
+            .padding(.bottom, Metrics.gutter)
+            .saklaloGround()
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                if step != .name {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Back") { goBack() }
+                    }
+                }
+                if isEditing {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Close") { dismiss() }
+                    }
                 }
             }
         }
+        .onAppear { isEditing = setupCompleted }
     }
 
-    private func addContact() {
-        let contact = Contact(
-            name: newContactName,
-            phone: newContactPhone,
-            relation: newContactRelation,
-            priority: contacts.count
-        )
-        modelContext.insert(contact)
-        newContactName = ""
-        newContactPhone = ""
-        newContactRelation = ""
+    private func goBack() {
+        guard let previous = Step(rawValue: step.rawValue - 1) else { return }
+        step = previous
     }
 
-    private func deleteContacts(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(contacts[index])
+    private func finish() {
+        setupCompleted = true
+        dismiss()
+    }
+}
+
+/// "Step 1 of 3" with a thin progress bar, as in B1 to B3.
+private struct SetupProgressHeader: View {
+    let step: Int
+    let of: Int
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            Text("Step \(step) of \(of)")
+                .font(Typography.finePrint)
+                .foregroundStyle(Palette.textDim)
+            ProgressView(value: Double(step), total: Double(of))
+                .tint(Palette.action)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Setup step \(step) of \(of)")
     }
 }
 
 #Preview {
     SetupView()
+        .modelContainer(for: Contact.self, inMemory: true)
 }
