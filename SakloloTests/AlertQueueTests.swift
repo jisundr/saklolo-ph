@@ -278,4 +278,84 @@ final class AlertQueueTests: XCTestCase {
         XCTAssertTrue(NetworkMonitor.hasSignal(pathSatisfied: false, cellularAvailable: true))
         XCTAssertFalse(NetworkMonitor.hasSignal(pathSatisfied: false, cellularAvailable: false))
     }
+
+    // MARK: - What the fallback cards show
+
+    private func face(_ kind: FallbackKind) -> FallbackCardView.Face {
+        FallbackCardView.face(for: kind, entry: queue.latest)
+    }
+
+    func testTheSendingCardSaysDeliveredOnlyOnceTheShortcutConfirms() {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+        XCTAssertEqual(face(.sending), .sending)
+
+        queue.resolve(handed.id, .sent)
+
+        XCTAssertEqual(face(.sending), .delivered(at: sentAt))
+    }
+
+    func testTheSendingCardOffersTheComposerWhenTheShortcutFails() {
+        let handed = outcome(.awaitingConfirmation)
+        queue.record(handed)
+
+        queue.resolve(handed.id, .failed)
+
+        XCTAssertEqual(face(.sending), .couldNotSend)
+    }
+
+    func testTheCouldNotSendCardTurnsDeliveredAfterTheComposerSends() {
+        let failed = outcome(.sendFailed)
+        queue.record(failed)
+        XCTAssertEqual(face(.sendFailed), .couldNotSend)
+
+        queue.composerSent(failed.id)
+
+        XCTAssertEqual(face(.sendFailed), .delivered(at: sentAt))
+        XCTAssertEqual(face(.composer), .hidden, "no second Send message once it went out")
+    }
+
+    func testTheNoSignalCardTurnsDeliveredOnceARetryIsConfirmed() {
+        let held = outcome(.queued)
+        queue.record(held)
+        XCTAssertEqual(face(.noSignal), .noSignal)
+
+        signal.hasSignal = true
+        queue.retry()
+        XCTAssertEqual(face(.noSignal), .noSignal, "handed over is not delivered")
+        queue.resolve(held.id, .sent)
+
+        XCTAssertEqual(face(.noSignal), .delivered(at: sentAt))
+    }
+
+    func testTheNoSignalCardOffersTheComposerWhenARetryCannotSend() {
+        queue.record(outcome(.queued))
+        sender.textFails = true
+
+        signal.hasSignal = true
+        queue.retry()
+
+        XCTAssertEqual(face(.noSignal), .couldNotSend)
+    }
+
+    func testNoFixAtAllIsAFailurePillAndALastKnownFixIsAPlainOne() {
+        queue.record(outcome(.awaitingConfirmation))
+        XCTAssertEqual(face(.noLocation), .location(.init(text: "Location unavailable", isFailure: true)))
+
+        var lastKnown = outcome(.awaitingConfirmation)
+        lastKnown.location = AlertFix(lat: 14.65, lng: 121.05, isLastKnown: true)
+        queue.record(lastKnown)
+        XCTAssertEqual(face(.noLocation), .location(.init(text: "Last known location", isFailure: false)))
+
+        var live = outcome(.awaitingConfirmation)
+        live.location = AlertFix(lat: 14.65, lng: 121.05, isLastKnown: false)
+        queue.record(live)
+        XCTAssertEqual(face(.noLocation), .hidden)
+    }
+
+    func testNoCardWithoutAnAlert() {
+        XCTAssertEqual(face(.sending), .sending, "a placeholder until the alert is recorded")
+        XCTAssertEqual(face(.composer), .hidden)
+        XCTAssertEqual(face(.noLocation), .hidden)
+    }
 }
