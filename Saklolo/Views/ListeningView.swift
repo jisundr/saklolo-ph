@@ -90,6 +90,7 @@ struct ListeningView: View {
             let source = heard.isEmpty ? "canned fallback\(failure)" : "heard"
             let took = transcribeStarted.map { (ContinuousClock.now - $0).formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 1))) }
             diagnostics = [source, took.map { "transcribe+load \($0)" }].compactMap { $0 }.joined(separator: " · ")
+            print("[004] \(diagnostics) | transcript: \(heard.debugDescription)")
             transcript = heard.isEmpty ? fallbackTranscript : heard
 
             // Keyword result is computed first inside classify(); the LLM can

@@ -22,46 +22,87 @@ actor SpeechTranscriptionService {
     static let shared = SpeechTranscriptionService()
 
     /// Whisper model folder in the whisperkit-coreml repo.
-    static let modelVariant = "openai_whisper-small"
+    static let modelVariant = "openai_whisper-large-v3-v20240930_turbo_632MB"
 
     private var pipe: WhisperKit?
     private var loading: Task<WhisperKit, Error>?
 
+    /// Where `prepare` is, for the loading screen.
+    enum Stage: Sendable {
+        /// Fetching the model, 0...1. Only on the first run.
+        case downloading(Double)
+        /// Loading the model. The first time, CoreML compiles it for the
+        /// Neural Engine, which takes minutes and reports no progress.
+        case compiling
+        /// One silent transcription through the whole pipeline.
+        case testing
+    }
+
+    /// Set once a load has fully succeeded, so the loading screen only warns
+    /// about the long wait when it is real. The OS can still drop its compile
+    /// cache (for example after an update), so this is a hint, not a promise.
+    static var hasLoadedBefore: Bool {
+        get { UserDefaults.standard.bool(forKey: "whisperLoaded.\(modelVariant)") }
+        set { UserDefaults.standard.set(newValue, forKey: "whisperLoaded.\(modelVariant)") }
+    }
+
     /// Loads the model, downloading it on first run (needs network). Later
     /// launches find it on disk and work offline. Safe to call repeatedly:
-    /// concurrent callers share one load. `onProgress` gets 0...1 while
-    /// downloading and is not called when the model is already on disk.
-    func prepare(onProgress: (@Sendable (Double) -> Void)? = nil) async throws {
+    /// concurrent callers share one load, and only the first caller's
+    /// `onStage` is called.
+    func prepare(onStage: (@Sendable (Stage) -> Void)? = nil) async throws {
         if pipe != nil { return }
         let task = loading ?? Task {
-            let folder: String
             if let cached = Self.cachedModelFolder() {
-                folder = cached.path
-            } else {
-                folder = try await WhisperKit.download(variant: Self.modelVariant) { progress in
-                    onProgress?(progress.fractionCompleted)
-                }.path
+                do {
+                    return try await Self.load(from: cached.path, onStage: onStage)
+                } catch {
+                    // Unreadable (corrupt or old) copy: drop it and download again.
+                    try? FileManager.default.removeItem(at: cached)
+                }
             }
-            return try await WhisperKit(WhisperKitConfig(modelFolder: folder, download: false))
+            onStage?(.downloading(0))
+            let folder = try await WhisperKit.download(variant: Self.modelVariant) { progress in
+                onStage?(.downloading(progress.fractionCompleted))
+            }
+            return try await Self.load(from: folder.path, onStage: onStage)
         }
         loading = task
         do {
             pipe = try await task.value
+            Self.hasLoadedBefore = true
         } catch {
             loading = nil
             throw error
         }
     }
 
-    /// WhisperKit's default download location, checked so launches without
-    /// network do not need to ask the Hugging Face hub anything.
+    private static func load(from folder: String, onStage: (@Sendable (Stage) -> Void)?) async throws -> WhisperKit {
+        let pipe = try await WhisperKit(WhisperKitConfig(modelFolder: folder, load: false, download: false))
+        onStage?(.compiling)
+        try await pipe.loadModels()
+        // Silence through the whole pipeline proves it works end to end, so a
+        // failure shows up on the loading screen and not during an emergency.
+        onStage?(.testing)
+        _ = try await pipe.transcribe(audioArray: [Float](repeating: 0, count: 16_000))
+        return pipe
+    }
+
+    /// WhisperKit's default download location, only if every model's
+    /// weights are on disk. A download that was interrupted leaves the
+    /// `.mlmodelc` folders behind without their weights, so checking for the
+    /// folders alone treats a half-downloaded model as ready. Launches
+    /// without network rely on this instead of asking the Hugging Face hub.
     private static func cachedModelFolder() -> URL? {
         guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
         let folder = documents
             .appending(path: "huggingface/models/argmaxinc/whisperkit-coreml")
             .appending(path: modelVariant)
-        let encoder = folder.appending(path: "AudioEncoder.mlmodelc")
-        return FileManager.default.fileExists(atPath: encoder.path) ? folder : nil
+        let complete = ["MelSpectrogram", "AudioEncoder", "TextDecoder"].allSatisfy { name in
+            let weights = folder.appending(path: "\(name).mlmodelc/weights/weight.bin")
+            return FileManager.default.fileExists(atPath: weights.path)
+        }
+        return complete ? folder : nil
     }
 
     /// What the recorder is doing, for the Listening screen's mic indicator.
