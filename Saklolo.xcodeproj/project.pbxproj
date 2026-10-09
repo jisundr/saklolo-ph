@@ -26,6 +26,7 @@
 		4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = E571F68D365C23F725BC86F3 /* FirstAidScript.swift */; };
 		48FE238DE91BC3E3AF2197EE /* KeywordDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */; };
 		49484D2FE77D636C96EA6889 /* ModelStatusStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3278C25619F1ADD5A7B2F9BC /* ModelStatusStrip.swift */; };
+		54489CDF282E6718BA277F00 /* VoiceOrbStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE164405132473F38B905732 /* VoiceOrbStatusTests.swift */; };
 		5758B6EA425D2319952C3ED1 /* head_injury.json in Resources */ = {isa = PBXBuildFile; fileRef = 2DB9528F3641CAE2E08E74C0 /* head_injury.json */; };
 		58A5C05089902FCF42062A85 /* fall.json in Resources */ = {isa = PBXBuildFile; fileRef = 384B62FB9B9A004977718172 /* fall.json */; };
 		59107513116691F646025721 /* FallbackCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3E961ADF4B0F438BB38983 /* FallbackCardView.swift */; };
@@ -125,6 +126,7 @@
 		B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AloneCountdownTests.swift; sourceTree = "<group>"; };
 		B698F2A1F50F44028F7AEC7B /* keywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = keywords.json; sourceTree = "<group>"; };
 		BB38CFFB75388706F2E9A5CF /* AlertCallbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertCallbackTests.swift; sourceTree = "<group>"; };
+		BE164405132473F38B905732 /* VoiceOrbStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceOrbStatusTests.swift; sourceTree = "<group>"; };
 		C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContactsPage.swift; sourceTree = "<group>"; };
 		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 		D13517B32F1311EA1F69FDA8 /* SessionExit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExit.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */,
 				475570EBBB4C0AF9520B2777 /* ShortcutMessageTests.swift */,
 				1F1554B937169BB45A23EA45 /* TestClock.swift */,
+				BE164405132473F38B905732 /* VoiceOrbStatusTests.swift */,
 			);
 			path = SakloloTests;
 			sourceTree = "<group>";
@@ -483,6 +486,7 @@
 				743BFAAF528D807B8DC37F09 /* SessionExitTests.swift in Sources */,
 				262E0CBEC3C5B463D2B5BEB9 /* ShortcutMessageTests.swift in Sources */,
 				8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */,
+				54489CDF282E6718BA277F00 /* VoiceOrbStatusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

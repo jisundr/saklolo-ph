@@ -70,6 +70,11 @@ final class AlertQueue: ObservableObject {
     /// The alert the chat's cards describe: the most recent one.
     var latest: Entry? { entries.last }
 
+    /// Where alert `id` is, or nil if it is not in the queue.
+    func status(of id: UUID) -> Entry.Status? {
+        entries.first { $0.id == id }?.status
+    }
+
     /// True while some text is held for signal.
     var hasWaiting: Bool { entries.contains { $0.status == .waiting } }
 
