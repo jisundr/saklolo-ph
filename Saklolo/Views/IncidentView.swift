@@ -48,5 +48,5 @@ struct IncidentView: View {
 }
 
 #Preview {
-    IncidentView(incident: Incident(trigger: "button", mode: .guide, summary: "Nahulog si Papa, dumudugo ang ulo."))
+    IncidentView(incident: Incident(trigger: "button", mode: .guide, summary: "Papa fell, his head is bleeding."))
 }

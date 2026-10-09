@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// Listening: "Ano'ng nangyari?" with live transcript, per the brief's Screens table.
+/// Listening: "What happened?" with live transcript, per the brief's Screens table.
 /// Transcribes, classifies with `SituationClassifierService`, and saves an `Incident`.
 /// The SMS and call do not wait on this screen (PRD FR-9): classification only
 /// decides which first-aid script and mode the guide uses.
@@ -36,7 +36,7 @@ struct ListeningView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Ano'ng nangyari?")
+            Text("What happened?")
                 .font(.title)
                 .bold()
 
@@ -143,9 +143,9 @@ extension ListeningView {
 
     fileprivate var statusText: String {
         switch stage {
-        case .waiting: quietTooLong ? "Walang marinig. Lakasan ang boses." : "Nakikinig..."
-        case .hearing: "Naririnig ka. Magsalita lang."
-        case .transcribing: "Iniintindi..."
+        case .waiting: quietTooLong ? "Can't hear you. Speak louder." : "Listening..."
+        case .hearing: "I can hear you. Keep talking."
+        case .transcribing: "Understanding..."
         case .done: ""
         }
     }

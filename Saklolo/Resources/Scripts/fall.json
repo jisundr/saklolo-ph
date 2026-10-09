@@ -1,12 +1,17 @@
 {
   "id": "fall",
   "title": "Fall, can't move",
-  "keywords": ["nahulog", "nadulas", "di makagalaw", "hindi makagalaw"],
+  "keywords": [
+    "nahulog",
+    "nadulas",
+    "di makagalaw",
+    "hindi makagalaw"
+  ],
   "steps": [
-    "Huwag siyang galawin.",
-    "Panatilihing tahimik ang ulo at leeg.",
-    "Painitin siya gamit ang kumot o damit.",
-    "Bantayan ang paghinga habang dumarating ang tulong."
+    "Don't move them.",
+    "Keep the head and neck still.",
+    "Keep them warm with a blanket or clothes.",
+    "Watch their breathing until help arrives."
   ],
   "source": "Philippine Red Cross — Basic First Aid (TODO: verify exact wording/order before submission)"
 }
