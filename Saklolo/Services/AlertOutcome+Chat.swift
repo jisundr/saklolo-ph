@@ -31,6 +31,15 @@ extension AlertOutcome {
         return messages
     }
 
+    /// The one location chip (I4): what the text said in place of a live
+    /// location. "Last known location (7:31 PM)", or "Location unavailable"
+    /// with no fix at all; nil for a live fix. One chip, not a "No GPS"
+    /// chip beside it: both would describe the same missing fix.
+    var locationChipText: String? {
+        guard let location else { return AlertPolicy.noLocationNote }
+        return location.note
+    }
+
     /// "Sending the alert to Kuya Ben and Tita Lina..." while unconfirmed.
     var sendingLine: String {
         "Sending the alert to \(recipientList)\u{2026}"

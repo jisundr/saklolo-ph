@@ -66,6 +66,22 @@ final class AlertOutcomeChatTests: XCTestCase {
         XCTAssertEqual(kinds, [.fallback(.sending), .fallback(.noLocation)])
     }
 
+    func testNoFixAtAllIsOneChipSayingWhatTheTextSaid() {
+        XCTAssertEqual(outcome(.awaitingConfirmation, names: [], location: nil).locationChipText, "Location unavailable")
+    }
+
+    func testALastKnownFixIsOneChipWithItsTime() {
+        let taken = Date(timeIntervalSince1970: 1_800_000_000)
+        let lastKnown = AlertFix(lat: 14.6507, lng: 121.0494, isLastKnown: true, takenAt: taken)
+        let time = taken.formatted(date: .omitted, time: .shortened)
+
+        XCTAssertEqual(outcome(.awaitingConfirmation, names: [], location: lastKnown).locationChipText, "Last known location (\(time))")
+    }
+
+    func testALiveFixHasNoLocationChip() {
+        XCTAssertNil(outcome(.awaitingConfirmation, names: [], location: liveFix).locationChipText)
+    }
+
     func testNoFixAtAllAlsoShowsTheLocationCard() {
         let kinds = outcome(.queued, names: ["Kuya Ben"], location: nil).chatMessages.map(\.kind)
 

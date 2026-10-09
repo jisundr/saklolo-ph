@@ -128,14 +128,16 @@ struct FallbackCardView: View {
 
     // MARK: - I4: no live location
 
+    @ViewBuilder
     private var locationChips: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            chip("No GPS right now", done: false)
-            if let location = entry?.outcome.location {
-                chip(location.note ?? "Live location", done: true)
-            } else {
-                chip(AlertPolicy.noLocationNote, done: false)
-            }
+        if let text = entry?.outcome.locationChipText {
+            let hasFix = entry?.outcome.location != nil
+            Label(text, systemImage: hasFix ? "mappin.and.ellipse" : "location.slash")
+                .font(Typography.finePrint.weight(.semibold))
+                .foregroundStyle(Palette.text)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Capsule().strokeBorder(Palette.signalOrange, lineWidth: 1))
         }
     }
 
