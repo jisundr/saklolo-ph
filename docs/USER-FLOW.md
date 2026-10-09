@@ -8,35 +8,9 @@ Anything the sources don't specify is marked **TBD**.
 
 ## Main emergency flow
 
-```mermaid
-flowchart TD
-    A[Trigger: "Tulong" / "Saklolo" heard, or big red button] --> B["Phone speaks: Ano'ng nangyari?"]
-    B --> C[Listen: record up to 15s]
-    C --> D[Whisper transcribes Taglish]
-    D -->|weak or failed| D2[Keyword matching on what was heard, or red button path]
-    D --> E{Local LLM classifies}
-    D2 --> E2[Keyword fallback picks script and summary]
-    E -->|JSON: mode, situation, script, urgency, summary| F{Mode?}
-    E -->|fails or slow| E2
-    E2 --> F
-    F -->|alone: nahulog ako| G[Alert always: SMS to contacts in priority order, then call #1]
-    F -->|guide: nahulog si Papa| G
-    G -->|silent Shortcut send fails| G2[Message composer, one tap to send]
-    G --> H{Mode branch}
-    G2 --> H
-    H -->|alone| I[Keep talking to the injured person]
-    I -->|no reply for 30s| J[Escalate: Walang sagot pagkatapos bumagsak; next action TBD]
-    H -->|guide| K{Script matched?}
-    K -->|yes| L[Speak script one step at a time]
-    K -->|no| M[General script: stay calm, check breathing, don't move them, help is coming]
-    L --> N[okay / tapos na = next, ulitin = repeat, or Next/Repeat buttons]
-    M --> N
-    N --> O[Reminder: help is on the way]
-    I --> P[Log incident]
-    J --> P
-    O --> P
-    P --> Q[Incident screen: transcript, summary, delivery status]
-```
+![Main emergency flow](diagrams/main-emergency-flow.png)
+
+Diagram source: [main-emergency-flow.mmd](diagrams/main-emergency-flow.mmd).
 
 ## 1. First-time setup
 

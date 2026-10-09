@@ -1,0 +1,27 @@
+flowchart TD
+    A["Trigger: 'Tulong' / 'Saklolo' heard,<br/>or big red button"] --> B["Phone speaks:<br/>'Ano'ng nangyari?'"]
+    B --> C["Listen:<br/>record up to 15s"]
+    C --> D["Whisper transcribes Taglish"]
+    D -->|"weak or failed"| D2["Keyword matching on what was heard,<br/>or red button path"]
+    D --> E{"Local LLM classifies"}
+    D2 --> E2["Keyword fallback picks<br/>script and summary"]
+    E -->|"JSON: mode, situation,<br/>script, urgency, summary"| F{"Mode?<br/>nahulog ako = alone<br/>nahulog si Papa = guide"}
+    E -->|"fails or slow"| E2
+    E2 --> F
+    F -->|"alone"| G["ALERT ALWAYS<br/>SMS to contacts in priority order,<br/>then call #1"]
+    F -->|"guide"| G
+    G -->|"silent Shortcut send fails"| G2["Message composer,<br/>one tap to send"]
+    G --> H{"Mode branch"}
+    G2 --> H
+    H -->|"alone"| I["Keep talking to<br/>the injured person"]
+    I -->|"no reply for 30s"| J["Escalate: 'Walang sagot pagkatapos bumagsak'<br/>next action TBD"]
+    H -->|"guide"| K{"Script matched?"}
+    K -->|"yes"| L["Speak script<br/>one step at a time"]
+    K -->|"no"| M["General script: stay calm, check breathing,<br/>don't move them, help is coming"]
+    L --> N["'okay' / 'tapos na' = next<br/>'ulitin' = repeat<br/>or Next / Repeat buttons"]
+    M --> N
+    N --> O["Reminder:<br/>help is on the way"]
+    I --> P["Log incident"]
+    J --> P
+    O --> P
+    P --> Q["Incident screen:<br/>transcript, summary, delivery status"]
