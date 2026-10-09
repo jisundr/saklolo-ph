@@ -119,7 +119,7 @@ Storage: SwiftData (fallback UserDefaults).
 
 **Dependencies:** a Mac with Xcode and an Apple ID; an iPhone with a SIM; WhisperKit; Apple Foundation Models (or Gemma/Qwen via MLX Swift or llama.cpp); the Shortcuts app.
 
-**Assumptions (unverified):** Apple's on-device model runs on the target iPhone; the Shortcut sends SMS silently; a Filipino TTS voice is installed. Also unverified: whether the Shortcut can send SMS and place a call on a locked phone. Test it with a real SIM.
+**Assumptions (unverified):** Apple's on-device model runs on the target iPhone (demo phone: iPhone 15 Pro Max, which needs iOS 26+ and Apple Intelligence turned on and fully downloaded; verify before the demo); the Shortcut sends SMS silently; a Filipino TTS voice is installed. Also unverified: whether the Shortcut can send SMS and place a call on a locked phone. Test it with a real SIM.
 
 **Risks**
 
@@ -127,6 +127,9 @@ Storage: SwiftData (fallback UserDefaults).
 | --- | --- |
 | No Mac / Xcode | Blocker for iOS. Borrow a Mac or switch to Android |
 | iPhone can't run Apple's on-device model | Gemma/Qwen via MLX Swift; else keyword rules (disclose honestly) |
+| Apple's model is wrong or blocked on an emergency phrase. Spike 001 (Mac): 35/36 script and mode with the keyword merge, but the safety guardrail blocks some injured-child phrasings and the model sometimes misreads script or mode | Keyword classifier runs first and replaces the LLM result on any error, timeout, or a "general" answer when keywords match. The LLM never delays or blocks the SMS and call. Disclose that the AI can be wrong |
+| Phone latency is unmeasured (0.75s median on a Mac) | 3s timeout then keyword result; test on the iPhone 15 Pro Max |
+| MLX 3B models (spike 002) were too inaccurate on Taglish (3 to 6 of 12 script, tested without examples) | Not used for the demo. Revisit after tuning or fine-tuning |
 | Shortcut silent send fails | MFMessageComposeViewController with one tap |
 | Whisper slow or weak on Taglish | Smaller model; keyword fallback; big red button |
 | Medical advice concerns | Fixed vetted scripts, LLM only classifies, source shown, disclaimer, always calls for help |
