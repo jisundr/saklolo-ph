@@ -28,7 +28,7 @@ Apple/Google fall detection, Emergency SOS, and Life360 need a wearable, a butto
 
 **Core flow**
 
-1. Trigger: "Tulong" / "Saklolo" heard, or the big red button.
+1. Trigger: "Tulong" / "Saklolo" heard, or the big red button. (Proposed extra triggers are listed under Goals.)
 2. Check-in: the phone asks "Ano'ng nangyari?" and listens for up to 15s.
 3. Understand: Whisper transcribes the Taglish. A local LLM returns JSON (mode, situation, matching script, urgency, one-line summary).
 4. Alert, always: SMS to contacts in priority order with summary and GPS, then call contact #1.
@@ -70,13 +70,20 @@ MVP scripts (max 4): fall and can't move; heavy bleeding; unconscious (with CPR 
 - Fall detection (CoreMotion) with silence escalation.
 - Contacts reply "PAPUNTA NA" and the phone announces it.
 
+**Triggers** (proposed additions beyond the brief; details in [PRD.md](PRD.md#triggers))
+- Existing: big red button (Must), voice "Tulong" / "Saklolo" while the app is open (Wow), fall detection (Stretch).
+- Proposed: a quick trigger outside the app (Lock Screen control, Action Button, Back Tap, or "Hey Siri, Saklolo") that runs the Saklolo Shortcut, with a 5-second cancel countdown; a Home Screen widget with a red button; shout detection (Stretch).
+- Passive triggers (shout, fall) ask "Okay ka lang?" for 10s before sending.
+
 **Before submission**
 - Check every script against Philippine Red Cross first-aid material, show the source in the app, and show the disclaimer "Gabay lang ito. Hindi ito kapalit ng doktor o rescuer."
 
 ## Non-goals
 
 Cut from the MVP and pitched as the roadmap:
-- Android, smartwatch, background listening with the app closed.
+- Android, smartwatch, background listening with the app closed. True always-on listening needs a background audio session, drains the battery, and shows the orange mic dot.
+- A loud-commotion / sound-spike trigger: too many false alarms.
+- Contacting 911. An optional "call 911" second tap is TBD / roadmap.
 - More scripts (burns, choking, stroke signs, seizures); Bisaya/Ilocano.
 - Barangay responder mode, family dashboard.
 
@@ -100,7 +107,14 @@ Deploying is not required for submission.
   - Deploying is not required if the repo has instructions for judges.
   - Finalists (10-15) are announced 1:00 PM Oct 10 and must pitch in person: 5 min plus 3 min Q&A.
 - **Tooling:** needs a Mac with Xcode and an Apple ID to install on the iPhone. Permissions: Microphone, Location (When In Use), Motion (only if fall detection is built).
-- **Unverified assumptions:** Apple Foundation Models runs on the target iPhone (needs Apple Intelligence, 15 Pro or newer), and the Shortcut can send SMS silently. Both have fallbacks below.
+- **Unverified assumptions:** Apple Foundation Models runs on the target iPhone (needs iOS 26 and Apple Intelligence hardware, 15 Pro or newer), and the Shortcut can send SMS silently. Both have fallbacks below.
+- **Honest limits (proposed triggers):**
+  - Alone mode works only if the phone is within earshot of the voice.
+  - Whether the Shortcut can send SMS and place a call on a locked phone is unverified. Test with a real SIM.
+  - The widget cannot use the mic and needs an unlocked phone. The Lock Screen control needs iOS 18+.
+  - The call (`tel://`) still needs one confirm tap.
+  - Nothing here contacts 911.
+- **Pitch wording:** say "alerts your circle", not "calls help"; say "no data needed", not "no network needed".
 
 **Stack (iOS)**
 
@@ -141,6 +155,11 @@ Carried over as-is from the brief:
 - Which iPhone model (decides Apple's on-device model vs MLX)?
 - Who is the emergency contact at the demo?
 - GitHub repo link for the last slide
+
+Added (proposed triggers):
+
+- Does the Shortcut send SMS and call on a locked phone?
+- Which iPhone/iOS version?
 
 ## Success criteria
 

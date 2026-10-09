@@ -1,18 +1,36 @@
 flowchart TD
-    A["Trigger: 'Tulong' / 'Saklolo' heard,<br/>or big red button"] --> B["Phone speaks:<br/>'Ano'ng nangyari?'"]
+    T1["T1 Big red button<br/>(Must) immediate"] --> A
+    T4["T4 Voice 'Tulong' / 'Saklolo'<br/>app open (Wow)"] --> A
+    T2["T2 Quick trigger outside the app<br/>Lock Screen, Action Button,<br/>Back Tap, Hey Siri (proposed)"] --> CD
+    T3["T3 Home Screen widget<br/>(proposed)"] --> CD
+    CD{"5s countdown<br/>'Magpapadala sa 5... Cancel'"}
+    CD -->|"cancel"| CX["Nothing sent"]
+    CD -->|"no cancel"| L1["Layer 1, no AI:<br/>Shortcut gets location, SMS all,<br/>call #1"]
+    CD -->|"no cancel"| A
+    T5["T5 Shout detection<br/>(proposed Stretch)"] --> CF
+    T6["T6 Fall detection<br/>(Stretch)"] --> CF
+    CF{"Confirm step, 10s:<br/>'Okay ka lang? Sabihin okay'"}
+    CF -->|"says okay"| CX2["Stand down"]
+    CF -->|"silence"| A
+    CF -->|"Tulong / Saklolo<br/>or red button"| A
+    A["Layer 2: app opens to Listening"] --> B["Phone speaks:<br/>'Ano'ng nangyari?'"]
     B --> C["Listen:<br/>record up to 15s"]
     C --> D["Whisper transcribes Taglish"]
     D -->|"weak or failed"| D2["Keyword matching on what was heard,<br/>or red button path"]
     D --> E{"Local LLM classifies"}
     D2 --> E2["Keyword fallback picks<br/>script and summary"]
     E -->|"JSON: mode, situation,<br/>script, urgency, summary"| F{"Mode?<br/>nahulog ako = alone<br/>nahulog si Papa = guide"}
+    E -->|"low confidence (proposed)"| LC["General script +<br/>one spoken question"]
     E -->|"fails or slow"| E2
+    LC --> F
     E2 --> F
     F -->|"alone"| G["ALERT ALWAYS<br/>SMS to contacts in priority order,<br/>then call #1"]
     F -->|"guide"| G
     G -->|"silent Shortcut send fails"| G2["Message composer,<br/>one tap to send"]
+    G -->|"no cell signal (proposed)"| GQ["SMS queued, retried when signal returns<br/>Incident shows 'naka-pila'"]
     G --> H{"Mode branch"}
     G2 --> H
+    GQ --> H
     H -->|"alone"| I["Keep talking to<br/>the injured person"]
     I -->|"no reply for 30s"| J["Escalate: 'Walang sagot pagkatapos bumagsak'<br/>next action TBD"]
     H -->|"guide"| K{"Script matched?"}
@@ -21,7 +39,9 @@ flowchart TD
     L --> N["'okay' / 'tapos na' = next<br/>'ulitin' = repeat<br/>or Next / Repeat buttons"]
     M --> N
     N --> O["Reminder:<br/>help is on the way"]
+    I -->|"user cancels after alert sent"| FA["'False alarm' SMS to same contacts<br/>(proposed, wording TBD)"]
     I --> P["Log incident"]
     J --> P
     O --> P
+    FA --> P
     P --> Q["Incident screen:<br/>transcript, summary, delivery status"]

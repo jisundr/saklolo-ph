@@ -1,0 +1,363 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Saklolo Wireframes</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#fff;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;color:#222;padding:40px 40px 48px;width:2060px}
+h1{font-size:30px;margin-bottom:6px}
+.sub{color:#666;font-size:16px;margin-bottom:34px}
+section{margin-bottom:56px}
+h2{font-size:24px;margin-bottom:4px}
+.gd{color:#666;font-size:14px;margin-bottom:18px}
+.row{display:flex;gap:36px;align-items:flex-start}
+.col{width:340px}
+.cap{font-weight:700;font-size:17px;margin-bottom:4px}
+.pur{color:#666;font-size:13px;margin-bottom:12px;min-height:34px}
+.phone{width:340px;height:700px;border:3px solid #222;border-radius:36px;background:#fafafa;padding:46px 18px 22px;position:relative;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.phone:before{content:"";position:absolute;top:14px;left:50%;margin-left:-45px;width:90px;height:18px;border-radius:10px;background:#222}
+.t{font-size:22px;font-weight:700}
+.s{font-size:13px;color:#666}
+.box{border:2px solid #444;border-radius:10px;padding:10px 12px;font-size:14px;background:#fff}
+.dash{border:2px dashed #999;color:#777}
+.btn{border:2px solid #222;border-radius:12px;padding:13px;text-align:center;font-weight:700;font-size:16px;background:#fff}
+.btn.pri{background:#222;color:#fff}
+.red{background:#e0453a;color:#fff;border-color:#a8261c}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+.grow{flex:1}
+.center{display:flex;align-items:center;justify-content:center;text-align:center}
+.bigred{width:230px;height:230px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;letter-spacing:1px}
+.pill{display:inline-block;border:2px solid #444;border-radius:20px;padding:3px 12px;font-size:13px;background:#fff}
+.ok{color:#1a7f37;font-weight:700}.pend{color:#999;font-weight:700}.bad{color:#c62828;font-weight:700}
+.n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#222;color:#fff;text-align:center;font-size:12px;line-height:22px;margin-right:8px;font-weight:700}
+.note{margin-top:12px;font-size:12px;color:#555;line-height:1.45}
+.note b{color:#222}
+.bar{height:8px;border-radius:4px;background:#ddd;overflow:hidden}.bar i{display:block;height:100%;width:40%;background:#444}
+.banner{background:#e8f5e9;border:2px solid #2e7d32;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:#1b5e20}
+.warn{background:#fff4e5;border:2px solid #e08a00;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;color:#8a5200}
+.foot{font-size:11px;color:#777;text-align:center;border-top:1px dashed #bbb;padding-top:8px}
+.tbd{color:#b45309;font-weight:700}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;color:#fff}
+.must{background:#222}.wow{background:#6a1b9a}.str{background:#1565c0}.tb{background:#b45309}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:1}
+.sheet{position:absolute;left:30px;right:30px;background:#fff;border:2px solid #222;border-radius:16px;padding:16px;text-align:center;z-index:2;font-size:14px}
+.sheet .a{border-top:1px solid #bbb;margin:12px -16px 0;padding-top:10px;font-weight:700}
+.bub{border-radius:16px;padding:9px 13px;font-size:14px;max-width:85%}
+.in{background:#e6e6e6;align-self:flex-start}.out{background:#2f80ed;color:#fff;align-self:flex-end}
+.list{font-size:12px;color:#444;line-height:1.5;margin-top:14px;max-width:700px}
+.list li{margin-left:16px}
+.sec{border-top:2px solid #ddd;padding-top:26px}
+</style></head><body>
+<h1>Saklolo — Wireframes</h1>
+<div class="sub">Every screen and state in <b>USER-FLOW.md</b>. Low-fidelity layout; names, numbers and times are sample data. Tags: <span class="tag must">MUST</span><span class="tag wow">WOW</span><span class="tag str">STRETCH</span><span class="tag tb">TBD</span> — <span class="tbd">orange TBD</span> means the sources don't decide it, so the wireframe shows a proposal.</div>
+
+<section id="setup"><h2>A. Setup (first launch)</h2><div class="gd">Done once, ahead of time. Ends on Home.</div><div class="row">
+
+<div class="col"><div class="cap">A1. Setup, empty<span class="tag must">MUST</span></div><div class="pur">Step 1–2: name, then add 1–5 contacts.</div>
+<div class="phone">
+<div class="t">Setup</div>
+<div class="box"><div class="s">Your name</div>Maria Santos</div>
+<div class="s">Emergency contacts (1–5)</div>
+<div class="box dash center" style="padding:28px">No contacts yet</div>
+<div class="box dash center">+ Add contact</div>
+<div class="grow"></div>
+<div class="btn" style="opacity:.4">Done (needs 1 contact)</div>
+</div>
+<div class="note">Per contact: name, phone, relation. Needs at least 1 contact before Done.</div></div>
+
+<div class="col"><div class="cap">A2. Setup, contacts and order<span class="tag must">MUST</span></div><div class="pur">Step 3: priority order. #1 gets the call.</div>
+<div class="phone">
+<div class="t">Setup</div>
+<div class="box"><div class="s">Your name</div>Maria Santos</div>
+<div class="s">Emergency contacts (1–5, in order)</div>
+<div class="box"><span class="n">1</span>Kuya Ben · 0917 ••• 1234 <span style="float:right">≡</span><div class="s">Relation: Brother · gets SMS + call</div></div>
+<div class="box"><span class="n">2</span>Tita Lina · 0918 ••• 5678 <span style="float:right">≡</span><div class="s">Relation: Aunt · SMS</div></div>
+<div class="box"><span class="n">3</span>Kapitbahay Ruel · 0920 ••• 9012 <span style="float:right">≡</span><div class="s">Relation: Neighbor · SMS</div></div>
+<div class="box dash center">+ Add contact</div>
+<div class="s">Drag ≡ to change priority.</div>
+<div class="grow"></div>
+<div class="btn pri">Done</div>
+</div>
+<div class="note">Add-contact form (name, phone, relation) is a simple sheet; not drawn.</div></div>
+
+<div class="col"><div class="cap">A3. Permission prompts<span class="tag must">MUST</span><span class="tag tb">TBD</span></div><div class="pur">Step 4: Microphone, then Location (When In Use).</div>
+<div class="phone">
+<div class="dim"></div>
+<div class="t">Setup</div>
+<div class="box"><div class="s">Your name</div>Maria Santos</div>
+<div class="box">1 Kuya Ben</div>
+<div class="sheet" style="top:230px">“Saklolo” would like to access the Microphone<div class="s" style="margin-top:6px">To hear “Tulong” and what happened.</div><div class="a">Don't Allow &nbsp;|&nbsp; OK</div></div>
+<div class="sheet" style="top:430px">Allow “Saklolo” to use your location?<div class="s" style="margin-top:6px">To send GPS to your contacts.</div><div class="a">Allow While Using App</div></div>
+</div>
+<div class="note"><span class="tbd">TBD:</span> shown at first launch or at first use. Motion is asked only if fall detection is built. Saving lands on Home.</div></div>
+
+</div></section>
+
+<section id="listen" class="sec"><h2>B. Trigger and listen</h2><div class="gd">Home → Listening → understanding. Same for both modes.</div><div class="row">
+
+<div class="col"><div class="cap">B1. Home<span class="tag must">MUST</span><span class="tag wow">WOW</span></div><div class="pur">Red button always works. Voice trigger works while the app is open.</div>
+<div class="phone">
+<div class="t">Saklolo</div>
+<div style="text-align:center"><span class="pill">● Nakikinig</span></div>
+<div class="grow center"><div class="bigred btn red">SAKLOLO</div></div>
+<div class="s" style="text-align:center">Sabihin: “Tulong” o “Saklolo”<br>o pindutin ang pula</div>
+<div class="box s" style="text-align:center">Mic ✓ · GPS ✓ · 3 contacts ready</div>
+</div>
+<div class="note">“Tulong” / “Saklolo” heard (Wow) or red button → Listening. <span class="tbd">TBD:</span> how users reach Setup and past Incidents from here.</div></div>
+
+<div class="col"><div class="cap">B2. Listening<span class="tag must">MUST</span></div><div class="pur">Phone speaks “Ano'ng nangyari?”, records up to 15s, live transcript.</div>
+<div class="phone">
+<div class="t center" style="margin-top:20px">Ano’ng nangyari?</div>
+<div class="center"><div style="width:120px;height:120px;border-radius:50%;border:3px solid #222;display:flex;align-items:center;justify-content:center;font-size:44px">🎙</div></div>
+<div class="bar"><i></i></div>
+<div class="s" style="text-align:right">6s / 15s</div>
+<div class="box grow"><div class="s">Live transcript</div>“Tulong! Nahulog si Papa, dumudugo ang ulo…”</div>
+<div class="btn">Tapusin na (stop)</div>
+<div class="btn red">SAKLOLO — i-text na agad</div>
+</div>
+<div class="note">The “stop” and “alert now” buttons are suggestions, <span class="tbd">not in the brief</span>.</div></div>
+
+<div class="col"><div class="cap">B3. Understanding<span class="tag must">MUST</span></div><div class="pur">Whisper transcript → local LLM JSON (mode, situation, script, urgency, summary).</div>
+<div class="phone">
+<div class="t center" style="margin-top:20px">Inuunawa…</div>
+<div class="box"><div class="s">Narinig</div>“Tulong! Nahulog si Papa, dumudugo ang ulo!”</div>
+<div class="box"><div class="s">Local AI (on this phone)</div>
+Mode: <b>guide</b> (“si Papa”)<br>Situation: heavy bleeding<br>Script: Heavy bleeding<br>Urgency: high<br>Summary: Si Papa nahulog, dumudugo ang ulo, gising pa.</div>
+<div class="warn">Kung mabagal o pumalya ang AI: keyword mode ang gagamitin. Hindi maaantala ang SMS.</div>
+<div class="grow"></div>
+<div class="s" style="text-align:center">Walang internet na ginagamit</div>
+</div>
+<div class="note">Normally brief and automatic. Next: alert goes out (SMS then call #1), then <b>Guide</b> or <b>Alone</b> screen.</div></div>
+
+</div></section>
+
+<section id="alone" class="sec"><h2>C. Alone mode</h2><div class="gd">The injured person is speaking ("nahulog <b>ako</b>"). The sources list no dedicated screen, so these are proposals.</div><div class="row">
+
+<div class="col"><div class="cap">C1. Alone mode screen<span class="tag must">MUST</span><span class="tag tb">TBD</span></div><div class="pur">Alert goes out; phone keeps talking to the injured person.</div>
+<div class="phone">
+<div class="t">Tulong ay paparating</div>
+<div class="banner">✓ Na-text na sina Kuya, Tita, Ruel</div>
+<div class="box"><div class="s">Alert status</div>
+GPS <span class="ok">✓</span> · SMS 3/3 <span class="ok">✓</span><br>
+Tumatawag kay <b>Kuya Ben</b>… <span class="pend">calling</span></div>
+<div class="box grow center" style="font-size:20px;font-weight:700;line-height:1.3"><div>Huwag kang gagalaw.<br>Nandito ako.<br><span style="font-size:13px;font-weight:400;color:#b45309">TBD: what the phone says here</span></div></div>
+<div class="center" style="gap:8px"><span class="pill">🔊 Nagsasalita</span><span class="pill">🎙 Nakikinig</span></div>
+<div class="btn red">Tumawag ulit</div>
+<div class="foot">Gabay lang ito. Hindi ito kapalit ng doktor o rescuer.</div>
+</div>
+<div class="note"><span class="tbd">TBD:</span> what the phone says in alone mode; sample text only.</div></div>
+
+<div class="col"><div class="cap">C2. Call confirm<span class="tag must">MUST</span><span class="tag tb">TBD</span></div><div class="pur">tel:// needs one confirm tap on iOS.</div>
+<div class="phone">
+<div class="dim"></div>
+<div class="t">Tulong ay paparating</div>
+<div class="banner">✓ Na-text na sina Kuya, Tita, Ruel</div>
+<div class="sheet" style="top:300px">Call Kuya Ben?<div class="s" style="margin-top:6px">0917 ••• 1234</div><div class="a">Cancel &nbsp;|&nbsp; <span style="color:#2f80ed">Call</span></div></div>
+</div>
+<div class="note"><span class="tbd">Problem:</span> an injured person may not be able to tap Call. How this is handled is TBD in the sources.</div></div>
+
+<div class="col"><div class="cap">C3. 30s no reply<span class="tag wow">ESCALATION</span><span class="tag tb">TBD</span></div><div class="pur">Silence after a fall.</div>
+<div class="phone" style="border-color:#c62828">
+<div class="t" style="color:#c62828">Walang sagot</div>
+<div class="warn">“Walang sagot pagkatapos bumagsak” · 30s</div>
+<div class="box"><div class="s">Na-text na ulit sa lahat ng contacts</div><span class="tbd">TBD: what escalation actually does</span><br><span class="s">(e.g. re-text, call #2, louder prompt)</span></div>
+<div class="grow"></div>
+<div class="btn red">Okay lang ako</div>
+</div>
+<div class="note">Brief gives the 30s trigger and the quoted message only. Actions shown are examples, <span class="tbd">not decided</span>. Fall detection (CoreMotion) that would trigger this is Stretch.</div></div>
+
+</div></section>
+
+<section id="guide" class="sec"><h2>D. Guide mode</h2><div class="gd">A companion is speaking ("nahulog <b>si Papa</b>"). Alert runs in the background; the Guide screen leads.</div><div class="row">
+
+<div class="col"><div class="cap">D1. Guide step<span class="tag must">MUST</span></div><div class="pur">One big step at a time. Voice or buttons.</div>
+<div class="phone">
+<div class="banner">✓ Na-text na sina Kuya at Tita · tumatawag kay Kuya Ben</div>
+<div class="s">Pagdurugo · Hakbang 2 ng 4</div>
+<div class="box grow center" style="font-size:26px;font-weight:700;line-height:1.3"><div>Diinan ang sugat gamit ang malinis na tela.<br><br><span style="font-size:15px;font-weight:400;color:#666">Huwag itaas ang tela para silipin.</span></div></div>
+<div class="s" style="text-align:center">Sabihin: “okay” / “tapos na” = susunod · “ulitin” = ulitin</div>
+<div class="row2"><div class="btn">↻ Ulitin</div><div class="btn pri">Susunod →</div></div>
+<div class="foot">Source: Philippine Red Cross · Gabay lang ito. Hindi ito kapalit ng doktor o rescuer.</div>
+</div>
+<div class="note">Every script starts with making sure help is being called (step 1). The LLM only picks the script. <span class="tbd">TBD:</span> placement of source and disclaimer.</div></div>
+
+<div class="col"><div class="cap">D2. General script<span class="tag must">MUST</span></div><div class="pur">When no script matches.</div>
+<div class="phone">
+<div class="banner">✓ Na-text na sina Kuya at Tita</div>
+<div class="s">Pangkalahatan · Hakbang 1 ng 4</div>
+<div class="box grow center" style="font-size:26px;font-weight:700;line-height:1.3"><div>Manatiling kalmado.<br><br><span style="font-size:15px;font-weight:400;color:#666">Susunod: tingnan ang paghinga · huwag galawin · paparating ang tulong</span></div></div>
+<div class="s" style="text-align:center">Sabihin: “okay” / “tapos na” = susunod · “ulitin” = ulitin</div>
+<div class="row2"><div class="btn">↻ Ulitin</div><div class="btn pri">Susunod →</div></div>
+<div class="foot">Source: Philippine Red Cross · Gabay lang ito. Hindi ito kapalit ng doktor o rescuer.</div>
+</div>
+<div class="note">General script: stay calm, check breathing, don't move them, help is coming.</div></div>
+
+<div class="col"><div class="cap">D3. CPR mode<span class="tag wow">WOW</span><span class="tag tb">TBD</span></div><div class="pur">Unconscious script, not breathing: spoken count and metronome beep.</div>
+<div class="phone" style="border-color:#c62828">
+<div class="banner">✓ Na-text na sina Kuya at Tita</div>
+<div class="s">Walang malay · CPR</div>
+<div class="grow center" style="flex-direction:column;gap:6px"><div style="font-size:110px;font-weight:800;line-height:1">17</div><div class="s">bilang · ● beep</div><div class="pill" style="margin-top:6px"><span class="tbd">pace TBD</span></div></div>
+<div class="box center" style="font-size:18px;font-weight:700">Diinan nang malakas sa gitna ng dibdib</div>
+<div class="row2"><div class="btn">Huminto</div><div class="btn pri">Tapos na</div></div>
+<div class="foot">Gabay lang ito. Hindi ito kapalit ng doktor o rescuer.</div>
+</div>
+<div class="note">Metronome pace comes from the Red Cross material. <span class="tbd">TBD:</span> layout and how CPR mode starts and stops.</div></div>
+
+<div class="col"><div class="cap">D4. End of script / reminder<span class="tag must">MUST</span><span class="tag tb">TBD</span></div><div class="pur">Reminder that help is on the way.</div>
+<div class="phone">
+<div class="banner">✓ Na-text na sina Kuya at Tita</div>
+<div class="box grow center" style="font-size:24px;font-weight:700;line-height:1.3"><div>Paparating na ang tulong.<br><br><span style="font-size:15px;font-weight:400;color:#666">Bantayan ang paghinga. Huwag galawin.</span></div></div>
+<div class="row2"><div class="btn">↻ Ulitin lahat</div><div class="btn pri">Tapos na</div></div>
+<div class="foot">Gabay lang ito. Hindi ito kapalit ng doktor o rescuer.</div>
+</div>
+<div class="note"><span class="tbd">TBD:</span> how often reminders are spoken, and what the last step shows. “Tapos na” → Incident (trigger TBD).</div></div>
+
+</div></section>
+
+<section id="fallback" class="sec"><h2>E. Fallbacks</h2><div class="gd">The alert is sent in every one of these cases.</div><div class="row">
+
+<div class="col"><div class="cap">E1. Message composer<span class="tag must">MUST</span></div><div class="pur">Silent Shortcut send fails → one tap to send.</div>
+<div class="phone" style="padding-top:60px">
+<div class="center" style="justify-content:space-between"><span class="s">Cancel</span><b>New Message</b><span style="color:#2f80ed;font-weight:700">Send</span></div>
+<div class="box"><span class="s">To:</span> Kuya Ben, Tita Lina, Ruel</div>
+<div class="box grow" style="font-size:14px">SAKLOLO: Si Papa nahulog, dumudugo ang ulo, gising pa. 7:42pm. Lokasyon: maps.apple.com/?ll=14.6507,121.0494</div>
+<div class="warn">Hindi nasend nang tahimik. Pindutin ang Send nang isang beses.</div>
+</div>
+<div class="note">System composer (MFMessageComposeViewController) pre-filled. Sending is one tap.</div></div>
+
+<div class="col"><div class="cap">E2. No GPS fix<span class="tag must">MUST</span></div><div class="pur">Last known location is used.</div>
+<div class="phone">
+<div class="banner">✓ Na-text na sina Kuya at Tita</div>
+<div class="warn">Walang GPS ngayon. Ginamit ang huling alam na lokasyon (7:31pm).</div>
+<div class="s">Pagdurugo · Hakbang 2 ng 4</div>
+<div class="box grow center" style="font-size:24px;font-weight:700"><div>Diinan ang sugat gamit ang malinis na tela.</div></div>
+<div class="row2"><div class="btn">↻ Ulitin</div><div class="btn pri">Susunod →</div></div>
+</div>
+<div class="note">Banner can appear on Guide, Alone and Incident screens. The SMS says the location is the last known one <span class="tbd">(wording TBD)</span>.</div></div>
+
+<div class="col"><div class="cap">E3. Voice or AI is weak<span class="tag must">MUST</span></div><div class="pur">Speech-to-text weak, LLM slow, or no match.</div>
+<div class="phone">
+<div class="t">Saklolo</div>
+<div class="warn">Hindi malinaw ang narinig. Pindutin ang SAKLOLO para ituloy.</div>
+<div class="grow center"><div class="bigred btn red" style="width:200px;height:200px;font-size:26px">SAKLOLO</div></div>
+<div class="box s">Fallbacks in order: smaller Whisper model → keyword matching → big red button. Alert still goes out.</div>
+</div>
+<div class="note">If no Filipino voice is installed, pre-recorded clips play instead (audio only, no screen change).</div></div>
+
+</div></section>
+
+<section id="after" class="sec"><h2>F. After and the contact's side</h2><div class="gd">Incident record, what the contact sees, and the reply (Stretch).</div><div class="row">
+
+<div class="col"><div class="cap">F1. Incident<span class="tag must">MUST</span></div><div class="pur">Transcript, summary, delivery status.</div>
+<div class="phone">
+<div class="t">Incident</div>
+<div class="s">7:42 PM · Mode: Guide · Script: Heavy bleeding</div>
+<div class="box"><div class="s">Summary</div>Si Papa nahulog, dumudugo ang ulo, gising pa.</div>
+<div class="box"><div class="s">Transcript</div>“Tulong! Nahulog si Papa, dumudugo ang ulo…”</div>
+<div class="box"><div class="s">Contacts notified</div>
+1 Kuya Ben &nbsp; SMS <span class="ok">✓ sent</span> · Call <span class="ok">✓</span><br>
+2 Tita Lina &nbsp; SMS <span class="ok">✓ sent</span><br>
+3 Ruel &nbsp; SMS <span class="bad">✕ failed</span> · <u>Ulitin</u></div>
+<div class="box"><div class="s">Location</div>14.6507, 121.0494 · Open in Maps</div>
+<div class="grow"></div>
+<div class="btn pri">Balik sa Home</div>
+</div>
+<div class="note">Saved: trigger, mode, transcript, summary, script, GPS, time, per-contact SMS and call status. <span class="tbd">TBD:</span> how the screen is reached and left; the retry link is a suggestion.</div></div>
+
+<div class="col"><div class="cap">F2. Contact's phone<span class="tag must">MUST</span></div><div class="pur">SMS with maps link; contact #1 also gets a call.</div>
+<div class="phone" style="padding-top:60px">
+<div class="center"><b>SAKLOLO</b></div>
+<div class="grow" style="display:flex;flex-direction:column;gap:10px;justify-content:flex-start;padding-top:10px">
+<div class="bub in">SAKLOLO: Si Papa nahulog, dumudugo ang ulo, gising pa. 7:42pm. Lokasyon: <u style="color:#2f80ed">maps.apple.com/?ll=14.6507,121.0494</u></div>
+<div class="s" style="align-self:flex-start">7:42 PM</div>
+</div>
+<div class="box center" style="flex-direction:column;gap:4px"><b>Incoming call</b><span class="s">Maria Santos · Saklolo contact #1</span></div>
+</div>
+<div class="note">Contact #1 gets the call; the others get the SMS only.</div></div>
+
+<div class="col"><div class="cap">F3. Contact replies<span class="tag str">STRETCH</span></div><div class="pur">“PAPUNTA NA” is announced on the user's phone.</div>
+<div class="phone">
+<div class="banner" style="background:#e3f0ff;border-color:#1565c0;color:#0d3c78">Papunta na si Kuya Ben</div>
+<div class="s">Pagdurugo · Hakbang 3 ng 4</div>
+<div class="box grow center" style="font-size:24px;font-weight:700"><div>Magdagdag ng isa pang tela sa ibabaw.</div></div>
+<div class="row2"><div class="btn">↻ Ulitin</div><div class="btn pri">Susunod →</div></div>
+</div>
+<div class="note">Banner plus a spoken announcement. Only if the Stretch tier is built.</div></div>
+
+
+<div class="col"><div class="cap">F4. Queued SMS<span class="tag tb">PROPOSED</span></div><div class="pur">No cell signal: SMS waits and retries.</div>
+<div class="phone">
+<div class="t">Incident</div>
+<div class="warn">Walang signal. Naka-pila ang text; ipapadala pag may signal.</div>
+<div class="box"><div class="s">Contacts notified</div>
+1 Kuya Ben &nbsp; SMS <span class="pend">… naka-pila</span> · Call <span class="bad">✕ no signal</span><br>
+2 Tita Lina &nbsp; SMS <span class="pend">… naka-pila</span><br>
+3 Ruel &nbsp; SMS <span class="pend">… naka-pila</span></div>
+<div class="box"><div class="s">Location</div>14.6507, 121.0494 (saved on this phone)</div>
+<div class="s">Susubukan ulit tuwing 30s <span class="tbd">(interval TBD)</span></div>
+<div class="grow"></div>
+<div class="btn">Subukan ngayon</div>
+</div>
+<div class="note">Guidance still works offline. Status wording and retry interval are <span class="tbd">TBD</span>.</div></div>
+</div>
+<ul class="list"><li>Audio-only states with no screen change: no Filipino voice installed → pre-recorded clips; "okay / tapos na / ulitin" voice commands on Guide.</li></ul>
+</section>
+
+<section id="triggers" class="sec"><h2>G. Quick triggers and confirmations</h2><div class="gd">Proposed additions, not in the original brief. Quick triggers outside the app run the Shortcut (location, SMS, call #1). Passive triggers ask first. <span class="tbd">TBD:</span> whether the Shortcut works on a locked phone; test with a real SIM.</div><div class="row">
+
+<div class="col"><div class="cap">G1. Lock Screen control<span class="tag tb">PROPOSED</span></div><div class="pur">iOS 18 control in a Lock Screen corner. Action Button, Back Tap and “Hey Siri, Saklolo” run the same Shortcut.</div>
+<div class="phone" style="background:#1d2733;color:#fff;border-color:#222">
+<div class="center" style="flex-direction:column;margin-top:20px"><div style="font-size:64px;font-weight:300;line-height:1">7:42</div><div style="font-size:14px;color:#aab">Biyernes, Oktubre 9</div></div>
+<div class="grow"></div>
+<div class="box" style="background:#2b394a;border-color:#556;color:#dde;font-size:13px">Notification: 2 mensahe</div>
+<div style="display:flex;justify-content:space-between;padding:6px 10px 10px">
+<div class="center" style="width:64px;height:64px;border-radius:50%;background:#e0453a;border:3px solid #fff;font-weight:800;font-size:11px;color:#fff;flex-direction:column"><div style="font-size:20px">SOS</div><div>SAKLOLO</div></div>
+<div class="center" style="width:64px;height:64px;border-radius:50%;background:#3a4656;color:#fff;font-size:24px">📷</div>
+</div>
+</div>
+<div class="note">Control sits in a bottom corner. <span class="tbd">TBD:</span> works while locked, or asks to unlock first. Layer 2 (guidance) needs the phone unlocked.</div></div>
+
+<div class="col"><div class="cap">G2. Home Screen widget<span class="tag tb">PROPOSED</span></div><div class="pur">Big red button on the Home Screen. Phone must be unlocked. Opens the app.</div>
+<div class="phone">
+<div class="s" style="text-align:right">Home Screen</div>
+<div class="btn red center" style="height:150px;border-radius:24px;flex-direction:column;font-size:28px;font-weight:800;border-color:#a8261c">SAKLOLO<div style="font-size:13px;font-weight:500;margin-top:6px">Pindutin para humingi ng tulong</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:10px 4px">
+<div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div>
+<div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div><div class="box center" style="height:56px;border-radius:14px">▢</div></div>
+<div class="grow"></div>
+<div class="s" style="text-align:center">Widget can't listen. It only starts the flow.</div>
+</div>
+<div class="note">Tap → 5-second countdown (G3), then the Shortcut runs and the app opens to Listening.</div></div>
+
+<div class="col"><div class="cap">G3. Cancel countdown<span class="tag tb">PROPOSED</span></div><div class="pur">Stops accidental pocket taps. Quick triggers outside the app only; the in-app button sends at once.</div>
+<div class="phone" style="border-color:#c62828">
+<div class="grow center" style="flex-direction:column;gap:8px"><div class="t">Magpapadala sa</div><div style="font-size:130px;font-weight:800;line-height:1;color:#c62828">5</div><div class="s">Text sa 3 contacts, tawag kay Kuya Ben</div></div>
+<div class="btn" style="padding:22px;font-size:20px">Cancel</div>
+<div class="btn red">Ipadala na ngayon</div>
+</div>
+<div class="note">Counts 5 → 1, then sends. Cancel before it ends sends nothing.</div></div>
+
+<div class="col"><div class="cap">G4. Confirm step<span class="tag str">STRETCH</span><span class="tag tb">PROPOSED</span></div><div class="pur">Passive triggers (fall, shout) ask first. Silence sends the alert.</div>
+<div class="phone" style="border-color:#e08a00">
+<div class="warn">Nakita ang pagbagsak (o sigaw)</div>
+<div class="grow center" style="flex-direction:column;gap:8px"><div class="t" style="font-size:28px">Okay ka lang?</div><div style="font-size:90px;font-weight:800;line-height:1">10</div><div class="s">Sabihin: “okay” · Walang sagot = tutulong kami</div></div>
+<div class="btn pri">OKAY AKO</div>
+<div class="btn red">TULONG</div>
+</div>
+<div class="note">Window is 10s <span class="tbd">(TBD)</span>. Saying “Tulong”/“Saklolo” or pressing the red button skips the wait. Shout detection uses Apple's on-device sound classifier (verify its class list).</div></div>
+
+<div class="col"><div class="cap">G5. False alarm<span class="tag tb">PROPOSED</span></div><div class="pur">User cancels after the alert already went out.</div>
+<div class="phone">
+<div class="t">Na-cancel</div>
+<div class="box"><div class="s">Naipadala na ang alert sa:</div>Kuya Ben, Tita Lina, Ruel</div>
+<div class="box grow center" style="font-size:20px;font-weight:700"><div>Ipaalam sa kanila na peke lang ang alarma?</div></div>
+<div class="box"><div class="s">Text na ipapadala</div>SAKLOLO: Pekeng alarma. Okay lang ako. 7:44pm.<div class="s"><span class="tbd">Wording TBD</span></div></div>
+<div class="btn pri">Ipadala ang “Peke lang”</div>
+<div class="btn">Hindi na</div>
+</div>
+<div class="note">Reduces alert fatigue so contacts keep trusting real alerts.</div></div>
+
+</div></section>
+
+<script>
+try{var h=location.hash;if(h){document.querySelectorAll('section').forEach(function(s){if('#'+s.id!==h){s.style.display='none'}else{s.classList.remove('sec')}});var d=document.querySelector('.sub');if(d)d.style.display='none';}}catch(e){}
+</script>
+</body></html>

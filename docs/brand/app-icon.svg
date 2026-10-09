@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Saklolo app icon">
+  <title>Saklolo app icon</title>
+  <rect width="1024" height="1024" fill="#0A1222"/>
+  <g transform="translate(512 512) scale(7.2) translate(-60 -60)">
+    <circle cx="60" cy="60" r="49" fill="none" stroke="#4C9AFF" stroke-width="7"/>
+    <circle cx="60" cy="60" r="37" fill="none" stroke="#FFD21F" stroke-width="7"/>
+    <circle cx="60" cy="60" r="25" fill="none" stroke="#FF8A1F" stroke-width="7"/>
+    <circle cx="60" cy="60" r="13" fill="#D81E2B"/>
+  </g>
+</svg>

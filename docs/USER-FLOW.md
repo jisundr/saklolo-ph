@@ -1,6 +1,6 @@
 # Saklolo — User Flows
 
-This walks through Saklolo from the user's side: what they say, see, and hear, and what the phone does. It covers setup, the two emergency modes, fallbacks, the contact's view, the incident record, and the demo.
+This walks through Saklolo from the user's side: what they say, see, and hear, and what the phone does. It covers the ways to trigger, setup, the two emergency modes, fallbacks, the contact's view, the incident record, and the demo.
 
 What and why: [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md). Requirements (FR-x IDs): [PRD.md](PRD.md). Source: [project brief](references/saklolo-project-brief.md).
 
@@ -11,6 +11,40 @@ Anything the sources don't specify is marked **TBD**.
 ![Main emergency flow](diagrams/main-emergency-flow.png)
 
 Diagram source: [main-emergency-flow.mmd](diagrams/main-emergency-flow.mmd).
+
+## 0. Ways to trigger
+
+Every trigger leads into the same flow: check-in, listen, understand, alert, guide. T1 and T4 are in the brief. The rest are **proposed** additions. Tiers are in [PRD.md](PRD.md#triggers).
+
+**T1. Big red button (Must).** Open the app and tap the red SAKLOLO button on Home. The flow starts at once, with no countdown.
+
+**T2. Quick trigger outside the app (proposed).** Without opening the app, use the Lock Screen control (iOS 18+), the Action Button (iPhone 15 Pro+), Back Tap, or say "Hey Siri, Saklolo". Each runs the Saklolo Shortcut.
+1. **See:** "Magpapadala sa 5… Cancel". Tap Cancel within 5 seconds to stop. Otherwise it goes on.
+2. **Layer 1 (instant, no AI):** the Shortcut gets the location, texts all contacts, and calls #1.
+3. **Layer 2 (guidance):** the same trigger opens the app to **Listening**, so guide mode can start. This needs the phone unlocked and the mic.
+4. Whether Layer 1 works on a locked phone is unverified. The SMS wording before any classification, and how it avoids a duplicate SMS later, are **TBD**.
+
+**T3. Home Screen widget (proposed).** The phone must be unlocked. Tap the big red SAKLOLO button on the widget. It opens the app and shows the same 5-second countdown. The widget cannot use the mic.
+
+**T4. Voice (Wow).** With the app open, say "Tulong" or "Saklolo". The flow starts at once.
+
+**T5. Shout detection (proposed Stretch).** The phone notices a shout or scream using Apple's on-device sound classification (class list to be verified). This is a passive trigger, so the confirm step runs.
+
+**T6. Fall detection (Stretch).** The builder's own CoreMotion version, active only while the app is running. Passive trigger, so the confirm step runs.
+
+**Confirm step (T5, T6; proposed).**
+1. **Hear:** "Okay ka lang? Sabihin 'okay'." There is a 10s window.
+2. If the user says "okay", the phone stands down.
+3. If there is silence, the alert is sent.
+4. If the user says "Tulong" / "Saklolo" or presses the red button, the wait is skipped.
+
+How the 10s window relates to the brief's 30s alone-mode silence escalation is **TBD**. The 10s window comes before the alert; the 30s window comes after it.
+
+**False alarm (proposed).** If the user cancels after an alert has already gone out, a "False alarm" SMS goes to the same contacts. Wording is **TBD**. Where the user cancels is **TBD**.
+
+**Queued SMS (proposed).** With no cell signal, the SMS is queued and retried when signal returns. The Incident screen shows it as "naka-pila". Final wording is **TBD**.
+
+**Low-confidence classification (proposed).** If the phone is unsure what happened, it runs the general script and asks one spoken question. It still only classifies, and every script still starts with making sure help is being called.
 
 ## 1. First-time setup
 
@@ -54,6 +88,11 @@ The four MVP scripts: fall/can't move, heavy bleeding, unconscious, head injury.
 ## 4. Fallback paths
 
 - **Voice doesn't work:** press the big red SAKLOLO button on Home. It starts the same flow. (The "Tulong" voice trigger is a Wow-tier feature that works only while the app is open.)
+- **Phone is out of the app or locked:** use a quick trigger (T2), which runs the Shortcut. Whether this works on a locked phone is unverified.
+- **Accidental trigger:** cancel during the 5-second countdown (T2, T3). After an alert went out, a "False alarm" SMS can follow (proposed).
+- **Passive trigger, user is fine:** say "okay" during the 10-second confirm step.
+- **No cell signal:** the SMS is queued and retried; the Incident shows "naka-pila" (proposed).
+- **Classifier unsure:** general script plus one spoken question (proposed).
 - **Speech-to-text is weak or slow:** the app can use a smaller Whisper model. Keyword matching and the red button remain available.
 - **LLM fails or is slow:** keyword matching picks the script and summary. The SMS is never held up by the LLM.
 - **No script matches:** the general script runs: stay calm, check breathing, don't move them, help is coming.
@@ -97,6 +136,9 @@ Short version. Logistics live in the brief.
 
 - **Setup** to **Home**: after saving name and contacts.
 - **Home** to **Listening**: red button, or "Tulong" / "Saklolo" heard.
+- **Outside the app** to **Listening**: a quick trigger (T2) opens the app to Listening after the 5-second countdown. Where the countdown shows when the phone is locked is **TBD**.
+- **Widget** to **Home**/**Listening**: the widget (T3) opens the app, then the countdown. Which screen shows the countdown is **TBD**.
+- **Passive trigger** to **Listening**: after the confirm step (T5, T6). Which screen shows the confirm prompt is **TBD**.
 - **Listening** to **Guide**: when guide mode is chosen.
 - **Listening** to ?: alone mode has no dedicated screen in the sources (**TBD**).
 - **Guide** or alone flow to **Incident**: when the incident ends. The exact trigger is **TBD**.

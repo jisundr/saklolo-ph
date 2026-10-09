@@ -41,7 +41,7 @@ Tags: **Must** (core loop), **Wow** (right after the core loop), **Stretch** (on
 | FR-11 | Must | Alone mode behavior | Alerts contacts, calls #1, and keeps talking to the person. If there is no reply, escalates after 30s ("Walang sagot pagkatapos bumagsak"). The escalation action itself is TBD (see section 11). |
 | FR-12 | Must | Incident log and screen | Each incident stores trigger, mode, transcript, summary, script, location, start time, and per-contact SMS and call status. The Incident screen shows summary, contacts notified, and delivery status. |
 | FR-13 | Wow | CPR mode | Within the unconscious script, speaks a count and plays a metronome beep. The pace value is TBD (to be taken from Red Cross material). |
-| FR-14 | Stretch | Fall detection and silence escalation | CoreMotion detects a fall and starts the alone-mode flow. Needs Motion permission. |
+| FR-14 | Stretch | Fall detection and silence escalation (trigger T6) | CoreMotion detects a fall and goes to the confirm step (FR-B2), then the alone-mode flow. Needs Motion permission. Runs only while the app is running. |
 | FR-15 | Stretch | Contact reply "PAPUNTA NA" | A reply from a contact is announced by the phone. |
 
 ### Safety requirements (all Must)
@@ -53,21 +53,49 @@ Tags: **Must** (core loop), **Wow** (right after the core loop), **Stretch** (on
 - **FR-S5.** The app shows the source (Philippine Red Cross) and the disclaimer "Gabay lang ito. Hindi ito kapalit ng doktor o rescuer."
 - **FR-S6.** The alert is always sent, regardless of classification result or mode.
 
+### Triggers
+
+Items marked **proposed** are not in the original brief. They keep the brief's tiers (Must/Wow/Stretch). T1, T4 and T6 already exist as FR-2, FR-3 and FR-14.
+
+| ID | Tag | Trigger | Acceptance criteria |
+| --- | --- | --- | --- |
+| FR-T1 | Must (= FR-2) | Big red button in the app | Starts the flow immediately. No countdown. |
+| FR-T2 | Must-light, proposed | Quick trigger outside the app: Lock Screen control (iOS 18+), Action Button (iPhone 15 Pro+), Back Tap, or "Hey Siri, Saklolo", each running the Saklolo Shortcut | After the countdown (FR-B1), Layer 1 runs with no AI: the Shortcut gets location, texts all contacts, and calls #1. The same trigger opens the app to Listening (Layer 2) so guide mode can start. Whether it works on a locked phone is unverified (see section 8). |
+| FR-T3 | Proposed | Home Screen widget with a big red SAKLOLO button | Phone must be unlocked. Tapping it opens the app and goes through the countdown (FR-B1). The widget cannot use the mic. |
+| FR-T4 | Wow (= FR-3) | Voice "Tulong" / "Saklolo" while the app is open | Starts the flow immediately. |
+| FR-T5 | Stretch, proposed | Shout/scream detection using Apple's on-device sound classification | Passive trigger, so it goes to the confirm step (FR-B2). The class list must be verified in Apple's docs before relying on it. |
+| FR-T6 | Stretch (= FR-14) | Fall detection with CoreMotion | Passive trigger, confirm step. This is the builder's own version (Apple's fall detection is Watch-based) and runs only while the app is running. |
+
+**Two layers.** Layer 1 (instant, no AI): the Shortcut gets location, texts all contacts, calls #1. It does not depend on the AI. Layer 2 (guidance): the same trigger opens the app to Listening so guide mode can start. It needs the phone unlocked and the mic.
+
+**Supporting behaviours (all proposed)**
+
+| ID | Requirement | Acceptance criteria |
+| --- | --- | --- |
+| FR-B1 | Cancel countdown, for T2 and T3 only | "Magpapadala sa 5… Cancel" shows for 5 seconds before anything sends. Cancelling sends nothing. T1 and T4 have no countdown. |
+| FR-B2 | Confirm step for passive triggers (T5, T6) | The phone asks "Okay ka lang? Sabihin 'okay'" with a 10s window. Silence sends the alert. Saying "okay" stands down. Saying "Tulong"/"Saklolo" or pressing the red button skips the wait. How this relates to the brief's 30s alone-mode silence escalation: TBD (the 10s window precedes the alert; the 30s window follows it). |
+| FR-B3 | False alarm message | If the user cancels after an alert was already sent, a "False alarm" SMS goes to the same contacts. Wording TBD. Where the user cancels is TBD. |
+| FR-B4 | Queued SMS | With no cell signal, the SMS is queued and retried when signal returns. The Incident screen shows it as "naka-pila". Status wording TBD. |
+| FR-B5 | Low-confidence classification | If the classifier is not confident, run the general script and ask one spoken question. The safety rules still hold: the LLM only classifies and every script starts with help being called. The confidence threshold is TBD. |
+
+**Open details for triggers:** the SMS content when Layer 1 fires before any classification (no summary yet), and how Layer 1 and the post-classification alert avoid sending duplicate SMS, are TBD.
+
 ## 4. Non-functional requirements
 
 - **Offline operation.** With Wi-Fi and cellular data off, the full flow works except delivery of SMS and calls, which use the cell network only. No AI call goes to a cloud API.
 - **Latency.** The alert must not wait on the LLM (FR-7). Numeric targets for response time are TBD; none are given in the sources. The only limits given are 15s recording and 30s escalation.
 - **Privacy.** No audio leaves the device. No per-use cost.
 - **Permissions.** Microphone, Location (When In Use), Motion (only if FR-14 is built).
+- **Offline wording.** SMS and calls still need cell signal. Say "no data needed", not "no network needed".
 - **Language.** Taglish input and Filipino speech output. Bisaya/Ilocano are out of scope.
 - **Reliability.** Each AI layer has a fallback (see section 8). Reliability targets are TBD.
-- **Platform.** iOS, SwiftUI. Apple Foundation Models needs an Apple Intelligence iPhone (15 Pro or newer).
+- **Platform.** iOS, SwiftUI. Apple Foundation Models needs iOS 26 on Apple Intelligence hardware (iPhone 15 Pro or newer). The Lock Screen control (T2) needs iOS 18+; the Action Button needs iPhone 15 Pro+.
 
 ## 5. Screens and key flows
 
 Screens: Setup, Home (red button, "Nakikinig" status), Listening (live transcript), Guide (one big step, Next/Repeat, "Na-text na sina Kuya at Tita" banner), Incident.
 
-Main flow: trigger, check-in, listen (up to 15s), understand, alert (SMS then call), guide (guide mode), log. Full step list in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#what-saklolo-does).
+Main flow: trigger, check-in, listen (up to 15s), understand, alert (SMS then call), guide (guide mode), log. Full step list in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#what-saklolo-does). Trigger variants, countdown, and confirm step are in [USER-FLOW.md](USER-FLOW.md#ways-to-trigger).
 
 ## 6. Data model
 
@@ -80,7 +108,9 @@ Storage: SwiftData (fallback UserDefaults).
 
 ## 7. Out of scope
 
-- Android, smartwatch, background listening with the app closed.
+- Android, smartwatch, background listening with the app closed. True always-on listening stays cut: it needs a background audio session, drains the battery, and shows the orange mic dot.
+- A loud-commotion / sound-spike trigger: roadmap only, because it would cause too many false alarms.
+- Contacting 911. An optional "call 911" second tap is TBD / roadmap. Nothing in the MVP contacts 911.
 - More scripts (burns, choking, stroke signs, seizures); Bisaya/Ilocano.
 - Barangay responder mode, family dashboard.
 - Live deployment (repo instructions for judges are enough).
@@ -89,7 +119,7 @@ Storage: SwiftData (fallback UserDefaults).
 
 **Dependencies:** a Mac with Xcode and an Apple ID; an iPhone with a SIM; WhisperKit; Apple Foundation Models (or Gemma/Qwen via MLX Swift or llama.cpp); the Shortcuts app.
 
-**Assumptions (unverified):** Apple's on-device model runs on the target iPhone; the Shortcut sends SMS silently; a Filipino TTS voice is installed.
+**Assumptions (unverified):** Apple's on-device model runs on the target iPhone; the Shortcut sends SMS silently; a Filipino TTS voice is installed. Also unverified: whether the Shortcut can send SMS and place a call on a locked phone. Test it with a real SIM.
 
 **Risks**
 
@@ -101,6 +131,14 @@ Storage: SwiftData (fallback UserDefaults).
 | Whisper slow or weak on Taglish | Smaller model; keyword fallback; big red button |
 | Medical advice concerns | Fixed vetted scripts, LLM only classifies, source shown, disclaimer, always calls for help |
 | No signal at the venue | Test SMS during AV check; backup video |
+| Shortcut may not send SMS and call on a locked phone (unverified, proposed triggers) | Test with a real SIM; if it fails, T2 needs an unlock, or the red button inside the app is the path |
+| Alone mode only works if the phone is within earshot of the voice | State this limit honestly; quick triggers (T2) cover the case where the phone is reachable but the user can't talk |
+| Widget (T3) cannot use the mic and needs an unlocked phone | It only opens the app; the app handles listening |
+| OS and hardware gates: Lock Screen control needs iOS 18; Apple's on-device model needs iOS 26 and iPhone 15 Pro or newer | Gemma/Qwen via MLX Swift; else keyword rules. Other triggers still work |
+| The call (`tel://`) still needs one confirm tap | Accepted limit; SMS goes out first |
+| Passive triggers (T5, T6) cause false alarms | Confirm step (10s), cancel path, "False alarm" SMS; a sound-spike trigger is excluded for this reason |
+| Sound classification class list unverified (T5) | Verify in Apple docs before building; drop T5 if no suitable class exists |
+| Pitch overclaims ("calls help", "no network needed") | Say "alerts your circle" and "no data needed". Nothing here contacts 911 |
 
 **Competition rules that bind the build** (participant briefing): substantially built during the hackathon; a meaningful part of AI inference runs locally; all models, frameworks, APIs, existing code and assets, and AI dev tools disclosed; only listed participants compete; no external help; one submission, no edits; public repo by the deadline. Full list in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#constraints--assumptions).
 
@@ -135,7 +173,7 @@ Coarse, from the brief's build timeline (exact hours stay in the brief). Build s
 2. **Alert loop.** Red button to Shortcut SMS, call, and GPS working end to end.
 3. **Guidance.** Scripts JSON and Guide screen with TTS and Next/Repeat.
 4. **Understanding.** WhisperKit transcript to keyword match; then on-device LLM classification with fallback.
-5. **Wow and polish.** Voice trigger, CPR metronome, UI polish.
+5. **Triggers and polish, in this order.** Red button (done at step 2); voice while the app is open; quick trigger via Shortcut / Action Button / widget (proposed); shout detection (proposed Stretch); fall detection with confirm (Stretch). Also CPR metronome and UI polish. Anything unfinished at the freeze is cut.
 6. **Full test** with a real SIM and contact. **Feature freeze 8:00 AM Oct 10.**
 7. **Wrap-up.** Demo video, README, disclosures, script check against Red Cross material; make the repo public; post; submit once.
 8. **Deadline: 10:00 AM, Oct 10, 2026.** No extensions.
@@ -151,7 +189,16 @@ Carried over unchanged from the brief:
 - Who is the emergency contact at the demo?
 - GitHub repo link for the last slide
 
+Added (proposed triggers):
+
+- Does the Shortcut send SMS and call on a locked phone?
+- Which iPhone/iOS version?
+
 Gaps noted while writing this PRD (not in the sources, so left as TBD):
+
+- Layer 1 SMS content before classification, and avoiding duplicate SMS.
+- Wording of the "False alarm" SMS and the queued status; confidence threshold for FR-B5.
+- How the 10s confirm window relates to the 30s alone-mode silence escalation.
 
 - What alone mode does when the 30s escalation fires, beyond the quoted message.
 - The metronome pace for CPR mode.
