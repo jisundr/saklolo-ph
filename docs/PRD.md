@@ -2,7 +2,7 @@
 
 **Summary.** Saklolo is an offline voice assistant for emergencies, built as an iPhone app for the AppBuildersPH Hackathon 2026 (theme: Local AI, solo entry). When someone calls "Tulong!", it understands the Taglish, texts and calls their contacts with a summary and GPS, and talks whoever is there through vetted first aid, one step at a time. Speech recognition, understanding, and guidance run on the phone, so it works with no data. Submission closes 10:00 AM, Oct 10, 2026.
 
-What and why are defined in [project-definition.md](project-definition.md). This PRD turns them into testable requirements. Sources: [project brief](references/saklolo-project-brief.md) and the official [participant briefing](references/AppBuildersPH%20Hackathon%202026%20Participant%20Briefing.pdf).
+What and why are defined in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md). This PRD turns them into testable requirements. Sources: [project brief](references/saklolo-project-brief.md) and the official [participant briefing](references/AppBuildersPH%20Hackathon%202026%20Participant%20Briefing.pdf).
 
 ## 1. Overview and objectives
 
@@ -14,7 +14,7 @@ What and why are defined in [project-definition.md](project-definition.md). This
 
 ## 2. Users and user stories
 
-Primary users: families caring for older parents; elderly people living alone; families in flood/typhoon areas. Secondary users: the contacts who receive the alert (neighbors, barangay officials, family). Details in [project-definition.md](project-definition.md#problem).
+Primary users: families caring for older parents; elderly people living alone; families in flood/typhoon areas. Secondary users: the contacts who receive the alert (neighbors, barangay officials, family). Details in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#problem).
 
 - **US-1 (alone mode).** As an injured person who can't reach the phone, I want to say "Tulong, nadulas ako, di ako makatayo" so that my contacts are alerted and called without me touching anything.
 - **US-2 (guide mode).** As a panicking family member, I want the phone to tell me what to do one step at a time so that I can help until rescuers arrive.
@@ -67,7 +67,7 @@ Tags: **Must** (core loop), **Wow** (right after the core loop), **Stretch** (on
 
 Screens: Setup, Home (red button, "Nakikinig" status), Listening (live transcript), Guide (one big step, Next/Repeat, "Na-text na sina Kuya at Tita" banner), Incident.
 
-Main flow: trigger, check-in, listen (up to 15s), understand, alert (SMS then call), guide (guide mode), log. Full step list in [project-definition.md](project-definition.md#what-saklolo-does).
+Main flow: trigger, check-in, listen (up to 15s), understand, alert (SMS then call), guide (guide mode), log. Full step list in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#what-saklolo-does).
 
 ## 6. Data model
 
@@ -102,7 +102,7 @@ Storage: SwiftData (fallback UserDefaults).
 | Medical advice concerns | Fixed vetted scripts, LLM only classifies, source shown, disclaimer, always calls for help |
 | No signal at the venue | Test SMS during AV check; backup video |
 
-**Competition rules that bind the build** (participant briefing): substantially built during the hackathon; a meaningful part of AI inference runs locally; all models, frameworks, APIs, existing code and assets, and AI dev tools disclosed; only listed participants compete; no external help; one submission, no edits; public repo by the deadline. Full list in [project-definition.md](project-definition.md#constraints--assumptions).
+**Competition rules that bind the build** (participant briefing): substantially built during the hackathon; a meaningful part of AI inference runs locally; all models, frameworks, APIs, existing code and assets, and AI dev tools disclosed; only listed participants compete; no external help; one submission, no edits; public repo by the deadline. Full list in [PROJECT-DEFINITION.md](PROJECT-DEFINITION.md#constraints--assumptions).
 
 ## 9. Success metrics
 
