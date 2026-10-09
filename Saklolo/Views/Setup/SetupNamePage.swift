@@ -14,13 +14,16 @@ struct SetupNamePage: View {
         VStack(alignment: .leading, spacing: Metrics.gap) {
             SetupPageTitle(title: "What's your name?", subtitle: "Used in the text your contacts receive.")
 
-            TextField("Your name", text: $draft)
+            TextField("Name", text: $draft, prompt: Text("Your name"))
                 .textContentType(.name)
                 .textInputAutocapitalization(.words)
                 .submitLabel(.next)
                 .focused($focused)
+                .accessibilityLabel("Your name")
                 .onSubmit(next)
-                .setupFieldStyle()
+                .saklaloField(label: "Name")
+                .contentShape(Rectangle())
+                .onTapGesture { focused = true }
 
             Spacer()
 
@@ -42,7 +45,7 @@ struct SetupNamePage: View {
     }
 }
 
-/// Large question plus one line of reason, shared by the setup pages.
+/// Large question plus one line of reason, shared by the setup pages (mockup `.t` + `.lead`).
 struct SetupPageTitle: View {
     let title: String
     var subtitle: String?
@@ -50,7 +53,8 @@ struct SetupPageTitle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.title.bold())
+                .font(Typography.title)
+                .foregroundStyle(Palette.text)
                 .accessibilityAddTraits(.isHeader)
             if let subtitle {
                 Text(subtitle)
@@ -58,23 +62,7 @@ struct SetupPageTitle: View {
                     .foregroundStyle(Palette.textDim)
             }
         }
-        .padding(.top, Metrics.gap)
-    }
-}
-
-extension View {
-    /// Bordered text field on the raised ground, at least the minimum target height.
-    func setupFieldStyle() -> some View {
-        padding(.horizontal, 14)
-            .frame(minHeight: Metrics.minTarget + 8)
-            .background(
-                RoundedRectangle(cornerRadius: Metrics.chipRadius, style: .continuous)
-                    .fill(Palette.groundRaised)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: Metrics.chipRadius, style: .continuous)
-                    .strokeBorder(Palette.line, lineWidth: 1.5)
-            )
+        .padding(.top, 8)
     }
 }
 

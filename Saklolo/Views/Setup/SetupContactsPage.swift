@@ -13,38 +13,44 @@ struct SetupContactsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.gap) {
-            SetupPageTitle(title: "Who should we alert?", subtitle: "1 to 5 people. #1 gets the call.")
+            SetupPageTitle(title: "Who should we alert?")
 
             List {
                 if contacts.isEmpty {
                     Text("No contacts yet")
+                        .font(Typography.body)
                         .foregroundStyle(Palette.textDim)
-                        .listRowBackground(Palette.groundRaised)
+                        .setupListRow()
                 }
                 ForEach(Array(contacts.enumerated()), id: \.element.id) { index, contact in
-                    ContactRow(position: index + 1, contact: contact)
-                        .listRowBackground(Palette.groundRaised)
+                    ContactRow(
+                        position: index + 1,
+                        contact: contact,
+                        count: contacts.count,
+                        onMove: { move(from: IndexSet(integer: index), to: $0) },
+                        onDelete: { delete(at: IndexSet(integer: index)) }
+                    )
+                    .setupListRow()
                 }
                 .onMove(perform: move)
                 .onDelete(perform: delete)
 
                 if contacts.count < Self.maxContacts {
-                    Button {
-                        showAddContact = true
-                    } label: {
-                        Label("Add contact", systemImage: "plus")
-                            .frame(maxWidth: .infinity, minHeight: Metrics.minTarget)
-                    }
-                    .listRowBackground(Palette.groundRaised)
+                    AddContactButton { showAddContact = true }
+                        .setupListRow()
                 }
-            }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .environment(\.editMode, .constant(contacts.count > 1 ? .active : .inactive))
 
-            Text(footnote)
-                .font(Typography.finePrint)
-                .foregroundStyle(Palette.textDim)
+                Text(hint)
+                    .font(.footnote)
+                    .foregroundStyle(Palette.textDim)
+                    .setupListRow()
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+
+            if let notice = Self.whoGetsWhat(contacts.map(\.name)) {
+                InlineNotice(notice, systemImage: "info.circle", tone: .info)
+            }
 
             Button("Next", action: onNext)
                 .buttonStyle(SaklaloActionStyle())
@@ -58,14 +64,25 @@ struct SetupContactsPage: View {
         }
     }
 
-    private var footnote: String {
-        guard let first = contacts.first else {
-            return "Add at least one person. We recommend 3."
+    private var hint: String {
+        switch contacts.count {
+        case 0: "Add at least one person. We recommend 3 contacts."
+        case 1: "We recommend 3 contacts."
+        case 2: "Drag to change who is #1. We recommend 3 contacts."
+        default: "Drag to change who is #1."
         }
-        if contacts.count == 1 {
-            return "\(first.name) gets the call and a text. Drag to change who is #1."
+    }
+
+    /// The B2 notice, from the real contacts in priority order: #1 gets the call, the rest a text.
+    static func whoGetsWhat(_ names: [String]) -> String? {
+        guard let first = names.first else { return nil }
+        switch names.count {
+        case 1: return "\(first) gets the call and a text."
+        case 2: return "\(first) gets the call. \(names[1]) gets a text."
+        default:
+            let others = names.count - 2
+            return "\(first) gets the call. \(names[1]) and \(others) more get a text."
         }
-        return "\(first.name) gets the call. Everyone gets a text. Drag to change who is #1."
     }
 
     private func move(from source: IndexSet, to destination: Int) {
@@ -89,28 +106,85 @@ struct SetupContactsPage: View {
     }
 }
 
+/// One B2 row: the contact's chip (mockup `.chip.tall`) with a drag handle. Long-press drags to
+/// reorder and a swipe deletes (the list's own gestures); VoiceOver gets the same as named actions.
 private struct ContactRow: View {
+    /// Mockup `.chip.tall`. `ContactChip` has no tall option, so the handle carries the extra height.
+    static let tallHeight: CGFloat = 58
+
     let position: Int
     let contact: Contact
+    let count: Int
+    /// Moves this row to a list offset, with `List.onMove`'s destination semantics.
+    let onMove: (Int) -> Void
+    let onDelete: () -> Void
 
     var body: some View {
-        HStack(spacing: Metrics.gap) {
-            Text("\(position)")
-                .font(Typography.signage(18, relativeTo: .headline))
-                .foregroundStyle(Palette.onAction)
-                .frame(width: 28, height: 28)
-                .background(Circle().fill(Palette.action))
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(contact.name) · \(contact.phone)")
-                    .font(.headline)
-                Text(position == 1 ? "\(contact.relation) · gets the call + text" : "\(contact.relation) · text")
-                    .font(.subheadline)
-                    .foregroundStyle(Palette.textDim)
-            }
-        }
-        .frame(minHeight: Metrics.minTarget)
-        .accessibilityElement(children: .combine)
+        ContactChip(
+            position: position,
+            name: contact.name,
+            caption: position == 1 ? "gets the call + text" : "text",
+            relation: contact.relation,
+            trailing: AnyView(handle)
+        )
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("Number \(position), \(contact.name), \(contact.relation), \(contact.phone)")
+        .accessibilityValue(position == 1 ? "Gets the call and a text" : "Gets a text")
+        .accessibilityActions {
+            if position > 1 {
+                Button("Move up") { onMove(position - 2) }
+            }
+            if position < count {
+                Button("Move down") { onMove(position + 1) }
+            }
+            Button("Delete") { onDelete() }
+        }
+    }
+
+    private var handle: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(Palette.textDim)
+            // Chip padding is 6 top and bottom: this makes the chip 58pt tall.
+            .frame(minHeight: Self.tallHeight - 12)
+            .accessibilityHidden(true)
+    }
+}
+
+/// The dashed "Add contact" field under the list (mockup `.field.dash`).
+private struct AddContactButton: View {
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "plus")
+                    .fontWeight(.semibold)
+                Text("Add contact")
+            }
+            .font(.body.weight(.semibold))
+            .foregroundStyle(Palette.textDim)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .background(
+                RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous)
+                    .fill(Palette.groundRaised)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous)
+                    .strokeBorder(Palette.line, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private extension View {
+    /// A `List` row with the list's chrome removed, so rows sit on the page ground like the mockup.
+    func setupListRow() -> some View {
+        listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
     }
 }
 
@@ -124,6 +198,9 @@ struct AddContactSheet: View {
     @State private var name = ""
     @State private var phone = ""
     @State private var relation = "Sibling"
+    @FocusState private var focus: Field?
+
+    private enum Field { case name, phone }
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedPhone: String { phone.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -132,34 +209,83 @@ struct AddContactSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Name", text: $name)
+        ScrollView {
+            VStack(spacing: Metrics.gap) {
+                header
+
+                TextField("Name", text: $name, prompt: Text(""))
                     .textContentType(.name)
                     .textInputAutocapitalization(.words)
-                TextField("Phone", text: $phone)
+                    .focused($focus, equals: .name)
+                    .accessibilityLabel("Name")
+                    .saklaloField(label: "Name")
+                    .contentShape(Rectangle())
+                    .onTapGesture { focus = .name }
+                TextField("Phone", text: $phone, prompt: Text(""))
                     .textContentType(.telephoneNumber)
                     .keyboardType(.phonePad)
-                Picker("Relation", selection: $relation) {
-                    ForEach(Self.relations, id: \.self) { Text($0) }
-                }
-            }
-            .navigationTitle("New contact")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onSave(trimmedName, trimmedPhone, relation)
-                        dismiss()
+                    .focused($focus, equals: .phone)
+                    .accessibilityLabel("Phone")
+                    .saklaloField(label: "Phone")
+                    .contentShape(Rectangle())
+                    .onTapGesture { focus = .phone }
+                Menu {
+                    Picker("Relation", selection: $relation) {
+                        ForEach(Self.relations, id: \.self) { Text($0) }
                     }
-                    .disabled(!canSave)
+                } label: {
+                    // The whole field box opens the picker, not just the value line.
+                    HStack {
+                        Text(relation)
+                        Spacer(minLength: 8)
+                        Image(systemName: "chevron.down")
+                            .fontWeight(.semibold)
+                    }
+                    .saklaloField(label: "Relation")
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Relation")
+                .accessibilityValue(relation)
             }
+            .padding(.horizontal, 18)
+            .padding(.top, 16)
+            .padding(.bottom, 20)
         }
+        .scrollBounceBehavior(.basedOnSize)
         .presentationDetents([.medium, .large])
+        .saklaloSheet()
+    }
+
+    /// Cancel, title, Save in one row (mockup `.shead`).
+    private var header: some View {
+        HStack(spacing: 10) {
+            Button { dismiss() } label: {
+                Text("Cancel")
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.textDim)
+                    .frame(minWidth: Metrics.minTarget, minHeight: Metrics.minTarget, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            Spacer(minLength: 0)
+            Text("New contact")
+                .font(.headline)
+                .foregroundStyle(Palette.text)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 0)
+            Button {
+                onSave(trimmedName, trimmedPhone, relation)
+                dismiss()
+            } label: {
+                Text("Save")
+                    .font(.headline)
+                    .foregroundStyle(canSave ? Palette.text : Palette.textDim)
+                    .frame(minWidth: Metrics.minTarget, minHeight: Metrics.minTarget, alignment: .trailing)
+                    .contentShape(Rectangle())
+            }
+            .disabled(!canSave)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -168,4 +294,12 @@ struct AddContactSheet: View {
         .padding()
         .saklaloGround()
         .modelContainer(for: Contact.self, inMemory: true)
+}
+
+#Preview("Add contact") {
+    Color.clear
+        .sheet(isPresented: .constant(true)) {
+            AddContactSheet { _, _, _ in }
+        }
+        .saklaloGround()
 }
