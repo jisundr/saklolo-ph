@@ -30,18 +30,18 @@ Tags: **Must** (core loop), **Wow** (right after the core loop), **Stretch** (on
 | --- | --- | --- | --- |
 | FR-1 | Must | Setup: user name and contacts with priority order | Can save a name and 1-5 contacts, each with name, phone, relation, priority. Order can be changed. Data persists after the app restarts. |
 | FR-2 | Must | Big red "SAKLOLO" button on Home | Tapping it starts the flow from the check-in step. Works with Wi-Fi and cellular data off. |
-| FR-3 | Wow | Voice trigger: "Tulong" / "Saklolo" while the app is open | With the app open on Home, saying "Tulong" starts the same flow as FR-2. The red button still works if voice fails. |
-| FR-4 | Must | Spoken check-in | The phone says "Ano'ng nangyari?" through AVSpeechSynthesizer. Uses a Filipino voice if installed; otherwise the fallback (pre-recorded clips). |
+| FR-3 | Wow, cut for now | Voice trigger: "Tulong" / "Saklolo" while the app is open | Not in the current design: it needs an always-open microphone on Home and is not built. The red button (FR-2) and the quick triggers (FR-T2, FR-T3) start the flow instead. |
+| FR-4 | Must | Spoken check-in | The phone says "Ano'ng nangyari?" through AVSpeechSynthesizer. Uses the built-in English voice. The text is always on screen, so no recorded clips are needed. |
 | FR-5 | Must | On-device speech-to-text (WhisperKit) | Records up to 15s. A Taglish phrase is transcribed with no network. Live transcript shows on the Listening screen. |
 | FR-6 | Must | On-device classification returning JSON | Output contains mode (alone/guide), situation, matching script, urgency, and a one-line summary. Mode follows the speaker ("nahulog ako" is alone; "nahulog si Papa" is guide). |
 | FR-7 | Must | Keyword fallback | If the LLM fails or is slow, keyword matching still picks a script and summary, and the alert is sent anyway. The SMS is never blocked by the LLM. |
 | FR-8 | Must | Offline GPS | Coordinates come from CoreLocation with no data. If a fix is unavailable, the last known location is used. |
-| FR-9 | Must | Alert: SMS then call | SMS goes to all contacts in priority order with summary, time, and a maps link. Then contact #1 is called (`tel://`, one confirm tap). SMS is sent through a Shortcut with no tap. If silent send fails, fall back to the message composer (one tap). |
+| FR-9 | Must | Alert: SMS then call | One SMS goes to all contacts in priority order with summary, time, and a maps link. It is sent when understanding finishes, and no later than 10 s after the trigger; if nothing was understood by 10 s, a general SMS ("Maria needs help" with the maps link) goes out instead. Then contact #1 is called (`tel://`, one confirm tap). SMS is sent through a Shortcut with no tap. If silent send fails, fall back to the message composer (one tap). |
 | FR-10 | Must | Guide mode | Speaks the matched script one step at a time. "okay" / "tapos na" advances; "ulitin" repeats. Big Next and Repeat buttons do the same. A banner shows who was texted. Reminds the user that help is on the way. |
-| FR-11 | Must | Alone mode behavior | Alerts contacts, calls #1, and keeps talking to the person. If there is no reply, escalates after 30s ("Walang sagot pagkatapos bumagsak"). The escalation action itself is TBD (see section 11). |
-| FR-12 | Must | Incident log and screen | Each incident stores trigger, mode, transcript, summary, script, location, start time, and per-contact SMS and call status. The Incident screen shows summary, contacts notified, and delivery status. |
+| FR-11 | Must | Alone mode behavior | Sends nothing at understanding. A countdown (10 s, TBD) to "I need help" runs in the chat; when it ends, or the person taps it, the alert goes out (SMS, then call #1) and the phone keeps talking to the person. A slide "I'm okay" before then cancels it and nothing is sent. If there is no reply, escalates after 30s ("Walang sagot pagkatapos bumagsak"). The escalation action itself is TBD (see section 11). |
+| FR-12 | Must | Incident log and screen | Each incident stores trigger, mode, transcript, summary, script, location, start time, a short timeline, and per-contact SMS and call status. An incident log lists past incidents, newest first (from the Home menu); a detail screen shows summary, timeline, contacts notified and delivery status, with Share summary and Delete. Stored on the phone only; no audio is kept. After a session ends the app opens that incident's detail. |
 | FR-13 | Wow | CPR mode | Within the unconscious script, speaks a count and plays a metronome beep. The pace value is TBD (to be taken from Red Cross material). |
-| FR-14 | Stretch | Fall detection and silence escalation (trigger T6) | CoreMotion detects a fall and goes to the confirm step (FR-B2), then the alone-mode flow. Needs Motion permission. Runs only while the app is running. |
+| FR-14 | Stretch | Fall detection and silence escalation (trigger T6) | CoreMotion detects a fall and enters the alone-mode check-in (FR-B2). Needs Motion permission. Runs only while the app is running. |
 | FR-15 | Stretch | Contact reply "PAPUNTA NA" | A reply from a contact is announced by the phone. |
 
 ### Safety requirements (all Must)
@@ -60,25 +60,25 @@ Items marked **proposed** are not in the original brief. They keep the brief's t
 | ID | Tag | Trigger | Acceptance criteria |
 | --- | --- | --- | --- |
 | FR-T1 | Must (= FR-2) | Big red button in the app | Starts the flow immediately. No countdown. |
-| FR-T2 | Must-light, proposed | Quick trigger outside the app: Lock Screen control (iOS 18+), Action Button (iPhone 15 Pro+), Back Tap, or "Hey Siri, Saklolo", each running the Saklolo Shortcut | After the countdown (FR-B1), Layer 1 runs with no AI: the Shortcut gets location, texts all contacts, and calls #1. The same trigger opens the app to Listening (Layer 2) so guide mode can start. Whether it works on a locked phone is unverified (see section 8). |
-| FR-T3 | Proposed | Home Screen widget with a big red SAKLOLO button | Phone must be unlocked. Tapping it opens the app and goes through the countdown (FR-B1). The widget cannot use the mic. |
-| FR-T4 | Wow (= FR-3) | Voice "Tulong" / "Saklolo" while the app is open | Starts the flow immediately. |
-| FR-T5 | Stretch, proposed | Shout/scream detection using Apple's on-device sound classification | Passive trigger, so it goes to the confirm step (FR-B2). The class list must be verified in Apple's docs before relying on it. |
-| FR-T6 | Stretch (= FR-14) | Fall detection with CoreMotion | Passive trigger, confirm step. This is the builder's own version (Apple's fall detection is Watch-based) and runs only while the app is running. |
+| FR-T2 | Must-light, proposed | Quick trigger outside the app: the Saklolo control on the Lock Screen or in Control Center (iOS 18+), or on the Action Button (iPhone 15 Pro+) | The control opens Saklolo straight into Listening (after Face ID or the passcode). Nothing is announced before the phone understands. The app then sends the alert through the Saklolo Shortcut and the chat continues to guide mode. Whether the Shortcut sends without extra taps is unverified (spike 003, see section 8). |
+| FR-T3 | Proposed | Home Screen widget with a big red SAKLOLO button | Phone must be unlocked. Tapping it opens Saklolo straight into Listening, with the same ✕ Cancel (FR-B1). |
+| FR-T4 | Wow (= FR-3), cut for now | Voice "Tulong" / "Saklolo" while the app is open | Not in the current design (see FR-3). |
+| FR-T5 | Stretch, proposed | Shout/scream detection using Apple's on-device sound classification | Passive trigger. It would enter the alone-mode check-in (FR-B2). The class list must be verified in Apple's docs before relying on it. |
+| FR-T6 | Stretch (= FR-14) | Fall detection with CoreMotion | Passive trigger, alone-mode check-in. This is the builder's own version (Apple's fall detection is Watch-based) and runs only while the app is running. |
 
-**Two layers.** Layer 1 (instant, no AI): the Shortcut gets location, texts all contacts, calls #1. It does not depend on the AI. Layer 2 (guidance): the same trigger opens the app to Listening so guide mode can start. It needs the phone unlocked and the mic.
+**Alert and guidance.** A quick trigger opens the app straight into Listening, so everything runs from the foreground: the alert (location, SMS to all contacts, call #1, sent through the Saklolo Shortcut), then guide mode. The alert does not depend on the AI.
 
 **Supporting behaviours (all proposed)**
 
 | ID | Requirement | Acceptance criteria |
 | --- | --- | --- |
-| FR-B1 | Cancel countdown, for T2 and T3 only | "Magpapadala sa 5… Cancel" shows for 5 seconds before anything sends. Cancelling sends nothing. T1 and T4 have no countdown. |
-| FR-B2 | Confirm step for passive triggers (T5, T6) | The phone asks "Okay ka lang? Sabihin 'okay'" with a 10s window. Silence sends the alert. Saying "okay" stands down. Saying "Tulong"/"Saklolo" or pressing the red button skips the wait. How this relates to the brief's 30s alone-mode silence escalation: TBD (the 10s window precedes the alert; the 30s window follows it). |
-| FR-B3 | False alarm message | If the user cancels after an alert was already sent, a "False alarm" SMS goes to the same contacts. Wording TBD. Where the user cancels is TBD. |
-| FR-B4 | Queued SMS | With no cell signal, the SMS is queued and retried when signal returns. The Incident screen shows it as "naka-pila". Status wording TBD. |
+| FR-B1 | Cancel a mistaken start, every start | A quiet "✕ Cancel" in the header of Listening. Nothing is sent before understanding finishes, so cancelling in that time sends nothing. There is no alert banner or countdown. |
+| FR-B2 | Passive triggers (T5, T6) enter the alone-mode check-in | A fall or shout starts the alone check-in with a first line such as "I think you fell. Are you okay?". The countdown to "I need help" and the "I'm okay" slide already there replace a separate confirm step. Stretch. |
+| FR-B3 | False alarm message | If the user says it was a false alarm after an alert went out (from the Guide sheet menu, or "I'm okay" in alone mode), a "False alarm" SMS goes to the same contacts, with wording that fits the mode. Wording TBD. |
+| FR-B4 | Queued SMS | With no cell signal, the SMS is queued and retried when signal returns. The incident shows it as "queued". Status wording TBD. |
 | FR-B5 | Low-confidence classification | If the classifier is not confident, run the general script and ask one spoken question. The safety rules still hold: the LLM only classifies and every script starts with help being called. The confidence threshold is TBD. |
 
-**Open details for triggers:** the SMS content when Layer 1 fires before any classification (no summary yet), and how Layer 1 and the post-classification alert avoid sending duplicate SMS, are TBD.
+**Alert timing.** There is one SMS per incident, so nothing is sent at the tap. It goes out when understanding finishes (no later than 10 s after the trigger), or as a general SMS at 10 s. Nothing about alerting is shown before that, so the user is not alarmed. **Open:** whether to send an update SMS with the summary when the 10 s limit was hit first.
 
 ## 4. Non-functional requirements
 
@@ -199,7 +199,7 @@ Added (proposed triggers):
 
 Gaps noted while writing this PRD (not in the sources, so left as TBD):
 
-- Layer 1 SMS content before classification, and avoiding duplicate SMS.
+- Whether to send an update SMS when the 10 s limit was hit before understanding finished.
 - Wording of the "False alarm" SMS and the queued status; confidence threshold for FR-B5.
 - How the 10s confirm window relates to the 30s alone-mode silence escalation.
 

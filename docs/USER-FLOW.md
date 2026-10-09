@@ -16,29 +16,23 @@ Diagram source: [main-emergency-flow.mmd](diagrams/main-emergency-flow.mmd).
 
 Every trigger leads into the same flow: check-in, listen, understand, alert, guide. T1 and T4 are in the brief. The rest are **proposed** additions. Tiers are in [PRD.md](PRD.md#triggers).
 
-**T1. Big red button (Must).** Open the app and tap the red SAKLOLO button on Home. The flow starts at once, with no countdown.
+**T1. Big red button (Must).** Open the app and tap the red SAKLOLO button on Home. Listening starts at once, with a quiet ✕ Cancel for a mistaken tap.
 
-**T2. Quick trigger outside the app (proposed).** Without opening the app, use the Lock Screen control (iOS 18+), the Action Button (iPhone 15 Pro+), Back Tap, or say "Hey Siri, Saklolo". Each runs the Saklolo Shortcut.
-1. **See:** "Magpapadala sa 5… Cancel". Tap Cancel within 5 seconds to stop. Otherwise it goes on.
-2. **Layer 1 (instant, no AI):** the Shortcut gets the location, texts all contacts, and calls #1.
-3. **Layer 2 (guidance):** the same trigger opens the app to **Listening**, so guide mode can start. This needs the phone unlocked and the mic.
-4. Whether Layer 1 works on a locked phone is unverified. The SMS wording before any classification, and how it avoids a duplicate SMS later, are **TBD**.
+**T2. Quick trigger outside the app (proposed).** Use the Saklolo control on the Lock Screen or in Control Center (iOS 18+), or on the Action Button (iPhone 15 Pro+). The control opens Saklolo straight into **Listening**, with no Home screen and no red-button tap.
+1. **Unlock:** the phone asks for Face ID or the passcode, because the app has to open.
+2. **See:** Listening starts at once. Nothing about alerting is shown. A quiet ✕ Cancel stops a mistaken start.
+3. **Alert:** one SMS goes out when understanding finishes (no later than 10 s after the tap), or a general SMS at 10 s. The app sends it through the Saklolo Shortcut (location, SMS to all contacts, call #1). Whether the Shortcut works without extra taps is unverified (spike 003).
+4. **Guide:** the chat understands what happened and opens the guide, as in the other triggers.
 
-**T3. Home Screen widget (proposed).** The phone must be unlocked. Tap the big red SAKLOLO button on the widget. It opens the app and shows the same 5-second countdown. The widget cannot use the mic.
+**T3. Home Screen widget (proposed).** The phone must be unlocked. Tap the big red SAKLOLO button on the widget. It opens Saklolo straight into Listening, as in T2.
 
-**T4. Voice (Wow).** With the app open, say "Tulong" or "Saklolo". The flow starts at once.
+**T4. Voice trigger (cut for now).** Saying "Tulong" or "Saklolo" with the app open is no longer in the design. An always-open microphone on Home is not built, and the controls in T2 and T3 start Listening instead. It can come back as a stretch.
 
 **T5. Shout detection (proposed Stretch).** The phone notices a shout or scream using Apple's on-device sound classification (class list to be verified). This is a passive trigger, so the confirm step runs.
 
-**T6. Fall detection (Stretch).** The builder's own CoreMotion version, active only while the app is running. Passive trigger, so the confirm step runs.
+**T6. Fall detection (Stretch).** The builder's own CoreMotion version, active only while the app is running. Passive trigger; it starts the alone-mode check-in.
 
-**Confirm step (T5, T6; proposed).**
-1. **Hear:** "Okay ka lang? Sabihin 'okay'." There is a 10s window.
-2. If the user says "okay", the phone stands down.
-3. If there is silence, the alert is sent.
-4. If the user says "Tulong" / "Saklolo" or presses the red button, the wait is skipped.
-
-How the 10s window relates to the brief's 30s alone-mode silence escalation is **TBD**. The 10s window comes before the alert; the 30s window comes after it.
+**Passive triggers (T5, T6).** A fall or shout starts the alone-mode check-in (see section 2) with a first line such as "I think you fell. Are you okay?". The countdown to "I need help" and the "I'm okay" slide there replace a separate confirm step.
 
 **False alarm (proposed).** If the user cancels after an alert has already gone out, a "False alarm" SMS goes to the same contacts. Wording is **TBD**. Where the user cancels is **TBD**.
 
@@ -75,7 +69,7 @@ The injured person can't reach the phone or can't get up.
 A companion (spouse, child, neighbor) is there.
 
 1. **Say:** "Tulong! Nahulog si Papa, dumudugo ang ulo!" The same check-in and listen steps run as in alone mode (steps 2-4 above). "Si Papa" makes it guide mode.
-2. **Phone, in the background:** the alert goes out as in alone mode: SMS to all contacts, then call #1.
+2. **Phone, in the background:** the alert goes out after understanding: SMS to all contacts, then call #1. (In alone mode it goes out when "I need help" fires.)
 3. **See:** the **Guide** screen shows one big step at a time, with Next and Repeat buttons and a banner such as "Na-text na sina Kuya at Tita".
 4. **Hear:** the phone speaks the matched script. Every script starts by making sure help is being called.
 5. **Move on:** the companion says "okay" or "tapos na" (or taps Next) to hear the next step. They say "ulitin" (or tap Repeat) to hear it again.
