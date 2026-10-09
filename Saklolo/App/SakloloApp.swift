@@ -3,9 +3,6 @@ import SwiftData
 
 @main
 struct SakloloApp: App {
-    @StateObject private var modelLoader = ModelLoader()
-    @State private var showLoading = true
-
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Contact.self,
@@ -23,11 +20,7 @@ struct SakloloApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if showLoading {
-                LoadingView(loader: modelLoader) { showLoading = false }
-            } else {
-                HomeView()
-            }
+            RootView()
         }
         .modelContainer(sharedModelContainer)
     }
