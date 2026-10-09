@@ -1,0 +1,44 @@
+name: Saklolo
+options:
+  bundleIdPrefix: com.phitopolis.saklolo
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: en
+settings:
+  SWIFT_VERSION: "6.0"
+targets:
+  Saklolo:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Saklolo
+    info:
+      path: Saklolo/App/Info.plist
+      properties:
+        UILaunchScreen: {}
+        NSMicrophoneUsageDescription: "Saklolo listens for \"Tulong\" and records what happened so it can alert your contacts and guide first aid."
+        NSLocationWhenInUseUsageDescription: "Saklolo includes your GPS location in the emergency SMS so contacts and responders know where you are."
+        NSMotionUsageDescription: "Saklolo can use motion data to detect a fall and trigger an alert automatically."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phitopolis.saklolo
+        CODE_SIGN_STYLE: Automatic
+        # No DEVELOPMENT_TEAM pinned — Xcode resolves to whichever Apple ID /
+        # team is signed in locally when the project is first opened.
+        # If that's a Personal Team, device installs are limited to 7-day
+        # provisioning renewal and no Apple Intelligence entitlement gating
+        # beyond what the OS itself allows. Swap in a paid team ID here once
+        # one exists.
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: true
+schemes:
+  Saklolo:
+    build:
+      targets:
+        Saklolo: all
+    run:
+      config: Debug
+    archive:
+      config: Release

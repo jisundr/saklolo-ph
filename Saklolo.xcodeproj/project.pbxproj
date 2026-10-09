@@ -1,0 +1,426 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0205E831341708828190A4C4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E869EDA2F4B46F098C822F4 /* HomeView.swift */; };
+		03D27A0B51724FDC37120D9A /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7887C2618CDBF767A0C4BFB0 /* Alert.swift */; };
+		3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1A3C166DBB4BAED919887 /* IncidentView.swift */; };
+		3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */; };
+		4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = E571F68D365C23F725BC86F3 /* FirstAidScript.swift */; };
+		5758B6EA425D2319952C3ED1 /* head_injury.json in Resources */ = {isa = PBXBuildFile; fileRef = 2DB9528F3641CAE2E08E74C0 /* head_injury.json */; };
+		58A5C05089902FCF42062A85 /* fall.json in Resources */ = {isa = PBXBuildFile; fileRef = 384B62FB9B9A004977718172 /* fall.json */; };
+		5C59213974497B9754D180AA /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335B945BC9A9CC4379EF2FB8 /* SetupView.swift */; };
+		6146897C35B128E40F5B825A /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF85AE66269B94DC71AF22D7 /* Incident.swift */; };
+		793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */; };
+		7CB4A3122EB7E9E39550C002 /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */; };
+		7D491DC73CB844AC0A97431A /* general.json in Resources */ = {isa = PBXBuildFile; fileRef = F5070F7F241920F87DF1B525 /* general.json */; };
+		8C57E20CABD6C296F439D885 /* unconscious.json in Resources */ = {isa = PBXBuildFile; fileRef = F189DF9000DA76E9609A7B95 /* unconscious.json */; };
+		940932067281CA0A0FE465A2 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD2E3944C15032EBD1193E /* Contact.swift */; };
+		9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */; };
+		B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF01D02FF45927209F625D /* GuideView.swift */; };
+		C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88E1D62881EB144522EC182 /* ListeningView.swift */; };
+		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
+		ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9556F074D68B0F89585AB36 /* LocationService.swift */; };
+		FBE1FEC241637D7609E10C62 /* bleeding.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B9BDAB0B207650AF0409394 /* bleeding.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0B9BDAB0B207650AF0409394 /* bleeding.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bleeding.json; sourceTree = "<group>"; };
+		1D7F0508DC0AE7F2598A75D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2DB9528F3641CAE2E08E74C0 /* head_injury.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = head_injury.json; sourceTree = "<group>"; };
+		335B945BC9A9CC4379EF2FB8 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		384B62FB9B9A004977718172 /* fall.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = fall.json; sourceTree = "<group>"; };
+		38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptLoader.swift; sourceTree = "<group>"; };
+		3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSMSService.swift; sourceTree = "<group>"; };
+		5E869EDA2F4B46F098C822F4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		74CF01D02FF45927209F625D /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
+		7887C2618CDBF767A0C4BFB0 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SituationClassifierService.swift; sourceTree = "<group>"; };
+		9BA1A3C166DBB4BAED919887 /* IncidentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentView.swift; sourceTree = "<group>"; };
+		A88E1D62881EB144522EC182 /* ListeningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningView.swift; sourceTree = "<group>"; };
+		ABCD2E3944C15032EBD1193E /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
+		E571F68D365C23F725BC86F3 /* FirstAidScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidScript.swift; sourceTree = "<group>"; };
+		E646B7C4DEABF92883A14158 /* SakloloApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakloloApp.swift; sourceTree = "<group>"; };
+		E9556F074D68B0F89585AB36 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		EF85AE66269B94DC71AF22D7 /* Incident.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incident.swift; sourceTree = "<group>"; };
+		F189DF9000DA76E9609A7B95 /* unconscious.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = unconscious.json; sourceTree = "<group>"; };
+		F1EF822BA69E66687F3D78BD /* Saklolo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Saklolo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5070F7F241920F87DF1B525 /* general.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = general.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0905F6D992CE20DDD25579EF = {
+			isa = PBXGroup;
+			children = (
+				7646869C2F0BD2A5548D7AF5 /* Saklolo */,
+				0A749E47B037DB710A88082A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0A749E47B037DB710A88082A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F1EF822BA69E66687F3D78BD /* Saklolo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		399D1CCFA617357A33B920D4 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				0B9BDAB0B207650AF0409394 /* bleeding.json */,
+				384B62FB9B9A004977718172 /* fall.json */,
+				F5070F7F241920F87DF1B525 /* general.json */,
+				2DB9528F3641CAE2E08E74C0 /* head_injury.json */,
+				F189DF9000DA76E9609A7B95 /* unconscious.json */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		63B71DDDA32437FD3EAE81EB /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7887C2618CDBF767A0C4BFB0 /* Alert.swift */,
+				ABCD2E3944C15032EBD1193E /* Contact.swift */,
+				E571F68D365C23F725BC86F3 /* FirstAidScript.swift */,
+				EF85AE66269B94DC71AF22D7 /* Incident.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7646869C2F0BD2A5548D7AF5 /* Saklolo */ = {
+			isa = PBXGroup;
+			children = (
+				C34AD2BF152B70F9B37B2FE6 /* App */,
+				63B71DDDA32437FD3EAE81EB /* Models */,
+				AAE0DBA751EDF68BB9147D36 /* Resources */,
+				7D7793D70E0832F80EA93523 /* Services */,
+				A166E1B4533E431E5F44BAB1 /* Views */,
+			);
+			path = Saklolo;
+			sourceTree = "<group>";
+		};
+		7D7793D70E0832F80EA93523 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E9556F074D68B0F89585AB36 /* LocationService.swift */,
+				38FA8BF5026A34EBBF872937 /* ScriptLoader.swift */,
+				3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */,
+				961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */,
+				C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A166E1B4533E431E5F44BAB1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				74CF01D02FF45927209F625D /* GuideView.swift */,
+				5E869EDA2F4B46F098C822F4 /* HomeView.swift */,
+				9BA1A3C166DBB4BAED919887 /* IncidentView.swift */,
+				A88E1D62881EB144522EC182 /* ListeningView.swift */,
+				335B945BC9A9CC4379EF2FB8 /* SetupView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AAE0DBA751EDF68BB9147D36 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				399D1CCFA617357A33B920D4 /* Scripts */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C34AD2BF152B70F9B37B2FE6 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1D7F0508DC0AE7F2598A75D7 /* Info.plist */,
+				E646B7C4DEABF92883A14158 /* SakloloApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B995F470C08815525017BCBE /* Saklolo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B38E7A5B9C2F266BC95B12FB /* Build configuration list for PBXNativeTarget "Saklolo" */;
+			buildPhases = (
+				2CE20331E3FBC415E6E48F2F /* Sources */,
+				CD19C5E10F36329AC7AFD5A0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Saklolo;
+			packageProductDependencies = (
+			);
+			productName = Saklolo;
+			productReference = F1EF822BA69E66687F3D78BD /* Saklolo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DD1D85EB928CDD5A7B83DFD7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					B995F470C08815525017BCBE = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A1214C3F9F4106F48796A626 /* Build configuration list for PBXProject "Saklolo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0905F6D992CE20DDD25579EF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0A749E47B037DB710A88082A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B995F470C08815525017BCBE /* Saklolo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CD19C5E10F36329AC7AFD5A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FBE1FEC241637D7609E10C62 /* bleeding.json in Resources */,
+				58A5C05089902FCF42062A85 /* fall.json in Resources */,
+				7D491DC73CB844AC0A97431A /* general.json in Resources */,
+				5758B6EA425D2319952C3ED1 /* head_injury.json in Resources */,
+				8C57E20CABD6C296F439D885 /* unconscious.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2CE20331E3FBC415E6E48F2F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03D27A0B51724FDC37120D9A /* Alert.swift in Sources */,
+				940932067281CA0A0FE465A2 /* Contact.swift in Sources */,
+				4877CC27E7010E398F9672C9 /* FirstAidScript.swift in Sources */,
+				B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */,
+				0205E831341708828190A4C4 /* HomeView.swift in Sources */,
+				6146897C35B128E40F5B825A /* Incident.swift in Sources */,
+				3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */,
+				C86BC920F67D4149316D3790 /* ListeningView.swift in Sources */,
+				ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */,
+				D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */,
+				793A630420C704509490A4C4 /* ScriptLoader.swift in Sources */,
+				5C59213974497B9754D180AA /* SetupView.swift in Sources */,
+				3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */,
+				9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */,
+				7CB4A3122EB7E9E39550C002 /* SpeechTranscriptionService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		285318937FF8509F1A34AC9F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Saklolo/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.phitopolis.saklolo;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		9B119604F6C6F5BE7061390F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		D101A61FBEB6CE53E5091FF3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Saklolo/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.phitopolis.saklolo;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E2770FEBFCEDE673BCA73299 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1214C3F9F4106F48796A626 /* Build configuration list for PBXProject "Saklolo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B119604F6C6F5BE7061390F /* Debug */,
+				E2770FEBFCEDE673BCA73299 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B38E7A5B9C2F266BC95B12FB /* Build configuration list for PBXNativeTarget "Saklolo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D101A61FBEB6CE53E5091FF3 /* Debug */,
+				285318937FF8509F1A34AC9F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DD1D85EB928CDD5A7B83DFD7 /* Project object */;
+}
