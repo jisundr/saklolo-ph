@@ -17,15 +17,24 @@ extension Color {
     fileprivate init(hex: UInt32) {
         self.init(UIColor(hex: hex))
     }
+
+    /// Adaptive tint: a color at a different strength on each ground.
+    fileprivate init(light: UInt32, lightAlpha: CGFloat, dark: UInt32, darkAlpha: CGFloat) {
+        self.init(UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(hex: dark, alpha: darkAlpha)
+                : UIColor(hex: light, alpha: lightAlpha)
+        })
+    }
 }
 
 extension UIColor {
-    fileprivate convenience init(hex: UInt32) {
+    fileprivate convenience init(hex: UInt32, alpha: CGFloat = 1) {
         self.init(
             red: CGFloat((hex >> 16) & 0xFF) / 255,
             green: CGFloat((hex >> 8) & 0xFF) / 255,
             blue: CGFloat(hex & 0xFF) / 255,
-            alpha: 1
+            alpha: alpha
         )
     }
 }
@@ -54,6 +63,8 @@ enum Palette {
     static let alarmText = Color(light: 0xC4121F, dark: 0xFF4B55)
     /// Only after something actually happened: SMS delivered, contact answered.
     static let delivered = Color(light: 0x0B7A50, dark: 0x36D399)
+    /// Fill behind delivered text: delivered at 14% on ink, 12% on paper.
+    static let deliveredTint = Color(light: 0x0B7A50, lightAlpha: 0.12, dark: 0x36D399, darkAlpha: 0.14)
 }
 
 // MARK: - Signal level
@@ -119,6 +130,18 @@ enum Typography {
 
     /// Everything people read stays on SF Pro text styles so Dynamic Type works.
     static let step = Font.system(.largeTitle, design: .default, weight: .bold)
+    /// Screen title (the mockup's `.t`): the system title style, bold, so Dynamic Type stays the system's.
+    static let title = Font.system(.title, design: .default, weight: .bold)
+    /// Chat bubble text sizes. Bubbles scale these with Dynamic Type (see `ChatBubble`).
+    static let bubbleSize: CGFloat = 18
+    static let bubbleLargeSize: CGFloat = 22
+    static let bubble = Font.system(size: bubbleSize)
+    /// The mockup's `.xl` bubble: listening and alone mode.
+    static let bubbleLarge = Font.system(size: bubbleLargeSize)
+    /// The name in signage type. Pair with `.textCase(.uppercase)` and `wordmarkTracking`; `SaklaloWordmark` does both.
+    static let wordmark = signage(28, relativeTo: .title)
+    /// 0.03em, the mockup's letter spacing for signage.
+    static func wordmarkTracking(_ size: CGFloat) -> CGFloat { size * 0.03 }
     static let body = Font.body
     static let finePrint = Font.caption
 }
@@ -133,6 +156,13 @@ enum Metrics {
     static let primaryActionHeight: CGFloat = 64
     static let chipRadius: CGFloat = 14
     static let buttonRadius: CGFloat = 18
+    /// Bottom sheets (menu, guide, contact editor).
+    static let sheetRadius: CGFloat = 26
+    static let bubbleRadius: CGFloat = 18
+    /// Secondary rows of actions, the mockup's `.btn.sm`.
+    static let smallActionHeight: CGFloat = 48
+    /// Fields, cards, notices, banners and contact chips.
+    static let tileRadius: CGFloat = 14
 }
 
 // MARK: - Components
@@ -140,14 +170,17 @@ enum Metrics {
 /// "TAPOS NA", "ULITIN": calm, high-contrast, signage type.
 struct SaklaloActionStyle: ButtonStyle {
     enum Kind { case primary, secondary }
+    /// `.small` is the mockup's `.btn.sm`: 48pt tall, Barlow 20.
+    enum Size { case regular, small }
     var kind: Kind = .primary
+    var size: Size = .regular
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Typography.signage(28, relativeTo: .title2))
+            .font(Typography.signage(size == .regular ? 28 : 20, relativeTo: size == .regular ? .title2 : .headline))
             .textCase(.uppercase)
             .tracking(0.8)
-            .frame(maxWidth: .infinity, minHeight: Metrics.primaryActionHeight)
+            .frame(maxWidth: .infinity, minHeight: size == .regular ? Metrics.primaryActionHeight : Metrics.smallActionHeight)
             .foregroundStyle(kind == .primary ? Palette.onAction : Palette.text)
             .background(
                 RoundedRectangle(cornerRadius: Metrics.buttonRadius, style: .continuous)
@@ -206,8 +239,11 @@ struct StepStrand: View {
 }
 
 /// The SAKLOLO button. Rings are the mark: they appear on trigger, expand once, then hold.
+/// `isDimmed` fades the rings when the phone can't do everything (mockup E2 to E6);
+/// the red core stays full strength and the button always works.
 struct SaklaloButton: View {
     var isActive = false
+    var isDimmed = false
     var action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -230,14 +266,19 @@ struct SaklaloButton: View {
 
     private var rings: some View {
         ZStack {
-            ring(Palette.signalOrange, inset: 16, opacity: isActive ? 0.9 : 0.55)
-            ring(Palette.signalYellow, inset: 36, opacity: isActive ? 0.8 : 0.4)
-            ring(Palette.signalBlue, inset: 56, opacity: isActive ? 0.7 : 0.32)
+            ring(Palette.signalOrange, inset: 16, opacity: ringOpacity(active: 0.9, resting: 0.55))
+            ring(Palette.signalYellow, inset: 34, opacity: ringOpacity(active: 0.8, resting: 0.4))
+            ring(Palette.signalBlue, inset: 52, opacity: ringOpacity(active: 0.7, resting: 0.32))
         }
         .frame(width: 220, height: 220)
         .scaleEffect(isActive || reduceMotion ? 1 : 0.94)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.9), value: isActive)
         .allowsHitTesting(false)
+    }
+
+    private func ringOpacity(active: Double, resting: Double) -> Double {
+        if isDimmed { return 0.3 }
+        return isActive ? active : resting
     }
 
     private func ring(_ color: Color, inset: CGFloat, opacity: Double) -> some View {

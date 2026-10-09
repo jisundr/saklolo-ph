@@ -1,35 +1,35 @@
 import SwiftUI
 
-/// A1: the plain splash shown on every open. It never waits for the model;
-/// `RootView` moves on to Home after about a second.
+/// A1: the plain splash shown on every open. Only the mark and the name: no
+/// progress, timer or buttons, so it can never block an alert. It never waits
+/// for the model; `RootView` moves on to Home after about a second.
+/// The ground is `Palette.ground`, the same colour as the launch screen's `LaunchGround`.
 struct SplashView: View {
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 10) {
             Spacer(minLength: 0)
-
-            ZStack {
-                Circle().strokeBorder(Palette.signalOrange, lineWidth: 8)
-                Circle().strokeBorder(Palette.signalYellow, lineWidth: 8).padding(24)
-                Circle().strokeBorder(Palette.signalBlue, lineWidth: 8).padding(48)
-                Circle().fill(Palette.signalRed.opacity(0.9)).padding(72)
-            }
-            .frame(width: 200, height: 200)
-            .accessibilityHidden(true)
-
-            Text("SAKLOLO")
-                .font(Typography.signage(46, relativeTo: .largeTitle))
-                .tracking(1.2)
-
+            SaklaloMark(size: 190)
+            SaklaloWordmark(size: 64)
+                // The wordmark is a fixed-size logo at 64pt; past accessibility1 it
+                // would run off a 375pt-wide screen. VoiceOver still reads "Saklolo".
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity)
         .padding(Metrics.gutter)
         .saklaloGround()
-        .accessibilityElement(children: .combine)
+        // The mark is decorative; the screen reads as one element named "Saklolo".
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("Saklolo")
     }
 }
 
-#Preview {
+#Preview("Dark") {
     SplashView()
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Light") {
+    SplashView()
+        .preferredColorScheme(.light)
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Launch flow: splash (A1) for about a second, then Home (E1) straight away.
 /// The listening model loads in the background the whole time and Home shows
-/// its state in a strip (E2); nothing waits on it.
+/// its state in the status pill (E2); nothing waits on it.
 struct RootView: View {
     /// How long the splash stays up. It never waits on the model.
     static let splashDuration: Duration = .seconds(1)
@@ -25,9 +25,6 @@ struct RootView: View {
                     .transition(.opacity)
             } else {
                 HomeView()
-                    .safeAreaInset(edge: .bottom, spacing: 0) {
-                        ModelStatusStrip()
-                    }
                     .fullScreenCover(isPresented: showSetup) {
                         SetupView()
                     }
