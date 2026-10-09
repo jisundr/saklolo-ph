@@ -4,12 +4,16 @@ import SwiftData
 /// The one chat screen the red button opens (F1 to F3, F5). The voice orb sits
 /// at the bottom; the transcript becomes the person's bubble; fixed replies
 /// say who and what happened; the first-aid guide opens as a sheet over it.
-/// Nothing is sent at the tap. Classification only picks the script and mode.
+/// Nothing is sent at the tap: the one alert text goes out when understanding
+/// finishes, or with the general text at `AlertPolicy.deadline` (step 4).
+/// Alone mode holds it for the person's dock instead (G1).
 ///
 /// Kept the `ListeningView` name and init so Home does not change (plan flag 7).
 struct ListeningView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Contact.priority) private var contacts: [Contact]
+    @StateObject private var location = LocationService()
 
     @State private var messages: [ChatMessage] = [.saklolo(ChatReplies.opening)]
     @State private var stage: Stage = .listening(.waiting)
@@ -19,6 +23,11 @@ struct ListeningView: View {
     @State private var script: FirstAidScript?
     @State private var showGuide = false
     @State private var cancelled = false
+    @State private var alerts: AlertCoordinator<ContinuousClock>?
+    @State private var alertOutcome: AlertOutcome?
+    @State private var understood: SituationClassification?
+    /// Alone mode, alert not sent yet: the dock decides.
+    @State private var awaitingPerson = false
 
     private enum Stage: Equatable {
         /// Recording or transcribing; the orb shows.
@@ -47,7 +56,7 @@ struct ListeningView: View {
         .task { await runSession() }
         .sheet(isPresented: $showGuide) {
             if let script {
-                GuideView(script: script)
+                GuideView(script: script, onDone: endSession)
             }
         }
     }
@@ -63,8 +72,8 @@ struct ListeningView: View {
                 .font(Typography.finePrint)
                 .foregroundStyle(Palette.textDim)
             Spacer()
-            if let incident {
-                Button("Done") { onClassified(incident) }
+            if incident != nil {
+                Button("Done", action: endSession)
                     .font(.body.bold())
                     .frame(minHeight: Metrics.minTarget)
             } else {
@@ -112,7 +121,9 @@ struct ListeningView: View {
         case .understanding:
             EmptyView()
         case .done:
-            if script != nil, !showGuide {
+            if awaitingPerson {
+                AloneDock(onFire: fireFromDock, onOkay: personIsOkay)
+            } else if script != nil, !showGuide {
                 Button("Start first aid") { showGuide = true }
                     .buttonStyle(SaklaloActionStyle())
                     .padding(Metrics.gutter)
@@ -127,12 +138,28 @@ struct ListeningView: View {
         // recorder; the flag makes sure nothing is saved even if Whisper or
         // the classifier is already past its last cancellation point.
         cancelled = true
+        alerts?.cancel()
         dismiss()
+    }
+
+    /// Done, or the guide's last step: the session ends with the incident.
+    private func endSession() {
+        guard let incident else { return }
+        alerts?.cancel()
+        onClassified(incident)
     }
 
     private var isStopped: Bool { cancelled || Task.isCancelled }
 
     private func runSession() async {
+        // The deadline starts at the tap; at 10 s the general text goes out
+        // if nothing was understood by then.
+        let coordinator = AlertCoordinator(location: location)
+        alerts = coordinator
+        coordinator.begin(at: startedAt, recipients: contacts.map(AlertRecipient.init)) { outcome in
+            show(outcome)
+        }
+
         var heard = ""
         var failure = ""
         do {
@@ -180,7 +207,20 @@ struct ListeningView: View {
         )
         modelContext.insert(saved)
         incident = saved
+        understood = result
         script = Self.script(id: result.scriptID)
+        if let alertOutcome { record(alertOutcome, on: saved) }
+
+        // Guide mode sends now, alongside the replies so they never delay it.
+        // Alone mode sends nothing at understanding; the dock fires it.
+        var sending: Task<AlertOutcome?, Never>?
+        switch result.mode {
+        case .guide:
+            sending = Task { await coordinator.send(classification: result) }
+        case .alone:
+            coordinator.hold()
+            awaitingPerson = !coordinator.hasFired
+        }
         stage = .done
 
         for reply in ChatReplies.replies(for: result) {
@@ -188,11 +228,47 @@ struct ListeningView: View {
             guard !isStopped else { return }
             messages.append(.saklolo(reply))
         }
+        if let outcome = await sending?.value {
+            show(outcome)
+        }
 
-        // Guide and alone both open the steps after a short pause (F3 to H1).
+        // The steps open after a short pause (F3 to H1); in alone mode only
+        // once the alert has gone (G2).
         try? await Task.sleep(for: .seconds(2))
-        guard !isStopped, script != nil else { return }
+        guard !isStopped, script != nil, !awaitingPerson else { return }
         showGuide = true
+    }
+
+    /// "I need help" in alone mode: send now, then the steps follow (G2).
+    private func fireFromDock() {
+        awaitingPerson = false
+        Task {
+            if let outcome = await alerts?.send(classification: understood) {
+                show(outcome)
+            }
+            guard !isStopped, script != nil else { return }
+            showGuide = true
+        }
+    }
+
+    /// "I'm okay" in alone mode: nothing is sent (G5).
+    private func personIsOkay() {
+        awaitingPerson = false
+        endSession()
+    }
+
+    /// Puts the alert in the thread and on the incident, once.
+    private func show(_ outcome: AlertOutcome) {
+        guard !cancelled, alertOutcome == nil else { return }
+        alertOutcome = outcome
+        messages.append(contentsOf: outcome.chatMessages)
+        if let incident { record(outcome, on: incident) }
+    }
+
+    private func record(_ outcome: AlertOutcome, on incident: Incident) {
+        for alert in outcome.alerts(for: incident) { modelContext.insert(alert) }
+        incident.lat = outcome.location?.lat
+        incident.lng = outcome.location?.lng
     }
 
     /// The bundled script for the classifier's pick, else the general one.

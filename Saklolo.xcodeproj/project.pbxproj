@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		013FE1728C49B043A08DAFD2 /* AlertOutcomeChatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */; };
 		0205E831341708828190A4C4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E869EDA2F4B46F098C822F4 /* HomeView.swift */; };
 		03D27A0B51724FDC37120D9A /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7887C2618CDBF767A0C4BFB0 /* Alert.swift */; };
 		0BC9A7685057102FC430D392 /* keywords.json in Resources */ = {isa = PBXBuildFile; fileRef = B698F2A1F50F44028F7AEC7B /* keywords.json */; };
@@ -14,6 +15,7 @@
 		1562C3D45490BFFD3A81EF10 /* SetupContactsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C65C48E128589B1B129B9C4B /* SetupContactsPage.swift */; };
 		158B1E1112ED6BD3C4336714 /* BarlowCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */; };
 		1AB46C4D598BF4104D975AA8 /* ModelLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2169BE6AA1670BF36813B /* ModelLoader.swift */; };
+		2564DDF77EC542E08C336C36 /* AlertCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */; };
 		3505E94F9C4A5FCD6D8A0A4E /* IncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA1A3C166DBB4BAED919887 /* IncidentView.swift */; };
 		3D1415A08F53C76FA4A780B8 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 37C60B3B2C48EEE5078CFDDB /* WhisperKit */; };
 		3E1CC9955AEF182DB6BE8DB0 /* ShortcutSMSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7FFC79FC9DE07155A77409 /* ShortcutSMSService.swift */; };
@@ -32,12 +34,15 @@
 		7D491DC73CB844AC0A97431A /* general.json in Resources */ = {isa = PBXBuildFile; fileRef = F5070F7F241920F87DF1B525 /* general.json */; };
 		88CA1137692EC082DF125DB9 /* IncidentLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67228251F5503E806DB4DCE1 /* IncidentLogView.swift */; };
 		89E9E8C1800E29DDDACA5D36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */; };
+		8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1554B937169BB45A23EA45 /* TestClock.swift */; };
 		8C57E20CABD6C296F439D885 /* unconscious.json in Resources */ = {isa = PBXBuildFile; fileRef = F189DF9000DA76E9609A7B95 /* unconscious.json */; };
 		91B3A3E2C6A4474C01866E39 /* ChatReplies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6883DDE67230C7692EDD37 /* ChatReplies.swift */; };
+		93A3CC98000D9348D82EA438 /* AlertOutcome+Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0630F9C31CC1A4FE2E66E982 /* AlertOutcome+Chat.swift */; };
 		940932067281CA0A0FE465A2 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCD2E3944C15032EBD1193E /* Contact.swift */; };
 		956F90E50143419085B65E86 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175032A4F57AB68F0D29CD0D /* RootView.swift */; };
 		9C650671D436FF199B7F2DF7 /* BarlowCondensed-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */; };
 		9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */; };
+		A5577E6966F0DD21BBFB4F1C /* AlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1794D8176111E9C002443 /* AlertCoordinator.swift */; };
 		AAC176FD2C8931415B589D24 /* VoiceOrb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D25EDF314277981A0534C5F /* VoiceOrb.swift */; };
 		B53C0C4098AE8B92F9298193 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF01D02FF45927209F625D /* GuideView.swift */; };
 		B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */; };
@@ -46,16 +51,30 @@
 		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
 		E8AEE9952D5980A31093CDBD /* BarlowCondensed-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */; };
 		ECC4AB9F47242BA07A4F32D5 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9556F074D68B0F89585AB36 /* LocationService.swift */; };
+		F788017C2E0B18443ED98580 /* AloneDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E4113257BE6DAE58182C66D /* AloneDock.swift */; };
 		F9B8DBE7261ACCD3C7A6589F /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9A07C40B442596BA4A9780 /* ChatMessage.swift */; };
 		FBE1FEC241637D7609E10C62 /* bleeding.json in Resources */ = {isa = PBXBuildFile; fileRef = 0B9BDAB0B207650AF0409394 /* bleeding.json */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F18363B45776612C86EE8BEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DD1D85EB928CDD5A7B83DFD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B995F470C08815525017BCBE;
+			remoteInfo = Saklolo;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		0630F9C31CC1A4FE2E66E982 /* AlertOutcome+Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertOutcome+Chat.swift"; sourceTree = "<group>"; };
 		0B9BDAB0B207650AF0409394 /* bleeding.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bleeding.json; sourceTree = "<group>"; };
+		0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertOutcomeChatTests.swift; sourceTree = "<group>"; };
 		14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-SemiBold.ttf"; sourceTree = "<group>"; };
 		175032A4F57AB68F0D29CD0D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1C9A07C40B442596BA4A9780 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		1D7F0508DC0AE7F2598A75D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1F1554B937169BB45A23EA45 /* TestClock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClock.swift; sourceTree = "<group>"; };
 		20852C79EFAC211EBB674769 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		2DB9528F3641CAE2E08E74C0 /* head_injury.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = head_injury.json; sourceTree = "<group>"; };
 		3278C25619F1ADD5A7B2F9BC /* ModelStatusStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStatusStrip.swift; sourceTree = "<group>"; };
@@ -69,6 +88,8 @@
 		61D7F419EB2C6199DFC88667 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		67228251F5503E806DB4DCE1 /* IncidentLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentLogView.swift; sourceTree = "<group>"; };
 		6D6883DDE67230C7692EDD37 /* ChatReplies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatReplies.swift; sourceTree = "<group>"; };
+		6E4113257BE6DAE58182C66D /* AloneDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AloneDock.swift; sourceTree = "<group>"; };
+		70809DE91210ABD99EBD0AB0 /* SakloloTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SakloloTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		74CF01D02FF45927209F625D /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
 		7887C2618CDBF767A0C4BFB0 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		7D25EDF314277981A0534C5F /* VoiceOrb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceOrb.swift; sourceTree = "<group>"; };
@@ -86,12 +107,14 @@
 		C7738FCBB2D10C964B269539 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 		E571F68D365C23F725BC86F3 /* FirstAidScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstAidScript.swift; sourceTree = "<group>"; };
 		E646B7C4DEABF92883A14158 /* SakloloApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SakloloApp.swift; sourceTree = "<group>"; };
+		E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertCoordinatorTests.swift; sourceTree = "<group>"; };
 		E9556F074D68B0F89585AB36 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		EF85AE66269B94DC71AF22D7 /* Incident.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incident.swift; sourceTree = "<group>"; };
 		F189DF9000DA76E9609A7B95 /* unconscious.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = unconscious.json; sourceTree = "<group>"; };
 		F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F1EF822BA69E66687F3D78BD /* Saklolo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Saklolo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5070F7F241920F87DF1B525 /* general.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = general.json; sourceTree = "<group>"; };
+		F6E1794D8176111E9C002443 /* AlertCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertCoordinator.swift; sourceTree = "<group>"; };
 		F87A41FBDAFE01B846A16AA3 /* SetupPermissionsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupPermissionsPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -111,14 +134,26 @@
 			isa = PBXGroup;
 			children = (
 				7646869C2F0BD2A5548D7AF5 /* Saklolo */,
+				09DB6DAAD0943B9293D7F44B /* SakloloTests */,
 				0A749E47B037DB710A88082A /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		09DB6DAAD0943B9293D7F44B /* SakloloTests */ = {
+			isa = PBXGroup;
+			children = (
+				E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */,
+				0C5981820EE92E8228304B7E /* AlertOutcomeChatTests.swift */,
+				1F1554B937169BB45A23EA45 /* TestClock.swift */,
+			);
+			path = SakloloTests;
 			sourceTree = "<group>";
 		};
 		0A749E47B037DB710A88082A /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				F1EF822BA69E66687F3D78BD /* Saklolo.app */,
+				70809DE91210ABD99EBD0AB0 /* SakloloTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -163,6 +198,8 @@
 		7D7793D70E0832F80EA93523 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F6E1794D8176111E9C002443 /* AlertCoordinator.swift */,
+				0630F9C31CC1A4FE2E66E982 /* AlertOutcome+Chat.swift */,
 				6D6883DDE67230C7692EDD37 /* ChatReplies.swift */,
 				A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */,
 				E9556F074D68B0F89585AB36 /* LocationService.swift */,
@@ -245,6 +282,7 @@
 		F29A421F9D8F1BE1C48F04DA /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				6E4113257BE6DAE58182C66D /* AloneDock.swift */,
 				4D12638CC270C4D7A81E79DE /* ChatMessageRow.swift */,
 				7D25EDF314277981A0534C5F /* VoiceOrb.swift */,
 			);
@@ -254,6 +292,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4B50617016D0931A043B0FBD /* SakloloTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FB24867F43AD49817D9103A /* Build configuration list for PBXNativeTarget "SakloloTests" */;
+			buildPhases = (
+				D81895879203254911090091 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C8131C7B646D16D91D7C520B /* PBXTargetDependency */,
+			);
+			name = SakloloTests;
+			packageProductDependencies = (
+			);
+			productName = SakloloTests;
+			productReference = 70809DE91210ABD99EBD0AB0 /* SakloloTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		B995F470C08815525017BCBE /* Saklolo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B38E7A5B9C2F266BC95B12FB /* Build configuration list for PBXNativeTarget "Saklolo" */;
@@ -306,6 +362,7 @@
 			projectRoot = "";
 			targets = (
 				B995F470C08815525017BCBE /* Saklolo */,
+				4B50617016D0931A043B0FBD /* SakloloTests */,
 			);
 		};
 /* End PBXProject section */
@@ -337,6 +394,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				03D27A0B51724FDC37120D9A /* Alert.swift in Sources */,
+				A5577E6966F0DD21BBFB4F1C /* AlertCoordinator.swift in Sources */,
+				93A3CC98000D9348D82EA438 /* AlertOutcome+Chat.swift in Sources */,
+				F788017C2E0B18443ED98580 /* AloneDock.swift in Sources */,
 				F9B8DBE7261ACCD3C7A6589F /* ChatMessage.swift in Sources */,
 				B5537409944326D2DDE2EDC3 /* ChatMessageRow.swift in Sources */,
 				91B3A3E2C6A4474C01866E39 /* ChatReplies.swift in Sources */,
@@ -368,7 +428,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D81895879203254911090091 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2564DDF77EC542E08C336C36 /* AlertCoordinatorTests.swift in Sources */,
+				013FE1728C49B043A08DAFD2 /* AlertOutcomeChatTests.swift in Sources */,
+				8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C8131C7B646D16D91D7C520B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B995F470C08815525017BCBE /* Saklolo */;
+			targetProxy = F18363B45776612C86EE8BEF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		285318937FF8509F1A34AC9F /* Release */ = {
@@ -389,6 +467,24 @@
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
+		};
+		6B5DA9B68ACA2C5768E93060 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaysondelosreyes.saklolo.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Saklolo.app/Saklolo";
+			};
+			name = Debug;
 		};
 		9B119604F6C6F5BE7061390F /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -452,6 +548,24 @@
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
+		};
+		B305E0B0667FE495AF680DF9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaysondelosreyes.saklolo.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Saklolo.app/Saklolo";
+			};
+			name = Release;
 		};
 		D101A61FBEB6CE53E5091FF3 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -531,6 +645,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4FB24867F43AD49817D9103A /* Build configuration list for PBXNativeTarget "SakloloTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B5DA9B68ACA2C5768E93060 /* Debug */,
+				B305E0B0667FE495AF680DF9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		A1214C3F9F4106F48796A626 /* Build configuration list for PBXProject "Saklolo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
