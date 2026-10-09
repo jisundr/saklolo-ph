@@ -50,6 +50,8 @@ struct SituationClassifierService {
     /// delay or replace it with nothing.
     func classify(transcript: String, timeout: Duration = .seconds(3)) async -> SituationClassification {
         let keyword = classifyByKeyword(transcript: transcript)
+        // Nothing heard: no point asking the model.
+        guard !transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return keyword }
         let llm: SituationClassification? = await withTaskGroup(of: SituationClassification?.self) { group in
             group.addTask { await llmClassification(transcript: transcript) }
             group.addTask { try? await Task.sleep(for: timeout); return nil }
