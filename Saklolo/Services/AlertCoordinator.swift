@@ -16,6 +16,12 @@ enum AlertPolicy {
     static let noLocationNote = "Location unavailable"
     /// Sent in place of the situation summary when nothing was understood.
     static let generalSummary = "I need help. I could not say what happened"
+    /// How long after the person is back in the app (from Shortcuts) the
+    /// alert may stay unconfirmed before the composer card takes over. A
+    /// Shortcuts x-success callback is what brings the app back, so a
+    /// confirmation that is coming arrives at once; a missing shortcut never
+    /// calls back at all (see `AlertCallback`).
+    static let confirmationWait: Duration = .seconds(3)
 }
 
 /// Someone the alert is recorded against. A plain copy of `Contact`, so the
@@ -57,8 +63,11 @@ extension AlertFix {
 /// fallback cards read it (T7).
 struct AlertOutcome: Equatable, Sendable {
     enum Delivery: Equatable, Sendable {
-        /// The Saklolo Shortcut opened with the text.
-        case sent
+        /// Shortcuts was opened with the text. Not yet known to have sent
+        /// it: `AlertQueue` tracks whether the shortcut confirms (x-success)
+        /// or not (x-error, x-cancel, or silence), so the chat never says
+        /// the contacts were told before that.
+        case awaitingConfirmation
         /// The Shortcut could not be opened (I1).
         case sendFailed
         /// Held for retry because there is no signal (I3).
@@ -86,8 +95,7 @@ struct AlertOutcome: Equatable, Sendable {
     /// Ties the chat cards and the stored rows to this alert.
     var id = UUID()
 
-    var sent: Bool { delivery == .sent }
-    var sentGeneral: Bool { sent && isGeneral }
+    var awaitingConfirmation: Bool { delivery == .awaitingConfirmation }
     var sendFailed: Bool { delivery == .sendFailed }
     var queued: Bool { delivery == .queued }
     var noLocationLastKnown: Bool { location?.isLastKnown ?? true }
@@ -97,13 +105,16 @@ struct AlertOutcome: Equatable, Sendable {
 /// a recorder in tests.
 @MainActor
 protocol AlertSending {
-    func sendText(_ message: String) throws
+    /// Hands `message` to the Shortcut for alert `id`. Not throwing only
+    /// means the hand-off started; the result comes back through
+    /// `AlertQueue.resolve`. `notOpened` runs if the hand-off fails later.
+    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws
     func call(phone: String) throws
 }
 
 extension ShortcutSMSService: AlertSending {
-    func sendText(_ message: String) throws {
-        try sendViaShortcut(message: message)
+    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
+        try sendViaShortcut(message: message, id: id, notOpened: notOpened)
     }
 }
 
@@ -137,7 +148,6 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
     private let signal: (any SignalChecking)?
     private let queue: AlertQueue?
     private let clock: C
-    private let now: () -> Date
 
     private var state: State = .idle
     private var tappedAt = Date.now
@@ -157,15 +167,13 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         locator: any AlertLocating,
         clock: C,
         signal: (any SignalChecking)? = nil,
-        queue: AlertQueue? = nil,
-        now: @escaping () -> Date = Date.init
+        queue: AlertQueue? = nil
     ) {
         self.sender = sender
         self.locator = locator
         self.signal = signal
         self.queue = queue
         self.clock = clock
-        self.now = now
     }
 
     /// The outcome once the alert has gone out (or failed to).
@@ -266,17 +274,19 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         )
 
         // No signal: hold the text for retry instead of losing it (I3).
-        var delivery = AlertOutcome.Delivery.sent
+        // Otherwise hand it to the Shortcut once; whether it went out is
+        // only known later (`AlertQueue.resolve`). Never sent twice by itself.
+        let id = UUID()
+        var delivery = AlertOutcome.Delivery.awaitingConfirmation
         if signal?.hasSignal == false {
             delivery = .queued
         } else {
             do {
-                try sender.sendText(message)
+                try sender.sendText(message, id: id) { [queue] in queue?.resolve(id, .failed) }
             } catch {
                 delivery = .sendFailed
             }
         }
-        let sentAt = delivery == .sent ? now() : nil
 
         // The call is independent of the text: try it even if the text failed.
         var calledID: UUID?
@@ -293,9 +303,11 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
             recipientNames: recipients.map(\.name),
             location: fix,
             records: recipients.map {
-                AlertOutcome.Record(contactID: $0.contactID, smsSentAt: sentAt, called: $0.contactID == calledID)
+                // Stamped once the text is confirmed (`alerts(for:)`).
+                AlertOutcome.Record(contactID: $0.contactID, smsSentAt: nil, called: $0.contactID == calledID)
             },
-            recipientPhones: recipients.map(\.phone)
+            recipientPhones: recipients.map(\.phone),
+            id: id
         )
         state = .sent(outcome)
         queue?.record(outcome)

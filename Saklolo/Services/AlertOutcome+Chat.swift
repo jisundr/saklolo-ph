@@ -1,9 +1,11 @@
 import Foundation
 
-/// How the alert shows in the chat thread (F3): "I've told ..." with the
-/// exact text that went out, or a fallback card when it did not (I1, I3),
-/// then a card when the location is not live (I4). Cards, not pop-ups, so
-/// the guide stays visible.
+/// How the alert shows in the chat thread (F3): "Sending the alert ..." with
+/// the exact text while the Shortcut has not confirmed it (the card becomes
+/// "I've told ..." only on confirmation, or the send-failed card), or a
+/// fallback card when it could not even be handed over (I1, I3), then a card
+/// when the location is not live (I4). Cards, not pop-ups, so the guide
+/// stays visible.
 extension AlertOutcome {
     static let keepGuiding = "I'll keep guiding you."
     static let firstAidStillWorks = "First aid still works. I'll keep guiding you."
@@ -11,8 +13,8 @@ extension AlertOutcome {
     var chatMessages: [ChatMessage] {
         var messages: [ChatMessage]
         switch delivery {
-        case .sent:
-            messages = [ChatMessage(role: .saklolo, kind: .alert(toldText))]
+        case .awaitingConfirmation:
+            messages = [ChatMessage(role: .saklolo, kind: .fallback(.sending))]
         case .sendFailed:
             messages = [ChatMessage(role: .saklolo, kind: .fallback(.sendFailed))]
         case .queued:
@@ -22,16 +24,30 @@ extension AlertOutcome {
             messages.append(ChatMessage(role: .saklolo, kind: .fallback(.noLocation)))
         }
         switch delivery {
-        case .sent: break
+        case .awaitingConfirmation: break
         case .sendFailed: messages.append(.saklolo(Self.keepGuiding))
         case .queued: messages.append(.saklolo(Self.firstAidStillWorks))
         }
         return messages
     }
 
-    /// "I've told Kuya Ben and Tita Lina" and the text, as in F3.
-    var toldText: String {
-        "\(toldLine)\n\u{201C}\(message)\u{201D}"
+    /// The one location chip (I4): what the text said in place of a live
+    /// location. "Last known location (7:31 PM)", or "Location unavailable"
+    /// with no fix at all; nil for a live fix. One chip, not a "No GPS"
+    /// chip beside it: both would describe the same missing fix.
+    var locationChipText: String? {
+        guard let location else { return AlertPolicy.noLocationNote }
+        return location.note
+    }
+
+    /// "Sending the alert to Kuya Ben and Tita Lina..." while unconfirmed.
+    var sendingLine: String {
+        "Sending the alert to \(recipientList)\u{2026}"
+    }
+
+    /// The exact text, in quotes, under the sending and told lines.
+    var quotedMessage: String {
+        "\u{201C}\(message)\u{201D}"
     }
 
     /// "I've told Kuya Ben and Tita Lina". With no contacts saved in the app

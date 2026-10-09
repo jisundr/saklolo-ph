@@ -17,7 +17,7 @@ final class AlertCoordinatorTests: XCTestCase {
         sender = RecordingSender()
         locator = FakeLocator(fix: AlertFix(lat: 14.5995, lng: 120.9842, isLastKnown: false))
         clock = TestClock()
-        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock, now: { [tap] in tap.addingTimeInterval(4) })
+        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock)
     }
 
     override func tearDown() async throws {
@@ -44,7 +44,7 @@ final class AlertCoordinatorTests: XCTestCase {
         let outcome = try await sent(fall())
 
         XCTAssertEqual(sender.texts.count, 1)
-        XCTAssertTrue(outcome.sent)
+        XCTAssertTrue(outcome.awaitingConfirmation, "handed to the Shortcut, not yet known to be sent")
         XCTAssertFalse(outcome.isGeneral)
         XCTAssertTrue(sender.texts[0].contains("Papa fell, his head is bleeding"))
         XCTAssertTrue(sender.texts[0].contains("14.5995,120.9842"))
@@ -62,7 +62,27 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertEqual(outcome.records.count, 2)
         XCTAssertEqual(outcome.records.first { $0.contactID == ben.contactID }?.called, true)
         XCTAssertEqual(outcome.records.first { $0.contactID == lina.contactID }?.called, false)
-        XCTAssertTrue(outcome.records.allSatisfy { $0.smsSentAt == tap.addingTimeInterval(4) })
+        XCTAssertTrue(outcome.records.allSatisfy { $0.smsSentAt == nil }, "stamped only when the Shortcut confirms")
+    }
+
+    func testTheShortcutIsAskedToReportBackForThisAlert() async throws {
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertEqual(sender.ids, [outcome.id])
+    }
+
+    func testTheShortcutFailingToOpenLaterMovesTheAlertToTheComposer() async throws {
+        let queue = AlertQueue(sender: sender, signal: SignalSwitch(on: true))
+        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock, queue: queue)
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+        _ = try await sent(fall())
+
+        sender.reportNotOpened()
+
+        XCTAssertEqual(queue.latest?.status, .needsComposer)
+        XCTAssertEqual(sender.texts.count, 1, "never resent by itself")
     }
 
     // MARK: - Exactly one alert
@@ -179,7 +199,8 @@ final class AlertCoordinatorTests: XCTestCase {
         await fulfillment(of: [deadline], timeout: 2)
 
         let outcome = try XCTUnwrap(received)
-        XCTAssertTrue(outcome.sentGeneral)
+        XCTAssertTrue(outcome.isGeneral)
+        XCTAssertTrue(outcome.awaitingConfirmation)
         XCTAssertEqual(sender.texts.count, 1)
         XCTAssertTrue(sender.texts[0].hasPrefix("SAKLOLO: "))
         XCTAssertEqual(sender.calls, [ben.phone])
@@ -210,7 +231,7 @@ final class AlertCoordinatorTests: XCTestCase {
 
         let outcome = try await sent(fall(summary: "  "))
 
-        XCTAssertTrue(outcome.sentGeneral)
+        XCTAssertTrue(outcome.isGeneral)
     }
 
     // MARK: - Cancel and hold
@@ -322,19 +343,18 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertEqual(queue.latest?.outcome.message, outcome.message)
     }
 
-    func testWithSignalTheTextGoesAndTheQueueKnowsIt() async throws {
+    func testWithSignalTheTextIsHandedOverAndTheQueueWaitsForConfirmation() async throws {
         let queue = AlertQueue(sender: sender, signal: SignalSwitch(on: true))
         coordinator = AlertCoordinator(
-            sender: sender, locator: locator, clock: clock, signal: SignalSwitch(on: true), queue: queue,
-            now: { [tap] in tap.addingTimeInterval(4) }
+            sender: sender, locator: locator, clock: clock, signal: SignalSwitch(on: true), queue: queue
         )
         coordinator.begin(at: tap, recipients: [ben]) { _ in }
 
         let outcome = try await sent(fall())
 
-        XCTAssertTrue(outcome.sent)
+        XCTAssertTrue(outcome.awaitingConfirmation)
         XCTAssertEqual(sender.texts.count, 1)
-        XCTAssertEqual(queue.latest?.status, .sent(at: tap.addingTimeInterval(4)))
+        XCTAssertEqual(queue.latest?.status, .confirming)
     }
 
     func testNoContactsStillSendsThroughTheShortcut() async throws {
@@ -342,7 +362,7 @@ final class AlertCoordinatorTests: XCTestCase {
 
         let outcome = try await sent(fall())
 
-        XCTAssertTrue(outcome.sent)
+        XCTAssertTrue(outcome.awaitingConfirmation)
         XCTAssertTrue(sender.calls.isEmpty)
         XCTAssertTrue(outcome.records.isEmpty)
     }
@@ -360,12 +380,22 @@ final class SignalSwitch: SignalChecking {
 final class RecordingSender: AlertSending {
     struct Failure: Error {}
     var texts: [String] = []
+    /// The alert id each text was handed over with.
+    var ids: [UUID] = []
     var calls: [String] = []
     var textFails = false
+    private var notOpened: [@MainActor () -> Void] = []
 
-    func sendText(_ message: String) throws {
+    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
         if textFails { throw Failure() }
         texts.append(message)
+        ids.append(id)
+        self.notOpened.append(notOpened)
+    }
+
+    /// iOS reporting, after the fact, that Shortcuts did not open.
+    func reportNotOpened() {
+        notOpened.last?()
     }
 
     func call(phone: String) throws {

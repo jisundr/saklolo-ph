@@ -21,6 +21,8 @@ struct SakloloApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                // The Saklolo Shortcut's x-callback-url result (AlertCallback).
+                .onOpenURL { AlertQueue.shared.handle($0) }
         }
         .modelContainer(sharedModelContainer)
     }

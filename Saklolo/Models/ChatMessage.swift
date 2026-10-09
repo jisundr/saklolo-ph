@@ -13,7 +13,9 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
     enum Kind: Equatable, Sendable {
         /// A plain bubble.
         case text(String)
-        /// "I've told ..." with the alert text that went out (T6).
+        /// "I've told ..." with the alert text that went out (T6). Only for
+        /// an alert known to be sent; one still being confirmed is the
+        /// `.fallback(.sending)` card, which follows the queue.
         case alert(String)
         /// A failure card that keeps the guide visible (T7 renders these).
         case fallback(FallbackKind)
@@ -41,6 +43,10 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
 /// The ways sending can fall short (I1 to I4). Defined here so the thread's
 /// shape is fixed; the cards themselves come with the fallback work.
 enum FallbackKind: Equatable, Sendable {
+    /// Handed to the Shortcut, not confirmed yet: "Sending the alert ...".
+    /// Turns into "I've told ..." on confirmation, or into the send-failed
+    /// card (I1) on failure or silence.
+    case sending
     /// The Shortcut could not send the text by itself (I1).
     case sendFailed
     /// Offer the system message composer instead (I2).

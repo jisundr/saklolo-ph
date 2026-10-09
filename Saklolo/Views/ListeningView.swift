@@ -14,6 +14,8 @@ struct ListeningView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Contact.priority) private var contacts: [Contact]
     @StateObject private var location = LocationService()
+    /// For the orb's line once the alert is going out.
+    @ObservedObject private var alertQueue = AlertQueue.shared
 
     @State private var messages: [ChatMessage] = [.saklolo(ChatReplies.opening)]
     @State private var stage: Stage = .listening(.waiting)
@@ -126,7 +128,7 @@ struct ListeningView: View {
     private var footer: some View {
         switch stage {
         case .listening(let phase):
-            VoiceOrb(phase: phase, level: level)
+            VoiceOrb(phase: phase, level: level, alert: orbAlert)
                 .padding(.bottom, Metrics.gutter)
         case .understanding:
             EmptyView()
@@ -139,6 +141,13 @@ struct ListeningView: View {
                     .padding(Metrics.gutter)
             }
         }
+    }
+
+    /// nil until the alert starts going out; then this session's alert
+    /// as the queue knows it (not merely the queue's latest).
+    private var orbAlert: VoiceOrb.AlertState? {
+        guard alertFired else { return nil }
+        return VoiceOrb.AlertState(alertOutcome.flatMap { alertQueue.status(of: $0.id) })
     }
 
     // MARK: - Session

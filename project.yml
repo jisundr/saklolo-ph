@@ -32,6 +32,12 @@ targets:
         NSMicrophoneUsageDescription: "Saklolo listens for \"Tulong\" and records what happened so it can alert your contacts and guide first aid."
         NSLocationWhenInUseUsageDescription: "Saklolo includes your GPS location in the emergency SMS so contacts and responders know where you are."
         NSMotionUsageDescription: "Saklolo can use motion data to detect a fall and trigger an alert automatically."
+        # saklolo:// is how the Saklolo Shortcut reports back (x-success,
+        # x-error, x-cancel); see AlertCallback.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.jaysondelosreyes.saklolo
+            CFBundleURLSchemes:
+              - saklolo
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jaysondelosreyes.saklolo
