@@ -216,6 +216,76 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertFalse(outcome.message.contains("Location:"))
     }
 
+    func testNoFixSaysSoInTheText() async throws {
+        locator.fix = nil
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertTrue(outcome.message.hasSuffix(" Location unavailable."))
+    }
+
+    func testALastKnownFixIsLabelledWithItsTime() async throws {
+        let taken = tap.addingTimeInterval(-11 * 60)
+        locator.fix = AlertFix(lat: 14.6507, lng: 121.0494, isLastKnown: true, takenAt: taken)
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        let time = taken.formatted(date: .omitted, time: .shortened)
+        XCTAssertTrue(outcome.message.contains("Last known location (\(time)): maps.apple.com/?ll=14.6507,121.0494"))
+        XCTAssertTrue(outcome.noLocationLastKnown)
+    }
+
+    func testAFreshFixIsNotLabelledLastKnown() async throws {
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertFalse(outcome.message.contains("Last known"))
+        XCTAssertFalse(outcome.noLocationLastKnown)
+    }
+
+    func testTheOutcomeCarriesTheNumbersForTheComposer() async throws {
+        coordinator.begin(at: tap, recipients: [lina, ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertEqual(outcome.recipientPhones, [ben.phone, lina.phone])
+    }
+
+    // MARK: - No signal (I3)
+
+    func testNoSignalHoldsTheTextInsteadOfSendingIt() async throws {
+        let signal = SignalSwitch(on: false)
+        let queue = AlertQueue(sender: sender, signal: signal)
+        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock, signal: signal, queue: queue)
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertTrue(outcome.queued)
+        XCTAssertTrue(sender.texts.isEmpty)
+        XCTAssertNil(outcome.records.first?.smsSentAt)
+        XCTAssertEqual(queue.latest?.status, .waiting)
+        XCTAssertEqual(queue.latest?.outcome.message, outcome.message)
+    }
+
+    func testWithSignalTheTextGoesAndTheQueueKnowsIt() async throws {
+        let queue = AlertQueue(sender: sender, signal: SignalSwitch(on: true))
+        coordinator = AlertCoordinator(
+            sender: sender, locator: locator, clock: clock, signal: SignalSwitch(on: true), queue: queue,
+            now: { [tap] in tap.addingTimeInterval(4) }
+        )
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertTrue(outcome.sent)
+        XCTAssertEqual(sender.texts.count, 1)
+        XCTAssertEqual(queue.latest?.status, .sent(at: tap.addingTimeInterval(4)))
+    }
+
     func testNoContactsStillSendsThroughTheShortcut() async throws {
         coordinator.begin(at: tap, recipients: []) { _ in }
 
@@ -227,10 +297,16 @@ final class AlertCoordinatorTests: XCTestCase {
     }
 }
 
-// MARK: - Fakes at the system boundaries (URL opening, GPS, time)
+// MARK: - Fakes at the system boundaries (URL opening, GPS, network, time)
 
 @MainActor
-private final class RecordingSender: AlertSending {
+final class SignalSwitch: SignalChecking {
+    var hasSignal: Bool
+    init(on: Bool) { hasSignal = on }
+}
+
+@MainActor
+final class RecordingSender: AlertSending {
     struct Failure: Error {}
     var texts: [String] = []
     var calls: [String] = []

@@ -11,9 +11,8 @@ struct ChatMessageRow: View {
             bubble(text)
         case .alert(let text):
             alertCard(text)
-        case .fallback:
-            // Fallback cards are drawn by the fallback work (T7).
-            EmptyView()
+        case .fallback(let kind):
+            FallbackCardView(kind: kind)
         }
     }
 

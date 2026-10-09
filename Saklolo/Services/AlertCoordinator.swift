@@ -9,6 +9,11 @@ enum AlertPolicy {
     /// The longest the send waits for a fresh GPS fix before using the last
     /// known one. Never extends past `deadline`.
     static let locationWait: Duration = .seconds(2)
+    /// How often a text held for no signal is tried again (I3). TBD in the
+    /// wireframes; 30 s is their proposal.
+    static let retryInterval: Duration = .seconds(30)
+    /// Sent in place of the location link when there is no fix at all (I4).
+    static let noLocationNote = "Location unavailable"
     /// Sent in place of the situation summary when nothing was understood.
     static let generalSummary = "I need help. I could not say what happened"
 }
@@ -35,6 +40,17 @@ struct AlertFix: Equatable, Sendable {
     var lng: Double
     /// True when no fresh fix came in time and an older one is used (I4).
     var isLastKnown: Bool
+    /// When the fix was taken, to label a last known one.
+    var takenAt: Date? = nil
+}
+
+extension AlertFix {
+    /// "Last known location (7:31 PM)" for a fix that is not live, else nil.
+    var note: String? {
+        guard isLastKnown else { return nil }
+        guard let takenAt else { return "Last known location" }
+        return "Last known location (\(takenAt.formatted(date: .omitted, time: .shortened)))"
+    }
 }
 
 /// What happened when the alert went out. The chat shows it (T6) and the
@@ -45,8 +61,7 @@ struct AlertOutcome: Equatable, Sendable {
         case sent
         /// The Shortcut could not be opened (I1).
         case sendFailed
-        /// Held for retry when there is no signal (I3). Not produced yet;
-        /// the network check comes with the fallback work.
+        /// Held for retry because there is no signal (I3).
         case queued
     }
 
@@ -66,6 +81,10 @@ struct AlertOutcome: Equatable, Sendable {
     var recipientNames: [String]
     var location: AlertFix?
     var records: [Record]
+    /// Numbers of the recipients, contact #1 first, for the composer (I2).
+    var recipientPhones: [String] = []
+    /// Ties the chat cards and the stored rows to this alert.
+    var id = UUID()
 
     var sent: Bool { delivery == .sent }
     var sentGeneral: Bool { sent && isGeneral }
@@ -115,6 +134,8 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
 
     private let sender: any AlertSending
     private let locator: any AlertLocating
+    private let signal: (any SignalChecking)?
+    private let queue: AlertQueue?
     private let clock: C
     private let now: () -> Date
 
@@ -124,9 +145,20 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
     private var recipients: [AlertRecipient] = []
     private var deadlineTask: Task<Void, Never>?
 
-    init(sender: any AlertSending, locator: any AlertLocating, clock: C, now: @escaping () -> Date = Date.init) {
+    /// `signal` nil means always try to send. `queue` gets every outcome,
+    /// so a held text is retried after this screen is gone (I3).
+    init(
+        sender: any AlertSending,
+        locator: any AlertLocating,
+        clock: C,
+        signal: (any SignalChecking)? = nil,
+        queue: AlertQueue? = nil,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.sender = sender
         self.locator = locator
+        self.signal = signal
+        self.queue = queue
         self.clock = clock
         self.now = now
     }
@@ -213,14 +245,20 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
             summary: isGeneral ? AlertPolicy.generalSummary : summary,
             timestamp: tappedAt,
             lat: fix?.lat,
-            lng: fix?.lng
+            lng: fix?.lng,
+            locationNote: fix == nil ? AlertPolicy.noLocationNote : fix?.note
         )
 
+        // No signal: hold the text for retry instead of losing it (I3).
         var delivery = AlertOutcome.Delivery.sent
-        do {
-            try sender.sendText(message)
-        } catch {
-            delivery = .sendFailed
+        if signal?.hasSignal == false {
+            delivery = .queued
+        } else {
+            do {
+                try sender.sendText(message)
+            } catch {
+                delivery = .sendFailed
+            }
         }
         let sentAt = delivery == .sent ? now() : nil
 
@@ -240,9 +278,11 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
             location: fix,
             records: recipients.map {
                 AlertOutcome.Record(contactID: $0.contactID, smsSentAt: sentAt, called: $0.contactID == calledID)
-            }
+            },
+            recipientPhones: recipients.map(\.phone)
         )
         state = .sent(outcome)
+        queue?.record(outcome)
         return outcome
     }
 
@@ -255,18 +295,35 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
 }
 
 extension AlertCoordinator where C == ContinuousClock {
-    /// The app's coordinator: the Saklolo Shortcut and the phone's GPS.
+    /// The app's coordinator: the Saklolo Shortcut, the phone's GPS, the
+    /// network check, and the app-wide retry queue.
     convenience init(location: LocationService) {
-        self.init(sender: ShortcutSMSService(), locator: LiveAlertLocator(service: location), clock: ContinuousClock())
+        self.init(
+            sender: ShortcutSMSService(),
+            locator: LiveAlertLocator(service: location),
+            clock: ContinuousClock(),
+            signal: NetworkMonitor.shared,
+            queue: .shared
+        )
     }
 }
 
 extension AlertOutcome {
-    /// The delivery rows to store on the incident.
-    func alerts(for incident: Incident) -> [Alert] {
-        records.map {
+    /// The delivery rows to store on the incident. Rows not sent yet
+    /// (`smsSentAt == nil`) are the queue: they are stamped when a retry or
+    /// the composer gets the text out.
+    @MainActor
+    func alerts(for incident: Incident, queue: AlertQueue = .shared) -> [Alert] {
+        let rows = records.map {
             Alert(incident: incident, contactID: $0.contactID, smsSentAt: $0.smsSentAt, called: $0.called)
         }
+        let unsent = rows.filter { $0.smsSentAt == nil }
+        if !unsent.isEmpty {
+            queue.whenSent(id) { sentAt in
+                for row in unsent { row.smsSentAt = sentAt }
+            }
+        }
+        return rows
     }
 }
 
@@ -304,6 +361,11 @@ final class LiveAlertLocator: AlertLocating {
     }
 
     private static func fix(_ location: CLLocation, isLastKnown: Bool) -> AlertFix {
-        AlertFix(lat: location.coordinate.latitude, lng: location.coordinate.longitude, isLastKnown: isLastKnown)
+        AlertFix(
+            lat: location.coordinate.latitude,
+            lng: location.coordinate.longitude,
+            isLastKnown: isLastKnown,
+            takenAt: location.timestamp
+        )
     }
 }
