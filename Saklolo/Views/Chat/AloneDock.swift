@@ -29,44 +29,52 @@ struct AloneDock: View {
     }
 }
 
-/// "I need help · sending in 0:10 · tap to send now", with a red bar that
-/// empties as the countdown runs.
+/// The red "I need help" bar (G1): a white line on top that empties as the
+/// countdown runs, the label in signage type, and "sending in 0:10 · tap to
+/// send now" under it.
 private struct HelpCountdownBar: View {
     let countdown: AloneCountdown<ContinuousClock>
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .footnote) private var detailSize: CGFloat = 14
+
+    /// Foreground on the signal red, as on the SAKLOLO button (mockup `--paper-raised`).
+    private let onRed = Color.white
 
     var body: some View {
         Button {
             countdown.fireNow()
         } label: {
-            VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
-                        Rectangle().fill(Palette.alarmText.opacity(0.18))
-                        Rectangle()
-                            .fill(Palette.alarmText)
+                        Capsule().fill(onRed.opacity(0.3))
+                        Capsule()
+                            .fill(onRed)
                             .frame(width: proxy.size.width * countdown.fractionLeft)
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 5)
                 .animation(reduceMotion ? nil : .linear(duration: 1), value: countdown.remaining)
 
-                Text("I need help · sending in \(AloneModePolicy.clockText(countdown.remaining)) · tap to send now")
-                    .font(.title3.bold())
-                    .foregroundStyle(Palette.alarmText)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                Text("I need help")
+                    .font(Typography.signage(28, relativeTo: .title2))
+                    .tracking(Typography.wordmarkTracking(28))
+                    .textCase(.uppercase)
+
+                Text("sending in \(AloneModePolicy.clockText(countdown.remaining)) · tap to send now")
+                    .font(.system(size: detailSize))
             }
-            .frame(minHeight: Metrics.primaryActionHeight)
-            .background(Palette.groundRaised)
+            .foregroundStyle(onRed)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 12)
+            .frame(minHeight: 72)
+            .background(Palette.signalRed)
             .clipShape(RoundedRectangle(cornerRadius: Metrics.buttonRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Metrics.buttonRadius, style: .continuous)
-                    .strokeBorder(Palette.alarmText, lineWidth: 2)
-            )
+            .contentShape(RoundedRectangle(cornerRadius: Metrics.buttonRadius, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
@@ -82,8 +90,9 @@ private struct HelpCountdownBar: View {
     }
 }
 
-/// "Slide: I'm okay". The knob must travel most of the track
-/// (`AloneModePolicy.slideThreshold`) or it springs back.
+/// "Slide: I'm okay" (G1, G5). The thumb must travel most of the track
+/// (`AloneModePolicy.slideThreshold`) or it springs back. The thumb is the
+/// action colour, not green: green means delivered, and nothing was sent.
 private struct OkaySlide: View {
     var onComplete: () -> Void
 
@@ -91,30 +100,40 @@ private struct OkaySlide: View {
     @State private var done = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let knob: CGFloat = Metrics.primaryActionHeight - 8
+    /// Mockup `.slide`: 64pt capsule, 2pt border, 3pt padding, 54pt thumb.
+    private let border: CGFloat = 2
+    private let thumbInset: CGFloat = 5
+    private let thumb: CGFloat = Metrics.primaryActionHeight - 2 * 5
 
     var body: some View {
         GeometryReader { proxy in
-            let travel = max(proxy.size.width - knob - 8, 0)
+            let travel = max(proxy.size.width - thumb - 2 * thumbInset, 0)
             ZStack(alignment: .leading) {
-                Capsule().fill(done ? Palette.delivered.opacity(0.15) : Palette.groundRaised)
-                Capsule().strokeBorder(done ? Palette.delivered : Palette.text, lineWidth: 2)
+                Capsule().fill(Palette.groundRaised)
+                Capsule().strokeBorder(Palette.line, lineWidth: border)
 
                 Text(done ? "I'm okay" : "Slide: I'm okay")
-                    .font(.title3.bold())
+                    .font(Typography.signage(26, relativeTo: .title2))
+                    .tracking(Typography.wordmarkTracking(26))
+                    .textCase(.uppercase)
+                    .foregroundStyle(Palette.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                     .frame(maxWidth: .infinity)
-                    .padding(.leading, knob)
+                    // Centred in the part of the track the thumb is not on.
+                    .padding(.leading, done ? thumbInset : thumb + thumbInset)
+                    .padding(.trailing, done ? thumb + thumbInset : thumbInset)
                     .opacity(done ? 1 : 1 - Double(offset / max(travel, 1)) * 0.8)
 
                 Circle()
-                    .fill(Palette.delivered)
+                    .fill(Palette.action)
                     .overlay(
-                        Image(systemName: done ? "checkmark" : "play.fill")
-                            .font(.title3.bold())
-                            .foregroundStyle(.white)
+                        Image(systemName: done ? "checkmark" : "chevron.right")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(Palette.onAction)
                     )
-                    .frame(width: knob, height: knob)
-                    .padding(4)
+                    .frame(width: thumb, height: thumb)
+                    .padding(thumbInset)
                     .offset(x: done ? travel : offset)
                     .gesture(
                         DragGesture(minimumDistance: 4)
