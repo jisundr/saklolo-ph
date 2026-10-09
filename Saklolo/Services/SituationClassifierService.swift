@@ -1,4 +1,5 @@
 import Foundation
+import FoundationModels
 
 /// Classification result. The LLM only ever fills these fields from fixed
 /// choices — it never generates first-aid instructions itself (safety rule
@@ -39,10 +40,36 @@ struct SituationClassifierService {
         return SituationClassification(mode: mode, scriptID: "general", summary: transcript, urgency: "unknown")
     }
 
-    /// TODO: on-device LLM path. Must race against / time out before the
-    /// keyword fallback would otherwise be used, never add latency to the
-    /// alert path.
+    /// Spike: Apple Foundation Models path. The model only picks from fixed
+    /// choices (mode/script/urgency) and writes a short summary.
+    @Generable
+    struct LLMOutput {
+        @Guide(description: "alone if the speaker is the one hurt/by themselves, guide if they are helping someone else", .anyOf(["alone", "guide"]))
+        var mode: String
+        @Guide(description: "Best matching script ID", .anyOf(["fall", "bleeding", "unconscious", "head_injury", "general"]))
+        var scriptID: String
+        @Guide(description: "One short English sentence describing the situation")
+        var summary: String
+        @Guide(description: "Urgency level", .anyOf(["high", "medium", "low"]))
+        var urgency: String
+    }
+
     func classifyWithLLM(transcript: String) async throws -> SituationClassification {
-        throw CocoaError(.featureUnsupported)
+        let model = SystemLanguageModel.default
+        guard case .available = model.availability else {
+            throw CocoaError(.featureUnsupported)
+        }
+        let session = LanguageModelSession(model: model, instructions: """
+            You classify emergency utterances (Taglish/Filipino/English) into fixed categories. \
+            You never give medical advice. Only choose from the allowed values.
+            """)
+        let response = try await session.respond(to: transcript, generating: LLMOutput.self)
+        let out = response.content
+        return SituationClassification(
+            mode: IncidentMode(rawValue: out.mode) ?? .guide,
+            scriptID: out.scriptID,
+            summary: out.summary,
+            urgency: out.urgency
+        )
     }
 }
