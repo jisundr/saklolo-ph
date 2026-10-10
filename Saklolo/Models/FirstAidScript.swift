@@ -14,7 +14,8 @@ final class FirstAidScript {
     var title: String
     var keywords: [String]
     var steps: [String]
-    /// e.g. "Philippine Red Cross — Basic First Aid" — shown in-app per the
+    /// e.g. "IFRC International First Aid, Resuscitation, and Education
+    /// Guidelines 2020 (Red Cross Red Crescent)" — shown in-app per the
     /// brief's "show the source in the app" requirement.
     var source: String
 

@@ -308,17 +308,17 @@ private func previewScript(general: Bool = false) -> FirstAidScript {
     general
         ? FirstAidScript(
             id: "general",
-            title: "General (no specific match)",
+            title: "General",
             keywords: [],
-            steps: ["Stay calm.", "Check that they are breathing normally.", "Don't move them unless you have to.", "Your contacts have been alerted."],
-            source: "Philippine Red Cross — Basic First Aid"
+            steps: ["Make sure help is on the way. Call 911 if no one has.", "Stay calm. Check that they are breathing normally.", "Don't move them unless you have to.", "Stay with them until help arrives."],
+            source: "IFRC International First Aid, Resuscitation, and Education Guidelines 2020 (Red Cross Red Crescent)"
         )
         : FirstAidScript(
             id: "fall",
             title: "Fall, can't move",
             keywords: ["nahulog", "nadulas"],
-            steps: ["Don't move them.", "Keep the head still.", "Keep them warm.", "Watch their breathing."],
-            source: "Philippine Red Cross — Basic First Aid"
+            steps: ["Make sure help is on the way. Call 911 if no one has.", "Don't move them.", "Keep their head and neck still.", "Watch their breathing until help arrives."],
+            source: "IFRC International First Aid, Resuscitation, and Education Guidelines 2020 (Red Cross Red Crescent)"
         )
 }
 

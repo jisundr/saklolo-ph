@@ -2,8 +2,7 @@ import Foundation
 
 /// Loads the bundled first-aid scripts (Resources/Scripts/*.json) into
 /// SwiftData on first launch. The JSON files, not this loader, are the
-/// thing to check against Philippine Red Cross material before submission
-/// (brief: "Before submission" checklist).
+/// thing to check against the IFRC first aid guidelines 2020 they cite.
 struct ScriptLoader {
     struct ScriptFile: Decodable {
         let id: String
