@@ -60,7 +60,7 @@ The speech model is not bundled. It downloads once (about 632 MB, needs network)
 xcodebuild -scheme Saklolo -destination 'platform=iOS Simulator,name=<an iPhone simulator>' test
 ```
 
-The 167 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
+The 170 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
 
 ### Simulator versus a real iPhone
 
