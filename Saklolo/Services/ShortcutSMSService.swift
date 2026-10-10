@@ -48,21 +48,49 @@ struct ShortcutSMSService {
         #endif
     }
 
-    /// Builds the SMS body per the brief's example:
-    /// "SAKLOLO: Papa fell, his head is bleeding, he is awake. 7:42pm. Location: maps.apple.com/?ll=..."
+    /// Builds the SMS body per the brief's example, naming who needs help:
+    /// "SAKLOLO: Jayson needs help. Papa fell, his head is bleeding. 7:42 PM. Location: maps.apple.com/?ll=..."
+    ///
+    /// `summary` nil or blank means nothing was understood: "Jayson needs
+    /// help. Could not say what happened." `name` is the one entered in
+    /// setup; with none stored the text keeps the first-person wording
+    /// ("I need help. I could not say what happened.").
     ///
     /// `locationNote` says plainly when the location is not live (I4):
     /// "Last known location (7:31 PM)" replaces "Location" before the link,
     /// and with no coordinates at all the note is sent on its own
     /// ("Location unavailable").
-    func buildMessage(summary: String, timestamp: Date, lat: Double?, lng: Double?, locationNote: String? = nil) -> String {
+    func buildMessage(
+        summary: String?,
+        name: String? = nil,
+        timestamp: Date,
+        lat: Double?,
+        lng: Double?,
+        locationNote: String? = nil
+    ) -> String {
         let time = timestamp.formatted(date: .omitted, time: .shortened)
-        var message = "SAKLOLO: \(summary). \(time)."
+        let what = Self.sentence(summary)
+        let body = switch (Self.sentence(name), what) {
+        case let (who?, what?): "\(who) needs help. \(what)"
+        case let (who?, nil): "\(who) needs help. \(AlertPolicy.generalSummaryNamed)"
+        case let (nil, what?): what
+        case (nil, nil): AlertPolicy.generalSummary
+        }
+        var message = "SAKLOLO: \(body). \(time)."
         if let lat, let lng {
             message += " \(locationNote ?? "Location"): maps.apple.com/?ll=\(lat),\(lng)"
         } else if let locationNote {
             message += " \(locationNote)."
         }
         return message
+    }
+
+    /// Trimmed, without a trailing full stop (the text adds its own); nil
+    /// when nothing is left.
+    private static func sentence(_ text: String?) -> String? {
+        var trimmed = text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        while trimmed.hasSuffix(".") { trimmed.removeLast() }
+        trimmed = trimmed.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

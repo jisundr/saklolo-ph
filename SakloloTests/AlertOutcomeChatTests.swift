@@ -95,12 +95,14 @@ final class AlertOutcomeChatTests: XCTestCase {
     func testAConfirmedAlertReplacesTheSendingCardWithOneBannerInPlace() {
         let sent = outcome(.awaitingConfirmation, names: ["Kuya Ben", "Tita Lina"], location: liveFix)
         let before: [ChatMessage] = [.saklolo("What happened?"), .user("Papa fell")] + sent.chatMessages + [.saklolo("I'll guide you.")]
-        let at = Date(timeIntervalSince1970: 1_800_000_000)
+        let tapped = Date(timeIntervalSince1970: 1_800_000_000)
+        var sentAtTap = sent
+        sentAtTap.timestamp = tapped
 
-        let after = sent.confirming(before, at: at)
+        let after = sentAtTap.confirming(before, at: tapped.addingTimeInterval(95))
 
         XCTAssertEqual(after.count, before.count)
-        XCTAssertEqual(after[2].kind, .alert(told: "I've told Kuya Ben and Tita Lina", sentText: "SAKLOLO: Papa fell. 7:42 PM.", details: "Sent to 2 \u{00B7} Location shared", at: at))
+        XCTAssertEqual(after[2].kind, .alert(told: "I've told Kuya Ben and Tita Lina", sentText: "SAKLOLO: Papa fell. 7:42 PM.", chips: [.location, .textSent], at: tapped))
         XCTAssertEqual(after.filter { if case .alert = $0.kind { true } else { false } }.count, 1)
         XCTAssertEqual(after.last, before.last)
     }
@@ -123,19 +125,29 @@ final class AlertOutcomeChatTests: XCTestCase {
         XCTAssertEqual(sent.confirming(once, at: .distantFuture), once)
     }
 
-    func testTheDetailsNameEveryRecordedPart() {
-        let line = outcome(.awaitingConfirmation, names: ["Kuya Ben", "Tita Lina", "Ruel"], location: liveFix, calledIndex: 0).detailsLine
+    func testTheBannerShowsTheAlertsOwnTimeNotTheConfirmationTime() {
+        var sent = outcome(.awaitingConfirmation, names: ["Kuya Ben"], location: liveFix)
+        let tapped = Date(timeIntervalSince1970: 1_800_000_000)
+        sent.timestamp = tapped
 
-        XCTAssertEqual(line, "Sent to 3 \u{00B7} Location shared \u{00B7} Calling Kuya Ben")
+        let banner = sent.confirming(sent.chatMessages, at: tapped.addingTimeInterval(3_600))[0]
+
+        guard case .alert(_, _, _, let at) = banner.kind else { return XCTFail("no banner") }
+        XCTAssertEqual(at, tapped)
     }
 
-    func testTheDetailsDropWhatTheAlertDidNotRecord() {
+    func testTheChipsNameEveryRecordedPartInTheMockupsOrder() {
+        let chips = outcome(.awaitingConfirmation, names: ["Kuya Ben", "Tita Lina", "Ruel"], location: liveFix, calledIndex: 0).deliveryChips
+
+        XCTAssertEqual(chips.map(\.text), ["Location", "Text sent", "Calling Kuya Ben"])
+    }
+
+    func testTheChipsNeverSayLocationWithoutALiveFixOrCallingWithoutACall() {
         let lastKnown = AlertFix(lat: 14.6507, lng: 121.0494, isLastKnown: true)
 
-        XCTAssertEqual(outcome(.awaitingConfirmation, names: ["Kuya Ben"], location: lastKnown, calledIndex: nil).detailsLine, "Sent to 1")
-        XCTAssertEqual(outcome(.awaitingConfirmation, names: ["Kuya Ben"], location: nil, calledIndex: 0).detailsLine, "Sent to 1 \u{00B7} Calling Kuya Ben")
-        XCTAssertEqual(outcome(.awaitingConfirmation, names: [], location: liveFix, calledIndex: nil).detailsLine, "Location shared")
-        XCTAssertNil(outcome(.awaitingConfirmation, names: [], location: nil, calledIndex: nil).detailsLine)
+        XCTAssertEqual(outcome(.awaitingConfirmation, names: ["Kuya Ben"], location: lastKnown, calledIndex: nil).deliveryChips, [.textSent])
+        XCTAssertEqual(outcome(.awaitingConfirmation, names: ["Kuya Ben"], location: nil, calledIndex: 0).deliveryChips, [.textSent, .calling("Kuya Ben")])
+        XCTAssertEqual(outcome(.awaitingConfirmation, names: [], location: liveFix, calledIndex: nil).deliveryChips, [.location, .textSent])
     }
 
     // MARK: - Fixed replies

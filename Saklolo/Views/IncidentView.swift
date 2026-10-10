@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// Incident detail (J2): when and which mode, summary, transcript, contacts notified, location.
+/// Incident detail (J2): when and which mode, summary, transcript, each contact's alert status, location.
 /// Pushed onto Home's navigation stack, from the incident log or after a session ends.
 struct IncidentView: View {
     let incident: Incident
@@ -62,7 +62,8 @@ struct IncidentView: View {
     @ViewBuilder
     private var contactsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Contacts notified")
+            // Not "notified": a row may still read "SMS not sent yet".
+            Text("Contacts")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Palette.textDim)
                 .accessibilityAddTraits(.isHeader)

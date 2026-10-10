@@ -59,36 +59,35 @@ extension AlertOutcome {
             : "I've told \(recipientNames.formatted(.list(type: .and)))"
     }
 
-    /// "Sent to 3 · Location shared · Calling Kuya Ben" under the delivered
-    /// banner. Each part only when this alert records it: no saved names,
-    /// no count; a last-known or missing fix, no "Location shared"; no call
-    /// placed, no "Calling". nil when nothing is left.
-    var detailsLine: String? {
-        var parts: [String] = []
-        if !recipientNames.isEmpty {
-            parts.append("Sent to \(recipientNames.count)")
-        }
+    /// The chips under the delivered banner, in the mockup's order:
+    /// "Location" only for a live fix, "Text sent", and "Calling Kuya Ben"
+    /// only when the call was placed.
+    var deliveryChips: [DeliveryChip] {
+        var chips: [DeliveryChip] = []
         if location?.isLastKnown == false {
-            parts.append("Location shared")
+            chips.append(.location)
         }
+        chips.append(.textSent)
         if let index = records.firstIndex(where: \.called), recipientNames.indices.contains(index) {
-            parts.append("Calling \(recipientNames[index])")
+            chips.append(.calling(recipientNames[index]))
         }
-        return parts.isEmpty ? nil : parts.joined(separator: " \u{00B7} ")
+        return chips
     }
 
-    /// The delivered banner for this alert, confirmed at `sentAt`.
-    func delivered(at sentAt: Date) -> ChatMessage {
+    /// The delivered banner for this alert. It shows the alert's own time
+    /// (`timestamp`, the time in the text), not when the confirmation came.
+    var delivered: ChatMessage {
         ChatMessage(
             role: .saklolo,
-            kind: .alert(told: toldLine, sentText: message, details: detailsLine, at: sentAt)
+            kind: .alert(told: toldLine, sentText: message, chips: deliveryChips, at: timestamp)
         )
     }
 
     /// The thread once this alert is confirmed sent: its delivery card
     /// (sending, send failed or no signal) becomes the delivered banner, in
     /// place, so the thread has one banner per incident. Unchanged when the
-    /// card is gone or already swapped.
+    /// card is gone or already swapped. `sentAt` (the confirmation) is not
+    /// shown: the banner keeps the alert's own time so it matches the text.
     func confirming(_ thread: [ChatMessage], at sentAt: Date) -> [ChatMessage] {
         guard let index = thread.firstIndex(where: { message in
             switch message.kind {
@@ -97,7 +96,7 @@ extension AlertOutcome {
             }
         }) else { return thread }
         var updated = thread
-        updated[index] = delivered(at: sentAt)
+        updated[index] = delivered
         return updated
     }
 

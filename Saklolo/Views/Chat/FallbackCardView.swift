@@ -14,10 +14,14 @@ struct FallbackCardView: View {
     enum Face: Equatable {
         /// Handed to the Shortcut, not confirmed yet.
         case sending
-        /// The text really went out: the delivered banner (F3, I4).
-        case delivered(at: Date)
+        /// The text really went out: the delivered banner (F3, I4), at the
+        /// alert's own time.
+        case delivered
         /// I1: the Shortcut could not send it; the notice and "Send message".
-        case couldNotSend
+        /// `keepGuiding` adds "I'll keep guiding you." under it when the
+        /// card got here from "Sending ..." (no confirmation): the thread
+        /// only has that line for a send that failed at once.
+        case couldNotSend(keepGuiding: Bool)
         /// I2 on its own: just "Send message".
         case composer
         /// I3: held for no signal and retried.
@@ -47,19 +51,21 @@ struct FallbackCardView: View {
     }
 
     static func face(for kind: FallbackKind, entry: AlertQueue.Entry?) -> Face {
-        let sentAt: Date? = if case .sent(let at)? = entry?.status { at } else { nil }
+        let sent = if case .sent? = entry?.status { true } else { false }
         switch kind {
         case .sending:
-            if let sentAt { return .delivered(at: sentAt) }
-            return entry?.status == .needsComposer ? .couldNotSend : .sending
+            if sent { return .delivered }
+            return entry?.status == .needsComposer ? .couldNotSend(keepGuiding: true) : .sending
         case .sendFailed:
-            if let sentAt { return .delivered(at: sentAt) }
-            return .couldNotSend
+            if sent { return .delivered }
+            // `chatMessages` already put "I'll keep guiding you." after it.
+            return .couldNotSend(keepGuiding: false)
         case .composer:
-            return entry != nil && sentAt == nil ? .composer : .hidden
+            return entry != nil && !sent ? .composer : .hidden
         case .noSignal:
-            if let sentAt { return .delivered(at: sentAt) }
-            return entry?.status == .needsComposer ? .couldNotSend : .noSignal
+            if sent { return .delivered }
+            // "First aid still works. I'll keep guiding you." is already there.
+            return entry?.status == .needsComposer ? .couldNotSend(keepGuiding: false) : .noSignal
         case .noLocation:
             return entry.flatMap { LocationPill($0.outcome) }.map(Face.location) ?? .hidden
         }
@@ -69,15 +75,17 @@ struct FallbackCardView: View {
         Group {
             switch Self.face(for: kind, entry: entry) {
             case .sending: sendingCard
-            case .delivered(let at): delivered(at: at)
-            case .couldNotSend:
+            case .delivered:
+                if let outcome = entry?.outcome { DeliveredAlertView(outcome) }
+            case .couldNotSend(let keepGuiding):
                 VStack(alignment: .leading, spacing: Metrics.gap) {
-                    InlineNotice(
-                        "I couldn't send the text by myself. Tap to send it to \(recipients).",
-                        systemImage: "xmark",
-                        tone: .failure
-                    )
+                    couldNotSendNotice
                     composerButton
+                    if keepGuiding {
+                        ChatBubble(AlertOutcome.keepGuiding, role: .incoming)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("Saklolo: \(AlertOutcome.keepGuiding)")
+                    }
                 }
             case .composer: composerButton
             case .noSignal: noSignalCard
@@ -171,20 +179,35 @@ struct FallbackCardView: View {
         )
     }
 
-    // MARK: - Delivered
+    // MARK: - I1 notice
 
     private var recipients: String {
         entry?.outcome.recipientList ?? "your contacts"
     }
 
-    private func delivered(at time: Date) -> some View {
-        let line = entry?.outcome.toldLine ?? "I've sent the alert"
-        return VStack(alignment: .leading, spacing: 8) {
-            DeliveredBanner("\(line) \u{00B7} \(time.formatted(date: .omitted, time: .shortened))")
-            if let message = entry?.outcome.message {
-                SentTextBox(message)
-            }
+    /// InlineNotice's failure look, built here so the names can be bold
+    /// (mockup I1: "Tap to send it to **Kuya Ben, Tita Lina and Ruel**.").
+    private var couldNotSendNotice: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "xmark")
+                .font(.body.weight(.bold))
+                .foregroundStyle(Palette.alarmText)
+                .accessibilityHidden(true)
+            Text("I couldn't send the text by myself. Tap to send it to \(Text(recipients).fontWeight(.bold)).")
+                .font(.callout.weight(.medium))
+                .foregroundStyle(Palette.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .padding(.leading, 5)
+        .background(Palette.groundRaised)
+        .overlay(alignment: .leading) {
+            Rectangle().fill(Palette.alarmText).frame(width: 5)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }
 

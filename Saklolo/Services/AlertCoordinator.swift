@@ -14,8 +14,13 @@ enum AlertPolicy {
     static let retryInterval: Duration = .seconds(30)
     /// Sent in place of the location link when there is no fix at all (I4).
     static let noLocationNote = "Location unavailable"
-    /// Sent in place of the situation summary when nothing was understood.
+    /// Sent in place of the situation summary when nothing was understood
+    /// and no name is stored.
     static let generalSummary = "I need help. I could not say what happened"
+    /// Follows "<Name> needs help." when nothing was understood.
+    static let generalSummaryNamed = "Could not say what happened"
+    /// Where setup stores the person's name (`SetupNamePage`).
+    static let userNameKey = "userName"
     /// How long after the person is back in the app (from Shortcuts) the
     /// alert may stay unconfirmed before the composer card takes over. A
     /// Shortcuts x-success callback is what brings the app back, so a
@@ -94,6 +99,9 @@ struct AlertOutcome: Equatable, Sendable {
     var recipientPhones: [String] = []
     /// Ties the chat cards and the stored rows to this alert.
     var id = UUID()
+    /// The alert's own time (the tap): the time written in the text, and the
+    /// one the delivered banner shows, so the two always agree.
+    var timestamp = Date.now
 
     var awaitingConfirmation: Bool { delivery == .awaitingConfirmation }
     var sendFailed: Bool { delivery == .sendFailed }
@@ -148,6 +156,9 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
     private let signal: (any SignalChecking)?
     private let queue: AlertQueue?
     private let clock: C
+    /// The name entered in setup, read when the alert goes out; nil or
+    /// blank when none is stored.
+    private let senderName: @MainActor () -> String?
 
     private var state: State = .idle
     private var tappedAt = Date.now
@@ -162,18 +173,21 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
 
     /// `signal` nil means always try to send. `queue` gets every outcome,
     /// so a held text is retried after this screen is gone (I3).
+    /// `senderName` names the person in the text ("Jayson needs help.").
     init(
         sender: any AlertSending,
         locator: any AlertLocating,
         clock: C,
         signal: (any SignalChecking)? = nil,
-        queue: AlertQueue? = nil
+        queue: AlertQueue? = nil,
+        senderName: @escaping @MainActor () -> String? = { nil }
     ) {
         self.sender = sender
         self.locator = locator
         self.signal = signal
         self.queue = queue
         self.clock = clock
+        self.senderName = senderName
     }
 
     /// The outcome once the alert has gone out (or failed to).
@@ -266,7 +280,8 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
         let summary = classification?.summary.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let isGeneral = summary.isEmpty
         let message = ShortcutSMSService().buildMessage(
-            summary: isGeneral ? AlertPolicy.generalSummary : summary,
+            summary: isGeneral ? nil : summary,
+            name: senderName(),
             timestamp: tappedAt,
             lat: fix?.lat,
             lng: fix?.lng,
@@ -307,7 +322,8 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
                 AlertOutcome.Record(contactID: $0.contactID, smsSentAt: nil, called: $0.contactID == calledID)
             },
             recipientPhones: recipients.map(\.phone),
-            id: id
+            id: id,
+            timestamp: tappedAt
         )
         state = .sent(outcome)
         queue?.record(outcome)
@@ -334,7 +350,8 @@ extension AlertCoordinator where C == ContinuousClock {
             locator: LiveAlertLocator(service: location),
             clock: ContinuousClock(),
             signal: NetworkMonitor.shared,
-            queue: .shared
+            queue: .shared,
+            senderName: { UserDefaults.standard.string(forKey: AlertPolicy.userNameKey) }
         )
     }
 }
