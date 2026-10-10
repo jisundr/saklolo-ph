@@ -188,7 +188,8 @@ private extension View {
     }
 }
 
-/// B4 (typed entry only; "Import from Contacts" is not built).
+/// B4: "Import from Contacts" fills Name and Phone from one card; typing works the same as before.
+/// Nothing is saved until the person taps Save.
 struct AddContactSheet: View {
     static let relations = ["Parent", "Sibling", "Child", "Partner", "Friend", "Neighbor", "Other"]
 
@@ -198,20 +199,38 @@ struct AddContactSheet: View {
     @State private var name = ""
     @State private var phone = ""
     @State private var relation = "Sibling"
+    @State private var showContactPicker = false
     @FocusState private var focus: Field?
 
     private enum Field { case name, phone }
 
-    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var trimmedPhone: String { phone.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var canSave: Bool {
-        !trimmedName.isEmpty && trimmedPhone.filter(\.isNumber).count >= 7
-    }
+    private var trimmedName: String { ContactEntry.normalisedName(name) }
+    private var trimmedPhone: String { ContactEntry.normalisedPhone(phone) }
+    private var canSave: Bool { ContactEntry.canSave(name: name, phone: phone) }
 
     var body: some View {
         ScrollView {
             VStack(spacing: Metrics.gap) {
                 header
+
+                Button {
+                    focus = nil
+                    showContactPicker = true
+                } label: {
+                    Text("Import from Contacts")
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 12)
+                }
+                .buttonStyle(SaklaloActionStyle(kind: .secondary, size: .small))
+                .accessibilityLabel("Import from Contacts")
+                .accessibilityHint("Opens your phone's contacts to fill in the name and number.")
+                .background(ContactPicker(isPresented: $showContactPicker, onPick: fill))
+
+                Text("or type it")
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.textDim)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityHidden(true)
 
                 TextField("Name", text: $name, prompt: Text(""))
                     .textContentType(.name)
@@ -255,6 +274,13 @@ struct AddContactSheet: View {
         .scrollBounceBehavior(.basedOnSize)
         .presentationDetents([.medium, .large])
         .saklaloSheet()
+    }
+
+    /// Prefills from a picked card, keeping whatever the card leaves empty. The person checks the
+    /// relation and saves.
+    private func fill(_ draft: ContactEntry.Draft) {
+        if !draft.name.isEmpty { name = draft.name }
+        if !draft.phone.isEmpty { phone = draft.phone }
     }
 
     /// Cancel, title, Save in one row (mockup `.shead`).
