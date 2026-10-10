@@ -10,3 +10,9 @@ DerivedData/
 *.ipa
 .build/
 
+
+# macOS
+.DS_Store
+
+# Test results
+*.xcresult
