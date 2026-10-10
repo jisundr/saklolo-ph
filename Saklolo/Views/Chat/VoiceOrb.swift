@@ -42,31 +42,50 @@ struct VoiceOrb: View {
 
     @State private var quietTooLong = false
 
-    private var size: CGFloat { phase == .transcribing ? 0.6 : 1 }
+    /// The mockup's `.bw.o`: a 92pt red core with the mic, three 4pt rings
+    /// 10, 20 and 30pt outside it. Transcribing shrinks the core to 56pt (F2).
+    private static let coreSize: CGFloat = 92
+    private static let transcribingCoreSize: CGFloat = 56
+    private static let rings: [(color: Color, inset: CGFloat, opacity: Double)] = [
+        (Palette.signalOrange, 10, 0.85),
+        (Palette.signalYellow, 20, 0.75),
+        (Palette.signalBlue, 30, 0.7),
+    ]
+    /// Room for the outer ring at its loudest.
+    private static let frameSize: CGFloat = 170
+
+    private var scale: CGFloat { phase == .transcribing ? Self.transcribingCoreSize / Self.coreSize : 1 }
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 16) {
             Text(statusText)
-                .font(Typography.body)
+                .font(Typography.body) // 17pt at the default size, scales with Dynamic Type
                 .foregroundStyle(showsQuietWarning ? Palette.alarmText : Palette.textDim)
+                .multilineTextAlignment(.center)
                 .accessibilityLabel(statusText)
 
             ZStack {
-                Circle().fill(Palette.signalRed.opacity(0.9)).frame(width: 56, height: 56)
-                ForEach(Array([Palette.signalOrange, Palette.signalYellow, Palette.signalBlue].enumerated()), id: \.offset) { index, color in
+                ForEach(Array(Self.rings.enumerated()), id: \.offset) { index, ring in
                     Circle()
-                        .strokeBorder(color.opacity(phase == .hearing ? 0.9 : 0.35), lineWidth: 5)
-                        .frame(width: 56 + CGFloat(index + 1) * 26, height: 56 + CGFloat(index + 1) * 26)
-                        .scaleEffect(1 + CGFloat(level) * 0.12 * CGFloat(index + 1))
+                        .strokeBorder(ring.color.opacity(ring.opacity), lineWidth: 4)
+                        .frame(width: Self.coreSize + ring.inset * 2, height: Self.coreSize + ring.inset * 2)
+                        .scaleEffect(1 + CGFloat(level) * 0.08 * CGFloat(index + 1))
                 }
+                Circle()
+                    .fill(Palette.signalRed)
+                    .frame(width: Self.coreSize, height: Self.coreSize)
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 34, weight: .semibold))
+                    .foregroundStyle(.white)
             }
-            .frame(width: 200, height: 200)
-            .scaleEffect(size)
-            .frame(height: 200 * size)
+            .frame(width: Self.frameSize, height: Self.frameSize)
+            .scaleEffect(scale)
+            .frame(height: Self.frameSize * scale)
             .animation(.easeOut(duration: 0.1), value: level)
             .animation(.easeOut(duration: 0.3), value: phase)
             .accessibilityHidden(true)
         }
+        .padding(.horizontal, Metrics.gutter)
         .task(id: phase) {
             quietTooLong = false
             guard phase == .waiting else { return }

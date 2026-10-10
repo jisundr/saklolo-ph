@@ -13,10 +13,12 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
     enum Kind: Equatable, Sendable {
         /// A plain bubble.
         case text(String)
-        /// "I've told ..." with the alert text that went out (T6). Only for
-        /// an alert known to be sent; one still being confirmed is the
-        /// `.fallback(.sending)` card, which follows the queue.
-        case alert(String)
+        /// The delivered banner (F3): "I've told ..." at the time the text
+        /// was confirmed, the exact text that went out, and a status line
+        /// built only from what the alert recorded. Only for an alert known
+        /// to be sent: the thread swaps the `.fallback` card for this once
+        /// `AlertQueue` confirms it (`AlertOutcome.confirming(_:at:)`).
+        case alert(told: String, sentText: String?, details: String?, at: Date)
         /// A failure card that keeps the guide visible (T7 renders these).
         case fallback(FallbackKind)
     }
