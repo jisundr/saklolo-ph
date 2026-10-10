@@ -1,212 +1,304 @@
 import SwiftUI
 
-/// Guide: first-aid steps as a bottom sheet over the chat (wireframes H1 to H3, H6, H7).
+/// Fixed guide wording. One place, so the disclaimer can be swapped (Taglish later) in one line.
+enum GuideCopy {
+    /// Always visible on the guide, at every height (DESIGN.md). English for now.
+    static let disclaimer = "This is a guide only. It does not replace a doctor or rescuer."
+    /// End state (H7). The mockup's "Your contacts have been alerted" is not always true, so it is not used.
+    static let endSentence = "Stay with them and watch their breathing until help arrives."
+    static let allStepsDone = "All steps done"
+}
+
+/// Guide: first-aid steps as a bottom sheet over the chat (mockup H1 to H3, H6, H7).
 ///
 /// Present it as `.sheet` content; it sets its own detents: peek (H2), half (H1, the
 /// default) and full (H3). The chat behind stays visible and usable, and the sheet never
 /// closes fully. The general script (H6) uses the same layout. After the last step the
 /// sheet shows an end state (H7) whose Done button calls `onDone`.
 struct GuideView: View {
-    static let peekHeight: CGFloat = 110
-    static let peek = PresentationDetent.height(peekHeight)
+    /// Peek, half and full on the mockup's 868pt phone: 300, 540 and 760pt.
+    static let peek = PresentationDetent.fraction(0.35)
+    static let half = PresentationDetent.fraction(0.62)
 
     let script: FirstAidScript
     let onDone: () -> Void
 
     @State private var detent: PresentationDetent
     /// Index into `script.steps`; equal to `steps.count` once every step is done (H7).
-    @State private var stepIndex = 0
+    @State private var stepIndex: Int
     @State private var callFailed = false
 
     init(script: FirstAidScript, onDone: @escaping () -> Void = {}) {
-        self.init(script: script, initialDetent: .medium, onDone: onDone)
+        self.init(script: script, initialDetent: Self.half, onDone: onDone)
     }
 
     /// `initialDetent` exists for previews; the app always opens at half height.
     init(script: FirstAidScript, initialDetent: PresentationDetent, onDone: @escaping () -> Void = {}) {
+        self.init(script: script, initialDetent: initialDetent, initialStep: 0, onDone: onDone)
+    }
+
+    /// For previews of a later step or the end state (`initialStep == steps.count`).
+    init(script: FirstAidScript, initialDetent: PresentationDetent, initialStep: Int, onDone: @escaping () -> Void = {}) {
         self.script = script
         self.onDone = onDone
         _detent = State(initialValue: initialDetent)
+        _stepIndex = State(initialValue: min(max(initialStep, 0), script.steps.count))
     }
 
     private var steps: [String] { script.steps }
     private var isFinished: Bool { stepIndex >= steps.count }
+    private var isPeek: Bool { detent == Self.peek }
+    private var isFull: Bool { detent == .large }
 
     var body: some View {
-        content
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .saklaloGround()
-            .presentationDetents([Self.peek, .medium, .large], selection: $detent)
-            .presentationDragIndicator(.visible)
-            .presentationBackgroundInteraction(.enabled)
-            .interactiveDismissDisabled()
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if detent == Self.peek {
-            peekContent
-        } else {
+        GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 10) {
                     header
-                    if isFinished { endState } else { currentStep }
-                    if detent == .large {
-                        allSteps
-                        callButton
-                        footer
+                    if isFull {
+                        stepList
+                        if isFinished { endSentence }
+                    } else if isFinished {
+                        endSentence
+                    } else {
+                        currentStep
                     }
+                    Spacer(minLength: 12)
+                    if isFull { callButton }
+                    actions(width: proxy.size.width)
+                    footer
                 }
                 .padding(.horizontal, Metrics.gutter)
-                .padding(.top, 24)
-                .padding(.bottom, Metrics.gutter)
+                .padding(.top, 22)
+                .padding(.bottom, 12)
+                // Fill the sheet so the actions sit in the thumb zone; scroll when large type overflows.
+                .frame(minHeight: proxy.size.height, alignment: .top)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
+        .foregroundStyle(Palette.text)
+        .saklaloSheet()
+        .presentationDetents([Self.peek, Self.half, .large], selection: $detent)
+        .presentationDragIndicator(.visible)
+        .presentationBackgroundInteraction(.enabled)
+        .interactiveDismissDisabled()
     }
 
-    // MARK: Peek (H2)
+    // MARK: Header
 
-    private var peekContent: some View {
-        HStack(alignment: .center, spacing: Metrics.gap) {
-            Text(isFinished ? "Done" : "\(stepIndex + 1)/\(steps.count)")
-                .font(Typography.signage(24, relativeTo: .headline))
-                .foregroundStyle(Palette.alarmText)
-            Text(isFinished ? "All steps done." : steps[stepIndex])
-                .font(.headline)
-                .lineLimit(2)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, Metrics.gutter)
-        .padding(.top, 28)
-        .contentShape(Rectangle())
-        .onTapGesture { detent = .medium }
-        .accessibilityAddTraits(.isButton)
-        .accessibilityHint("Shows the first-aid step in full.")
+    private var headerLabel: String {
+        isFinished
+            ? "\(script.title) · \(GuideCopy.allStepsDone)"
+            : "\(script.title) · Step \(stepIndex + 1) of \(steps.count)"
     }
-
-    // MARK: Half (H1)
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(script.title)
-                .font(Typography.signage(22, weight: .bold, relativeTo: .headline))
+        VStack(alignment: .leading, spacing: 10) {
+            Text(headerLabel)
+                .font(Typography.signage(20, weight: .bold, relativeTo: .headline))
                 .textCase(.uppercase)
-                .tracking(0.6)
+                .tracking(Typography.wordmarkTracking(20))
                 .foregroundStyle(Palette.textDim)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
             if !steps.isEmpty {
-                StepStrand(count: steps.count, current: min(stepIndex, steps.count - 1))
+                // Past the last step every segment reads done. The label above says the same for VoiceOver.
+                StepStrand(count: steps.count, current: stepIndex)
+                    .accessibilityHidden(true)
             }
         }
     }
 
-    private var currentStep: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Step \(stepIndex + 1) of \(steps.count)")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Palette.textDim)
-            Text(steps[stepIndex])
-                .font(Typography.step)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: Metrics.gap) {
-                Button("Repeat") {
-                    // TODO: re-speak current step via AVSpeechSynthesizer
-                }
-                .buttonStyle(SaklaloActionStyle(kind: .secondary))
+    // MARK: Step (H1, H2, H6)
 
-                Button("Next") {
-                    stepIndex += 1
-                    // TODO: speak next step via AVSpeechSynthesizer
-                }
-                .buttonStyle(SaklaloActionStyle())
-            }
-        }
+    private var currentStep: some View {
+        Text(steps[stepIndex])
+            .font(isPeek ? .title2.bold() : Typography.step)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, isPeek ? 0 : 4)
     }
 
     // MARK: End state (H7)
 
-    private var endState: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("That's all the steps.")
-                .font(Typography.step)
-            Text("Stay with them and watch their breathing until help arrives.")
-                .font(Typography.body)
-                .foregroundStyle(Palette.textDim)
-            HStack(spacing: Metrics.gap) {
-                Button("Start over") { stepIndex = 0 }
-                    .buttonStyle(SaklaloActionStyle(kind: .secondary))
-                Button("Done", action: onDone)
-                    .buttonStyle(SaklaloActionStyle())
-            }
-        }
+    private var endSentence: some View {
+        Text(GuideCopy.endSentence)
+            .font(Typography.title)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 4)
     }
 
     // MARK: Full (H3)
 
-    private var allSteps: some View {
-        VStack(alignment: .leading, spacing: Metrics.gap) {
-            Text("All steps")
-                .font(.headline)
+    private var stepList: some View {
+        VStack(alignment: .leading, spacing: 8) {
             ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                Button {
-                    stepIndex = index
-                } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: Metrics.gap) {
-                        Text("\(index + 1)")
-                            .font(Typography.signage(22, relativeTo: .body))
-                            .foregroundStyle(index == stepIndex ? Palette.alarmText : Palette.textDim)
-                            .frame(minWidth: 24)
-                        Text(step)
-                            .font(Typography.body.weight(index == stepIndex ? .semibold : .regular))
-                            .multilineTextAlignment(.leading)
-                        Spacer(minLength: 0)
-                    }
-                    .frame(minHeight: Metrics.minTarget)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Step \(index + 1): \(step)")
-                .accessibilityAddTraits(index == stepIndex ? .isSelected : [])
+                stepRow(index: index, step: step)
             }
         }
     }
 
-    private var callButton: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                do {
-                    try ShortcutSMSService().call(phone: "911")
-                    callFailed = false
-                } catch {
-                    callFailed = true
+    private func stepRow(index: Int, step: String) -> some View {
+        let isDone = index < stepIndex
+        let isCurrent = index == stepIndex
+        return Button {
+            stepIndex = index
+        } label: {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                if isDone {
+                    Image(systemName: "checkmark")
+                        .fontWeight(.bold)
+                        .accessibilityHidden(true)
                 }
-            } label: {
-                Label("Call 911", systemImage: "phone.fill")
-                    .font(Typography.signage(28, relativeTo: .title2))
-                    .textCase(.uppercase)
-                    .frame(maxWidth: .infinity, minHeight: Metrics.primaryActionHeight)
-                    .foregroundStyle(.white)
-                    .background(
-                        RoundedRectangle(cornerRadius: Metrics.buttonRadius, style: .continuous)
-                            .fill(Palette.signalRed)
-                    )
+                Text("\(index + 1). \(step)")
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
+            .font(isCurrent ? .title3.bold() : .body)
+            .foregroundStyle(isCurrent ? Palette.text : Palette.textDim)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
+            .padding(.leading, isCurrent ? 5 : 0)
+            .frame(minHeight: Metrics.minTarget)
+            .background(Palette.ground)
+            .overlay(alignment: .leading) {
+                if isCurrent {
+                    Rectangle().fill(Palette.alarmText).frame(width: 5)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Step \(index + 1)\(isDone ? ", done" : ""): \(step)")
+        .accessibilityAddTraits(isCurrent ? .isSelected : [])
+    }
+
+    /// A plain phone call for a panicking companion (H3). Secondary: red is reserved.
+    private var callButton: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            HStack {
+                Spacer(minLength: 0)
+                Button {
+                    do {
+                        try ShortcutSMSService().call(phone: "911")
+                        callFailed = false
+                    } catch {
+                        callFailed = true
+                    }
+                } label: {
+                    Text("Call 911")
+                        .padding(.horizontal, 16)
+                }
+                .buttonStyle(SaklaloActionStyle(kind: .secondary, size: .small))
+                .fixedSize()
+            }
             if callFailed {
                 Text("This phone can't place the call. Dial 911 from the Phone app.")
                     .font(Typography.finePrint)
                     .foregroundStyle(Palette.alarmText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
 
-    private var footer: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Source: \(script.source)")
-            Text("These steps are general first aid, not a diagnosis. Call 911 if the person is in danger.")
+    // MARK: Actions
+
+    @ViewBuilder
+    private func actions(width: CGFloat) -> some View {
+        if isPeek {
+            // H2: Repeat and Next (Next 1.6x wide).
+            HStack(spacing: 10) {
+                repeatButton(size: .regular)
+                    .frame(width: peekRepeatWidth(width))
+                primaryButton
+            }
+        } else {
+            // H1, H3, H6, H7: primary on top, then Back and Repeat.
+            VStack(spacing: 10) {
+                primaryButton
+                HStack(spacing: 10) {
+                    backButton
+                    repeatButton(size: .small)
+                }
+            }
         }
-        .font(Typography.finePrint)
-        .foregroundStyle(Palette.textDim)
-        .padding(.top, 8)
+    }
+
+    /// Next while there are steps left; Done in the end state (H7).
+    @ViewBuilder
+    private var primaryButton: some View {
+        if isFinished {
+            Button("Done") { onDone() }
+                .buttonStyle(SaklaloActionStyle())
+        } else {
+            Button { next() } label: { iconLabel("Next", systemImage: "chevron.right") }
+                .buttonStyle(SaklaloActionStyle())
+        }
+    }
+
+    private var backButton: some View {
+        Button { back() } label: { iconLabel("Back", systemImage: "chevron.left") }
+            .buttonStyle(SaklaloActionStyle(kind: .secondary, size: .small))
+            .disabled(stepIndex == 0)
+            .opacity(stepIndex == 0 ? 0.4 : 1)
+    }
+
+    /// "Repeat" re-reads the current step; in the end state "Repeat all" starts over.
+    private func repeatButton(size: SaklaloActionStyle.Size) -> some View {
+        Button {
+            if isFinished { repeatAll() } else { repeatStep() }
+        } label: {
+            iconLabel(isFinished ? "Repeat all" : "Repeat", systemImage: "arrow.clockwise")
+        }
+        .buttonStyle(SaklaloActionStyle(kind: .secondary, size: size))
+    }
+
+    /// The peek row splits the width 1 : 1.6 between Repeat and Next.
+    private func peekRepeatWidth(_ sheetWidth: CGFloat) -> CGFloat {
+        max((sheetWidth - Metrics.gutter * 2 - 10) / 2.6, 0)
+    }
+
+    private func iconLabel(_ title: String, systemImage: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .fontWeight(.bold)
+                .imageScale(.small)
+                .accessibilityHidden(true)
+            Text(title)
+                // Half-width buttons: shrink a long word at the largest sizes instead of breaking it.
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+    }
+
+    private func next() {
+        stepIndex = min(stepIndex + 1, steps.count)
+        // TODO: speak next step via AVSpeechSynthesizer
+    }
+
+    private func back() {
+        stepIndex = max(stepIndex - 1, 0)
+    }
+
+    private func repeatStep() {
+        // TODO: re-speak current step via AVSpeechSynthesizer
+    }
+
+    private func repeatAll() {
+        stepIndex = 0
+        // TODO: speak the first step via AVSpeechSynthesizer
+    }
+
+    // MARK: Footer
+
+    private var footer: some View {
+        Text("Source: \(script.source) · \(GuideCopy.disclaimer)")
+            .font(Typography.finePrint)
+            .foregroundStyle(Palette.textDim)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -234,6 +326,7 @@ private func previewScript(general: Bool = false) -> FirstAidScript {
 private struct GuidePreviewHost: View {
     var detent: PresentationDetent
     var general = false
+    var step = 0
 
     var body: some View {
         Text("Chat thread")
@@ -241,12 +334,13 @@ private struct GuidePreviewHost: View {
             .padding()
             .saklaloGround()
             .sheet(isPresented: .constant(true)) {
-                GuideView(script: previewScript(general: general), initialDetent: detent)
+                GuideView(script: previewScript(general: general), initialDetent: detent, initialStep: step)
             }
     }
 }
 
-#Preview("Peek (H2)") { GuidePreviewHost(detent: GuideView.peek) }
-#Preview("Half (H1)") { GuidePreviewHost(detent: .medium) }
-#Preview("Full (H3)") { GuidePreviewHost(detent: .large) }
-#Preview("General (H6)") { GuidePreviewHost(detent: .medium, general: true) }
+#Preview("Peek (H2)") { GuidePreviewHost(detent: GuideView.peek, step: 1) }
+#Preview("Half (H1)") { GuidePreviewHost(detent: GuideView.half, step: 1) }
+#Preview("Full (H3)") { GuidePreviewHost(detent: .large, step: 1) }
+#Preview("General (H6)") { GuidePreviewHost(detent: GuideView.half, general: true) }
+#Preview("End (H7)") { GuidePreviewHost(detent: GuideView.half, step: 4) }
