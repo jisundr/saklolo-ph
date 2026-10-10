@@ -70,7 +70,7 @@ struct KeywordDatabase: Sendable {
     /// Same content as the bundled file, kept in code as the last resort.
     static let builtIn = KeywordDatabase(version: 0, entries: [
         Entry(script: "head_injury", keywords: ["tumama ang ulo", "nauntog", "nabagok", "nabagok ang ulo"]),
-        Entry(script: "unconscious", keywords: ["walang malay", "nawalan ng malay", "di gumigising", "hindi gumigising", "hindi humihinga", "di humihinga"]),
+        Entry(script: "unconscious", keywords: ["walang malay", "nawalan ng malay", "di gumigising", "hindi gumigising", "hindi humihinga", "di humihinga", "hinimatay", "nahimatay"]),
         Entry(script: "bleeding", keywords: ["dumudugo", "dugo", "sugat", "naputol"]),
         Entry(script: "fall", keywords: ["nahulog", "nadulas", "bumagsak", "di makagalaw", "hindi makagalaw"]),
     ])

@@ -19,6 +19,7 @@
 		158B1E1112ED6BD3C4336714 /* BarlowCondensed-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */; };
 		1AB46C4D598BF4104D975AA8 /* ModelLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2169BE6AA1670BF36813B /* ModelLoader.swift */; };
 		23289C889612507F0D53C2CA /* AlertQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A64B8818017FE64A06380DF4 /* AlertQueue.swift */; };
+		24DB09AB808029B314F11E4C /* KeywordDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86BA6194F82FC0C3E94AC765 /* KeywordDatabaseTests.swift */; };
 		2564DDF77EC542E08C336C36 /* AlertCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EC476F3419C5B28D804BFE /* AlertCoordinatorTests.swift */; };
 		262E0CBEC3C5B463D2B5BEB9 /* ShortcutMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475570EBBB4C0AF9520B2777 /* ShortcutMessageTests.swift */; };
 		28A8233B706C18A78A8D7822 /* HomeStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706F4BC7F9172B43F3C3CC29 /* HomeStatusTests.swift */; };
@@ -140,6 +141,7 @@
 		7F4C0A1CEE1A59EA9F2A8E5E /* Deadline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deadline.swift; sourceTree = "<group>"; };
 		813BDC999494A1AC82E5AEFE /* ContactPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPicker.swift; sourceTree = "<group>"; };
 		8285C90EAF7C72FF22CD0002 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		86BA6194F82FC0C3E94AC765 /* KeywordDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordDatabaseTests.swift; sourceTree = "<group>"; };
 		879792E6B537E6E6044316E0 /* AlertQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertQueueTests.swift; sourceTree = "<group>"; };
 		8F4272ED63C16B1019E34805 /* SetupNamePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupNamePage.swift; sourceTree = "<group>"; };
 		8F9111DE4BC9E7AAFE152592 /* BarlowCondensed-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-Bold.ttf"; sourceTree = "<group>"; };
@@ -211,6 +213,7 @@
 				1A76A032E5513E2EBEF59528 /* ContactEntryTests.swift */,
 				7B95624160F09DE98303BD00 /* HomeMenuTests.swift */,
 				706F4BC7F9172B43F3C3CC29 /* HomeStatusTests.swift */,
+				86BA6194F82FC0C3E94AC765 /* KeywordDatabaseTests.swift */,
 				BFBC28EB72731C2B0DB3B4BD /* ModelStateTextTests.swift */,
 				1421D6CC56D1D9DDFF6B09A4 /* ScriptLoaderTests.swift */,
 				05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */,
@@ -555,6 +558,7 @@
 				2946FF8A2987CCF95D071EB5 /* ContactEntryTests.swift in Sources */,
 				0C644564DB5D0B8D13FD7774 /* HomeMenuTests.swift in Sources */,
 				28A8233B706C18A78A8D7822 /* HomeStatusTests.swift in Sources */,
+				24DB09AB808029B314F11E4C /* KeywordDatabaseTests.swift in Sources */,
 				E5AE5EA166FD46F91E08571A /* ModelStateTextTests.swift in Sources */,
 				BC4C1FE1FC86CE17753BB4ED /* ScriptLoaderTests.swift in Sources */,
 				743BFAAF528D807B8DC37F09 /* SessionExitTests.swift in Sources */,
