@@ -61,25 +61,31 @@ struct SetupView: View {
     }
 }
 
-/// "Step 1 of 3" with a thin progress bar, as in B1 to B3.
+/// B1 to B5 header (mockup `.prep` + `.prog`): the listening model's state on the left while it
+/// prepares, "Step 1 of 3" on the right, a thin progress track under both.
 private struct SetupProgressHeader: View {
     let step: Int
     let of: Int
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            Text("Step \(step) of \(of)")
-                .font(Typography.finePrint)
-                .foregroundStyle(Palette.textDim)
-            ProgressView(value: Double(step), total: Double(of))
-                .tint(Palette.action)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                ModelStateLabel(compact: true)
+                Spacer(minLength: 0)
+                Text("Step \(step) of \(of)")
+                    .font(.subheadline)
+                    .foregroundStyle(Palette.textDim)
+                    .accessibilityLabel("Setup step \(step) of \(of)")
+            }
+            SaklaloProgressBar(value: Double(step) / Double(max(of, 1)))
+                .accessibilityHidden(true)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Setup step \(step) of \(of)")
+        .padding(.top, 4)
     }
 }
 
 #Preview {
     SetupView()
         .modelContainer(for: Contact.self, inMemory: true)
+        .environmentObject(ModelLoader())
 }

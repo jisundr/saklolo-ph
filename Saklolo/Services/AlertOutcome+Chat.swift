@@ -2,7 +2,8 @@ import Foundation
 
 /// How the alert shows in the chat thread (F3): "Sending the alert ..." with
 /// the exact text while the Shortcut has not confirmed it (the card becomes
-/// "I've told ..." only on confirmation, or the send-failed card), or a
+/// the "I've told ..." banner only on confirmation, or the send-failed
+/// card), or a
 /// fallback card when it could not even be handed over (I1, I3), then a card
 /// when the location is not live (I4). Cards, not pop-ups, so the guide
 /// stays visible.
@@ -56,6 +57,48 @@ extension AlertOutcome {
         recipientNames.isEmpty
             ? "I've sent the alert"
             : "I've told \(recipientNames.formatted(.list(type: .and)))"
+    }
+
+    /// "Sent to 3 · Location shared · Calling Kuya Ben" under the delivered
+    /// banner. Each part only when this alert records it: no saved names,
+    /// no count; a last-known or missing fix, no "Location shared"; no call
+    /// placed, no "Calling". nil when nothing is left.
+    var detailsLine: String? {
+        var parts: [String] = []
+        if !recipientNames.isEmpty {
+            parts.append("Sent to \(recipientNames.count)")
+        }
+        if location?.isLastKnown == false {
+            parts.append("Location shared")
+        }
+        if let index = records.firstIndex(where: \.called), recipientNames.indices.contains(index) {
+            parts.append("Calling \(recipientNames[index])")
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " \u{00B7} ")
+    }
+
+    /// The delivered banner for this alert, confirmed at `sentAt`.
+    func delivered(at sentAt: Date) -> ChatMessage {
+        ChatMessage(
+            role: .saklolo,
+            kind: .alert(told: toldLine, sentText: message, details: detailsLine, at: sentAt)
+        )
+    }
+
+    /// The thread once this alert is confirmed sent: its delivery card
+    /// (sending, send failed or no signal) becomes the delivered banner, in
+    /// place, so the thread has one banner per incident. Unchanged when the
+    /// card is gone or already swapped.
+    func confirming(_ thread: [ChatMessage], at sentAt: Date) -> [ChatMessage] {
+        guard let index = thread.firstIndex(where: { message in
+            switch message.kind {
+            case .fallback(.sending), .fallback(.sendFailed), .fallback(.noSignal): true
+            default: false
+            }
+        }) else { return thread }
+        var updated = thread
+        updated[index] = delivered(at: sentAt)
+        return updated
     }
 
     /// "Kuya Ben, Tita Lina and Ruel", or "your contacts" when none are saved.

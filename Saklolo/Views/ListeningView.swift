@@ -60,6 +60,7 @@ struct ListeningView: View {
         }
         .saklaloGround()
         .task { await runSession() }
+        .onChange(of: alertStatus) { showDeliveredIfConfirmed() }
         .sheet(isPresented: $showGuide) {
             if let script {
                 GuideView(script: script, onDone: endSession)
@@ -70,38 +71,60 @@ struct ListeningView: View {
     // MARK: - Layout
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("Saklolo")
-                .font(.title2.bold())
-            Spacer()
-            Text(startedAt, format: .dateTime.hour().minute())
-                .font(Typography.finePrint)
-                .foregroundStyle(Palette.textDim)
-            Spacer()
-            let headerExit = SessionExit.header(
-                incidentSaved: incident != nil,
-                awaitingPerson: awaitingPerson,
-                alertFired: alertFired
-            )
-            if headerExit == .done {
-                Button("Done", action: endSession)
-                    .font(.body.bold())
-                    .frame(minHeight: Metrics.minTarget)
-                    .accessibilityHint(headerExit.hint)
-            } else {
-                Button {
-                    cancel()
-                } label: {
-                    Label("Cancel", systemImage: "xmark")
-                }
-                .font(.body)
-                .foregroundStyle(Palette.textDim)
-                .frame(minHeight: Metrics.minTarget)
-                .accessibilityHint(headerExit.hint)
+        VStack(spacing: 2) {
+            HStack {
+                SaklaloWordmark()
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                exitButton
             }
+            .frame(minHeight: Metrics.minTarget)
+            Text("Today \u{00B7} \(startedAt.formatted(date: .omitted, time: .shortened))")
+                .font(Typography.finePrint) // 12pt at the default size
+                .foregroundStyle(Palette.textDim)
         }
         .padding(.horizontal, Metrics.gutter)
         .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private var exitButton: some View {
+        let headerExit = SessionExit.header(
+            incidentSaved: incident != nil,
+            awaitingPerson: awaitingPerson,
+            alertFired: alertFired
+        )
+        if headerExit == .done {
+            Button("Done", action: endSession)
+                .font(.body.bold())
+                .foregroundStyle(Palette.text)
+                .frame(minHeight: Metrics.minTarget)
+                .accessibilityHint(headerExit.hint)
+        } else {
+            // The mockup's quiet "✕ Cancel" (F1).
+            Button {
+                cancel()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "xmark")
+                        .fontWeight(.bold)
+                    Text("Cancel")
+                }
+            }
+            .font(.callout.weight(.semibold))
+            .foregroundStyle(Palette.textDim)
+            .frame(minHeight: Metrics.minTarget)
+            .contentShape(Rectangle())
+            .accessibilityLabel("Cancel")
+            .accessibilityHint(headerExit.hint)
+        }
+    }
+
+    /// The mockup's `.xl` bubbles: while listening, and for the whole
+    /// session once it is alone mode (G1).
+    private var largeBubbles: Bool {
+        if case .listening = stage { return true }
+        return understood?.mode == .alone
     }
 
     private var thread: some View {
@@ -109,14 +132,15 @@ struct ListeningView: View {
             ScrollView {
                 LazyVStack(spacing: Metrics.gap) {
                     ForEach(messages) { message in
-                        ChatMessageRow(message: message)
+                        ChatMessageRow(message: message, large: largeBubbles)
                             .id(message.id)
                     }
                     if stage == .listening(.transcribing) || stage == .understanding {
-                        TypingBubble().id("typing")
+                        TypingDots().id("typing")
                     }
                 }
-                .padding(Metrics.gutter)
+                .padding(.horizontal, Metrics.gutter)
+                .padding(.vertical, Metrics.gap)
             }
             .onChange(of: messages) {
                 withAnimation { proxy.scrollTo(messages.last?.id, anchor: .bottom) }
@@ -136,8 +160,16 @@ struct ListeningView: View {
             if awaitingPerson {
                 AloneDock(onFire: fireFromDock, onOkay: personIsOkay)
             } else if script != nil, !showGuide {
-                Button("Start first aid") { showGuide = true }
-                    .buttonStyle(SaklaloActionStyle())
+                Button { showGuide = true } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "chevron.right")
+                            .fontWeight(.bold)
+                            .accessibilityHidden(true)
+                        Text("Start first aid")
+                    }
+                }
+                .buttonStyle(SaklaloActionStyle())
+                .accessibilityLabel("Start first aid")
                     .padding(Metrics.gutter)
             }
         }
@@ -275,7 +307,7 @@ struct ListeningView: View {
         }
         stage = .done
 
-        for reply in ChatReplies.replies(for: result) {
+        for reply in ChatReplies.replies(for: result, dockShown: awaitingPerson) {
             try? await Task.sleep(for: .milliseconds(400))
             guard !isStopped else { return }
             messages.append(.saklolo(reply))
@@ -315,6 +347,20 @@ struct ListeningView: View {
         alertOutcome = outcome
         messages.append(contentsOf: outcome.chatMessages)
         if let incident { record(outcome, on: incident) }
+        showDeliveredIfConfirmed()
+    }
+
+    /// This session's alert as the queue knows it.
+    private var alertStatus: AlertQueue.Entry.Status? {
+        alertOutcome.flatMap { alertQueue.status(of: $0.id) }
+    }
+
+    /// Once the queue confirms this session's alert went out (Shortcut
+    /// x-success, a retry, or the composer), its card becomes the delivered
+    /// banner. Before that the thread never says contacts were told.
+    private func showDeliveredIfConfirmed() {
+        guard !stopped, let alertOutcome, case .sent(let at)? = alertStatus else { return }
+        messages = alertOutcome.confirming(messages, at: at)
     }
 
     private func record(_ outcome: AlertOutcome, on incident: Incident) {

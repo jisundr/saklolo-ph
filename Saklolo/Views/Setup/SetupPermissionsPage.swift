@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import AVFAudio
 import CoreLocation
 
@@ -9,6 +10,7 @@ struct SetupPermissionsPage: View {
     var onFinish: () -> Void
 
     @StateObject private var location = LocationService()
+    @Query private var contacts: [Contact]
     @State private var microphone: AVAudioApplication.recordPermission = AVAudioApplication.shared.recordPermission
     @State private var isAsking = false
     @Environment(\.scenePhase) private var scenePhase
@@ -22,14 +24,14 @@ struct SetupPermissionsPage: View {
             SetupPageTitle(title: "Allow what we need")
 
             PermissionRow(
-                symbol: "mic.fill",
+                symbol: "mic",
                 title: "Microphone",
                 reason: "To hear what happened.",
                 deniedNote: "Voice won't work. The red button still does.",
                 state: PermissionState(microphone)
             )
             PermissionRow(
-                symbol: "location.fill",
+                symbol: "location",
                 title: "Location",
                 reason: "To send your GPS to your contacts.",
                 deniedNote: "The text goes without a map link.",
@@ -38,13 +40,21 @@ struct SetupPermissionsPage: View {
 
             Spacer()
 
+            if !needsAsking {
+                ReadinessLine(items: readiness)
+            }
+
             if needsAsking {
                 Button("Allow") { Task { await askAll() } }
                     .buttonStyle(SaklaloActionStyle())
                     .disabled(isAsking)
-                Button("Not now", action: onFinish)
-                    .frame(maxWidth: .infinity, minHeight: Metrics.minTarget)
-                    .foregroundStyle(Palette.textDim)
+                Button(action: onFinish) {
+                    Text("Not now")
+                        .foregroundStyle(Palette.textDim)
+                        .frame(maxWidth: .infinity, minHeight: Metrics.minTarget)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             } else {
                 Button(finishTitle, action: onFinish)
                     .buttonStyle(SaklaloActionStyle())
@@ -58,6 +68,18 @@ struct SetupPermissionsPage: View {
             // Back from Settings: show the current microphone state.
             if phase == .active { microphone = AVAudioApplication.shared.recordPermission }
         }
+    }
+
+    /// B5: what will work once setup ends.
+    private var readiness: [ReadinessItem] {
+        [
+            ReadinessItem(label: "Mic", isOK: PermissionState(microphone) == .on),
+            ReadinessItem(label: "GPS", isOK: PermissionState(location.authorizationStatus) == .on),
+            ReadinessItem(
+                label: contacts.count == 1 ? "1 contact ready" : "\(contacts.count) contacts ready",
+                isOK: !contacts.isEmpty
+            ),
+        ]
     }
 
     /// Microphone, then location, one system prompt at a time.
@@ -94,6 +116,8 @@ enum PermissionState: Equatable {
     }
 }
 
+/// One B3 row (mockup `.rowbox`): a dim symbol, the name, its state once asked, and the reason.
+/// "Off" is alarm text with the denied note and a Settings link; "On" is plain text.
 private struct PermissionRow: View {
     let symbol: String
     let title: String
@@ -106,23 +130,41 @@ private struct PermissionRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: Metrics.gap) {
             Image(systemName: symbol)
-                .foregroundStyle(Palette.alarmText)
-                .frame(width: 24)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(title).font(.headline)
+                .font(.title3)
+                .foregroundStyle(Palette.textDim)
+                .frame(width: 26)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 10) {
+                    Text(title)
+                        .font(.body.weight(.bold))
+                        .foregroundStyle(Palette.text)
                     switch state {
-                    case .on: Text("On").font(.headline).foregroundStyle(Palette.delivered)
-                    case .off: Text("Off").font(.headline).foregroundStyle(Palette.alarmText)
-                    case .notAsked: EmptyView()
+                    case .on:
+                        Text("On").font(.body.weight(.bold)).foregroundStyle(Palette.text)
+                    case .off:
+                        Text("Off").font(.body.weight(.bold)).foregroundStyle(Palette.alarmText)
+                    case .notAsked:
+                        EmptyView()
                     }
                 }
-                Text(state == .off ? deniedNote : reason)
-                    .font(.subheadline)
-                    .foregroundStyle(Palette.textDim)
+                if state != .on {
+                    Text(state == .off ? deniedNote : reason)
+                        .font(.subheadline)
+                        .foregroundStyle(Palette.textDim)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if state == .off, let settings = URL(string: UIApplication.openSettingsURLString) {
-                    Button("Open Settings") { openURL(settings) }
-                        .font(.subheadline.bold())
+                    Button { openURL(settings) } label: {
+                        Text("Open Settings")
+                            .font(.subheadline.weight(.bold))
+                            .underline()
+                            .foregroundStyle(Palette.text)
+                            .frame(minHeight: Metrics.minTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, -6)
                 }
             }
             Spacer(minLength: 0)
@@ -130,12 +172,8 @@ private struct PermissionRow: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: Metrics.chipRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous)
                 .fill(Palette.groundRaised)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: Metrics.chipRadius, style: .continuous)
-                .strokeBorder(Palette.line, lineWidth: 1.5)
         )
         .accessibilityElement(children: .combine)
     }
@@ -145,4 +183,5 @@ private struct PermissionRow: View {
     SetupPermissionsPage {}
         .padding()
         .saklaloGround()
+        .modelContainer(for: Contact.self, inMemory: true)
 }
