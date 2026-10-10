@@ -6,27 +6,31 @@ import UIKit
 /// Sends the emergency SMS via a Shortcut (silent send) and places the call
 /// to contact #1, per the brief's Core flow step 5.
 ///
-/// Requires a Shortcut named "Saklolo" to exist on the device with a "Send
-/// Message" action with "Show When Run" off — this app can only deep-link
-/// into it, Shortcuts itself isn't scriptable from inside the app sandbox.
-/// That Shortcut is out-of-band setup, not something this code creates.
+/// Requires a Shortcut named "Saklolo" to exist on the device: it reads the
+/// JSON input (`AlertCallback.shortcutInput`) and sends the text to the `to`
+/// numbers with "Show When Run" off. This app can only deep-link into it, and
+/// iOS has no API to create one silently; `ShortcutInstaller` opens the
+/// system import screen for the shared copy.
 struct ShortcutSMSService {
     enum SendError: Error {
         case invalidURL
         case cannotOpenURL
+        /// Nobody to text: the Shortcut would run Send Message with no one.
+        case noRecipients
     }
 
-    /// Opens the "Saklolo" Shortcut with the message text as input, through
+    /// Opens the "Saklolo" Shortcut with the message and recipient numbers, through
     /// x-callback-url so Shortcuts can report back (`AlertCallback`).
     /// Returning without throwing does NOT mean the text went out: it only
     /// means Shortcuts is being opened. The confirmation, if any, arrives
     /// later as a `saklolo://` URL. `notOpened` runs if iOS reports that
     /// Shortcuts could not be opened after all.
-    /// Fallback per the brief's Risks table: MFMessageComposeViewController
-    /// (one tap) if the silent Shortcut send doesn't work on a given device.
+    /// When the silent send does not work, the composer card
+    /// (`MessageComposer`, one tap) takes over; see `AlertQueue`.
     @MainActor
-    func sendViaShortcut(message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
-        guard let url = AlertCallback.shortcutURL(message: message, id: id) else {
+    func sendViaShortcut(message: String, recipients: [String], id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
+        guard !recipients.isEmpty else { throw SendError.noRecipients }
+        guard let url = AlertCallback.shortcutURL(message: message, recipients: recipients, id: id) else {
             throw SendError.invalidURL
         }
         #if canImport(UIKit)

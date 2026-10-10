@@ -113,16 +113,17 @@ struct AlertOutcome: Equatable, Sendable {
 /// a recorder in tests.
 @MainActor
 protocol AlertSending {
-    /// Hands `message` to the Shortcut for alert `id`. Not throwing only
-    /// means the hand-off started; the result comes back through
-    /// `AlertQueue.resolve`. `notOpened` runs if the hand-off fails later.
-    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws
+    /// Hands `message` and the `recipients` numbers to the Shortcut for
+    /// alert `id`. Not throwing only means the hand-off started; the result
+    /// comes back through `AlertQueue.resolve`. `notOpened` runs if the
+    /// hand-off fails later.
+    func sendText(_ message: String, to recipients: [String], id: UUID, notOpened: @escaping @MainActor () -> Void) throws
     func call(phone: String) throws
 }
 
 extension ShortcutSMSService: AlertSending {
-    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
-        try sendViaShortcut(message: message, id: id, notOpened: notOpened)
+    func sendText(_ message: String, to recipients: [String], id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
+        try sendViaShortcut(message: message, recipients: recipients, id: id, notOpened: notOpened)
     }
 }
 
@@ -297,7 +298,7 @@ final class AlertCoordinator<C: Clock> where C.Duration == Duration {
             delivery = .queued
         } else {
             do {
-                try sender.sendText(message, id: id) { [queue] in queue?.resolve(id, .failed) }
+                try sender.sendText(message, to: recipients.map(\.phone), id: id) { [queue] in queue?.resolve(id, .failed) }
             } catch {
                 delivery = .sendFailed
             }

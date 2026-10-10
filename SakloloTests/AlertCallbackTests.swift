@@ -27,7 +27,7 @@ final class AlertCallbackTests: XCTestCase {
 
     func testTheShortcutURLCarriesTheExactTextAndTheThreeCallbacks() throws {
         let message = "SAKLOLO: Papa & Tita fell, 1+1=2? Ñ. 7:42 PM. Location: maps.apple.com/?ll=14.6,121.0"
-        let url = try XCTUnwrap(AlertCallback.shortcutURL(message: message, id: id))
+        let url = try XCTUnwrap(AlertCallback.shortcutURL(message: message, recipients: ["+639171234567"], id: id))
         let parts = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false))
         let query = Dictionary(uniqueKeysWithValues: (parts.queryItems ?? []).map { ($0.name, $0.value ?? "") })
 
@@ -36,7 +36,10 @@ final class AlertCallbackTests: XCTestCase {
         XCTAssertEqual(parts.path, "/run-shortcut")
         XCTAssertEqual(query["name"], "Saklolo")
         XCTAssertEqual(query["input"], "text")
-        XCTAssertEqual(query["text"], message)
+        let input = try XCTUnwrap(query["text"]?.data(using: .utf8))
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: input) as? [String: Any])
+        XCTAssertEqual(payload["text"] as? String, message)
+        XCTAssertEqual(payload["to"] as? [String], ["+639171234567"])
         XCTAssertEqual(query["x-success"].flatMap(URL.init(string:)).flatMap(AlertCallback.parse)?.result, .sent)
         XCTAssertEqual(query["x-error"].flatMap(URL.init(string:)).flatMap(AlertCallback.parse)?.result, .failed)
         XCTAssertEqual(query["x-cancel"].flatMap(URL.init(string:)).flatMap(AlertCallback.parse)?.result, .cancelled)

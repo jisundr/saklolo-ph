@@ -41,10 +41,12 @@ Then in Xcode:
 
 ### Create the "Saklolo" Shortcut (setup step, on the phone)
 
-The app can only open a Shortcut, it cannot create one. In the Shortcuts app, create a shortcut named exactly `Saklolo` that:
+The app can only open a Shortcut, it cannot create one: iOS shows its own "Add Shortcut" screen for any import. In the Shortcuts app, create a shortcut named exactly `Saklolo` that:
 
-1. receives the text as its Shortcut Input,
-2. sends that text as a message (Send Message, with Show When Run off) to your emergency contacts. Add the recipients inside the Shortcut: the app passes only the message text, so the numbers entered in the app are used for the call and for the "Send message" fallback button, not for this SMS.
+1. receives text as its Shortcut Input. The app passes JSON: `{"to": ["+639171234567", "..."], "text": "SAKLOLO: ..."}`,
+2. runs Get Dictionary from Input, then Send Message (Show When Run off) with the text from the key `text`, to the numbers from the key `to`.
+
+The Shortcut holds no contacts, so the numbers entered in the app are the ones texted, the same ones used for the call and the fallback composer. If you built the old plain-text Saklolo Shortcut, replace it with this one: the old one would text the raw JSON to your contacts. Once a signed copy is shared, set `ShortcutInstaller.shareURL` to its iCloud link and setup shows an "Add the Saklolo Shortcut" button.
 
 The app then opens `tel://` for contact #1 on its own. The Shortcut reports back to the app through `saklolo://alert/<id>/<sent|failed|cancelled>`.
 
@@ -58,7 +60,7 @@ The speech model is not bundled. It downloads once (about 632 MB, needs network)
 xcodebuild -scheme Saklolo -destination 'platform=iOS Simulator,name=<an iPhone simulator>' test
 ```
 
-The 165 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
+The 167 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
 
 ### Simulator versus a real iPhone
 
@@ -87,7 +89,7 @@ Airplane-mode behaviour with a cached model has not been verified (spike 004b is
 
 ## Known limits
 
-- Checked on a real iPhone: with the phone unlocked, the Shortcut sent the SMS and reported success back to the app, and the app then showed "I've told ...". Not verified: that it can send with no taps on a locked phone (spike 003 is open). A tap may be needed.
+- Checked on a real iPhone with the earlier plain-text Shortcut: with the phone unlocked, it sent the SMS and reported success back to the app, and the app then showed "I've told ...". The JSON input (Get Dictionary from Input) has not been re-verified on a device. Not verified: that it can send with no taps on a locked phone (spike 003 is open). A tap may be needed.
 - Not verified: Apple Foundation Models on a phone. The measured accuracy comes from a Mac (spike 001); whether it is available on the test phone was not checked (spike 005 is open). When it is unavailable or too slow, the keyword rules are used.
 - Not verified: Taglish transcription accuracy across a full set of utterances (only 3 sentences were spoken in spike 004).
 - Medical content is fixed JSON, written once and not generated. The guide screen shows: "This is a guide only. It does not replace a doctor or rescuer."

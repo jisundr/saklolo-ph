@@ -49,13 +49,26 @@ enum AlertCallback {
         return (id, result)
     }
 
-    /// Runs the "Saklolo" shortcut with `message` as its text input, asking
-    /// Shortcuts to come back with the result for alert `id`.
-    static func shortcutURL(message: String, id: UUID) -> URL? {
+    /// The Shortcut's input: JSON text `{"to": [<numbers>], "text": <message>}`.
+    /// The Shortcut reads it with Get Dictionary from Input, so the numbers
+    /// entered in the app are the ones texted and the Shortcut itself holds
+    /// no contacts (one shared Shortcut works for everyone).
+    static func shortcutInput(message: String, recipients: [String]) -> String? {
+        let payload: [String: Any] = ["to": recipients, "text": message]
+        guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys, .withoutEscapingSlashes]),
+              let json = String(data: data, encoding: .utf8) else { return nil }
+        return json
+    }
+
+    /// Runs the "Saklolo" shortcut with `shortcutInput` as its text input,
+    /// asking Shortcuts to come back with the result for alert `id`.
+    static func shortcutURL(message: String, recipients: [String], id: UUID) -> URL? {
+        // Never plain text: a Shortcut expecting a dictionary would get none.
+        guard let input = shortcutInput(message: message, recipients: recipients) else { return nil }
         let query = [
             ("name", "Saklolo"),
             ("input", "text"),
-            ("text", message),
+            ("text", input),
             ("x-success", url(.sent, id: id).absoluteString),
             ("x-error", url(.failed, id: id).absoluteString),
             ("x-cancel", url(.cancelled, id: id).absoluteString),
