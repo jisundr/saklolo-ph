@@ -15,6 +15,7 @@ struct HomeView: View {
     @State private var showMenu = false
     @State private var showSetup = false
     @State private var showLog = false
+    @State private var showAbout = false
     @State private var incident: Incident?
     /// Where the menu leads, acted on once the menu sheet has gone so two sheets never overlap.
     @State private var menuChoice: MenuChoice?
@@ -37,35 +38,18 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: Metrics.gap) {
                 topBar
-
-                pill
-                if let banner = status.banner {
-                    InlineNotice(
-                        banner.text,
-                        systemImage: "xmark",
-                        tone: .failure,
-                        actionTitle: banner.actionTitle
-                    ) { fix(banner.fix) }
+                    .padding(.horizontal, Metrics.gutter)
+                // Normal sizes: everything fits and the spacers centre the button. Large text:
+                // the same content scrolls, so nothing runs off the bottom or under the top bar.
+                ViewThatFits(in: .vertical) {
+                    content(status, spacer: 64)
+                    // 60 still clears the rings, which draw 52pt outside the button's frame.
+                    ScrollView {
+                        content(status, spacer: 60)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
                 }
-
-                Spacer(minLength: 64)
-
-                SaklaloButton(isDimmed: status.ringsDimmed) {
-                    // TODO: check-in prompt (TTS) and the Shortcut SMS + call, per brief step 1-3.
-                    isListening = true
-                }
-
-                Spacer(minLength: 64)
-
-                Text(status.lead)
-                    .font(.body)
-                    .foregroundStyle(Palette.textDim)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                ReadinessLine(items: status.readiness)
             }
-            .padding(.horizontal, Metrics.gutter)
-            .padding(.bottom, 8)
             .saklaloGround()
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showMenu, onDismiss: openMenuChoice) {
@@ -76,6 +60,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showSetup) {
                 SetupView()
+            }
+            .sheet(isPresented: $showAbout) {
+                AboutSheet()
             }
             .fullScreenCover(isPresented: $isListening) {
                 ListeningView(fallbackTranscript: Self.cannedTranscript) { saved in
@@ -99,8 +86,42 @@ struct HomeView: View {
         }
     }
 
+    /// Pill, banner, the red button, the lead and the readiness line.
+    private func content(_ status: HomeStatus, spacer: CGFloat) -> some View {
+        VStack(spacing: Metrics.gap) {
+            pill
+            if let banner = status.banner {
+                InlineNotice(
+                    banner.text,
+                    systemImage: "xmark",
+                    tone: .failure,
+                    actionTitle: banner.actionTitle
+                ) { fix(banner.fix) }
+            }
+
+            Spacer(minLength: spacer)
+
+            SaklaloButton(isDimmed: status.ringsDimmed) {
+                // TODO: check-in prompt (TTS) and the Shortcut SMS + call, per brief step 1-3.
+                isListening = true
+            }
+
+            Spacer(minLength: spacer)
+
+            Text(status.lead)
+                .font(.body)
+                .foregroundStyle(Palette.textDim)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            ReadinessLine(items: status.readiness)
+        }
+        .padding(.horizontal, Metrics.gutter)
+        .padding(.bottom, 8)
+    }
+
     /// Wordmark left, menu right (mockup `.bar-top`). Drawn here rather than in the navigation
-    /// bar so the system does not wrap the wordmark in a toolbar background.
+    /// bar so the system does not wrap the wordmark in a toolbar background. Brand signage, so it
+    /// stops growing at xxxLarge; the gear offers the large content viewer instead.
     private var topBar: some View {
         HStack {
             SaklaloWordmark()
@@ -116,8 +137,13 @@ struct HomeView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Menu")
+            .accessibilityShowsLargeContentViewer {
+                Image(systemName: "gearshape")
+                Text("Menu")
+            }
         }
         .frame(minHeight: Metrics.minTarget)
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     /// The pill ticks each second while the model loads, so the clock moves.
@@ -155,7 +181,9 @@ struct HomeView: View {
     private func openMenuChoice() {
         switch menuChoice {
         case .contacts: showSetup = true
+        case .permissions: fix(.openSettings)
         case .incidents: showLog = true
+        case .about: showAbout = true
         case nil: break
         }
         menuChoice = nil
@@ -176,16 +204,26 @@ struct HomeView: View {
     }
 }
 
-private enum MenuChoice {
-    case contacts, incidents
+/// The menu's rows, in the mockup's order (E7). "Set up quick trigger" and "Send a test alert"
+/// are left out until that work exists.
+enum MenuChoice: CaseIterable {
+    case contacts, permissions, incidents, about
+
+    var title: String {
+        switch self {
+        case .contacts: "Contacts"
+        case .permissions: "Permissions"
+        case .incidents: "Past incidents"
+        case .about: "About and disclaimer"
+        }
+    }
 }
 
 /// E7: everything that is not the red button, in a bottom sheet sized to its rows.
-/// Only Contacts and Past incidents exist so far; the mockup's other rows are deferred.
 private struct HomeMenu: View {
     var onChoose: (MenuChoice) -> Void
 
-    @State private var height: CGFloat = 220
+    @State private var height: CGFloat = 320
 
     var body: some View {
         VStack(spacing: 0) {
@@ -195,15 +233,18 @@ private struct HomeMenu: View {
                 .padding(.top, 22)
                 .padding(.bottom, 10)
                 .accessibilityAddTraits(.isHeader)
-            row("Contacts") { onChoose(.contacts) }
-            Rectangle().fill(Palette.line).frame(height: 1)
-            row("Past incidents") { onChoose(.incidents) }
+            ForEach(Array(MenuChoice.allCases.enumerated()), id: \.element) { index, choice in
+                if index > 0 {
+                    Rectangle().fill(Palette.line).frame(height: 1)
+                }
+                row(choice.title) { onChoose(choice) }
+            }
         }
         .padding(.horizontal, Metrics.gutter)
-        .padding(.bottom, 12)
         .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
         .frame(maxHeight: .infinity, alignment: .top)
+        // The sheet adds the home-indicator inset below this height, so no extra bottom padding.
         .presentationDetents([.height(height)])
         .presentationDragIndicator(.visible)
         .saklaloSheet()
@@ -225,6 +266,44 @@ private struct HomeMenu: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// "About and disclaimer": what the app is, and that its first-aid steps are a guide only.
+private struct AboutSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Metrics.gap) {
+                    SaklaloWordmark()
+                        .foregroundStyle(Palette.text)
+                        .accessibilityAddTraits(.isHeader)
+                    Text(GuideCopy.disclaimer)
+                        .font(.body)
+                        .foregroundStyle(Palette.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
+                        Text("Version \(version)")
+                            .font(.footnote)
+                            .foregroundStyle(Palette.textDim)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Metrics.gutter)
+            }
+            .navigationTitle("About")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .saklaloSheet()
     }
 }
 

@@ -21,6 +21,8 @@ struct StatusPill: View {
     var systemImage: String?
     var tone: Tone
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     init(_ text: String, systemImage: String? = nil, tone: Tone = .neutral) {
         self.text = text
         self.systemImage = systemImage
@@ -35,12 +37,18 @@ struct StatusPill: View {
                     .fontWeight(.bold)
             }
             Text(text)
+                // Wraps instead of truncating: two lines at most, as many as it needs at AX sizes.
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(foreground)
         .padding(.horizontal, 14)
+        .padding(.vertical, 6)
         .frame(minHeight: 34)
-        .background(Capsule().fill(background))
+        // A capsule at one line; stays a rounded tile, not a lozenge, when the text wraps.
+        .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(background))
         .accessibilityElement(children: .combine)
     }
 
@@ -85,7 +93,7 @@ struct ReadinessLine: View {
                 .accessibilityLabel(item.isOK ? item.label : "\(item.label) off")
             }
         }
-        .font(.callout)
+        .font(.subheadline)
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity)
@@ -168,33 +176,27 @@ struct InlineNotice: View {
         self.action = action
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var hasAction: Bool { actionTitle != nil && action != nil }
+    /// At accessibility sizes the action moves under the text so neither gets squeezed or clipped.
+    private var stacksAction: Bool { hasAction && dynamicTypeSize.isAccessibilitySize }
 
     var body: some View {
-        HStack(alignment: hasAction ? .center : .top, spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.body.weight(.bold))
-                .foregroundStyle(tone == .failure ? Palette.alarmText : Palette.textDim)
-                .accessibilityHidden(true)
-            Text(text)
-                .font(.callout.weight(.medium))
-                .foregroundStyle(Palette.text)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-            if let actionTitle, let action {
-                Button(action: action) {
-                    Text(actionTitle)
-                        .font(.callout.weight(.bold))
-                        .underline()
-                        .foregroundStyle(Palette.text)
-                        .frame(minHeight: Metrics.minTarget)
-                        .padding(.leading, 10)
-                        .contentShape(Rectangle())
+        Group {
+            if stacksAction {
+                VStack(alignment: .leading, spacing: 4) {
+                    message
+                    actionButton
                 }
-                .buttonStyle(.plain)
+            } else {
+                HStack(alignment: hasAction ? .center : .top, spacing: 10) {
+                    message
+                    actionButton
+                }
             }
         }
-        .padding(.vertical, hasAction ? 0 : 12)
+        .padding(.vertical, hasAction && !stacksAction ? 0 : 12)
         .padding(.horizontal, 14)
         .padding(.leading, tone == .failure ? 5 : 0)
         .frame(minHeight: hasAction ? 46 : nil)
@@ -206,6 +208,37 @@ struct InlineNotice: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous))
         .accessibilityElement(children: .contain)
+    }
+
+    private var message: some View {
+        HStack(alignment: hasAction && !stacksAction ? .center : .top, spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.body.weight(.bold))
+                .foregroundStyle(tone == .failure ? Palette.alarmText : Palette.textDim)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(.callout.weight(.medium))
+                .foregroundStyle(Palette.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder
+    private var actionButton: some View {
+        if let actionTitle, let action {
+            Button(action: action) {
+                Text(actionTitle)
+                    .font(.callout.weight(.bold))
+                    .underline()
+                    .foregroundStyle(Palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: Metrics.minTarget)
+                    .padding(.leading, stacksAction ? 0 : 10)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
@@ -265,21 +298,33 @@ struct ContactChip: View {
     var caption: String?
     var relation: String?
     var trailing: AnyView?
+    /// The setup list's taller 58pt row; off by default (48pt).
+    var tall: Bool
 
-    init(position: Int, name: String, caption: String?, relation: String?, trailing: AnyView? = nil) {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// The numeral tile grows with the numeral, capped so it never crowds out the name.
+    @ScaledMetric(relativeTo: .title3) private var tileSize: CGFloat = 36
+
+    init(position: Int, name: String, caption: String?, relation: String?, trailing: AnyView? = nil, tall: Bool = false) {
         self.position = position
         self.name = name
         self.caption = caption
         self.relation = relation
         self.trailing = trailing
+        self.tall = tall
     }
 
     var body: some View {
+        // At accessibility sizes nothing truncates: the name wraps and the relation moves under it.
+        let isLarge = dynamicTypeSize.isAccessibilitySize
+        let tile = min(tileSize, 56)
         HStack(spacing: 12) {
             Text("\(position)")
                 .font(Typography.signage(24, relativeTo: .title3))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .foregroundStyle(Self.numeralColor(for: position))
-                .frame(width: 36, height: 36)
+                .frame(width: tile, height: tile)
                 .background(
                     RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous)
                         .fill(Self.tileColor(for: position))
@@ -294,10 +339,16 @@ struct ContactChip: View {
                         .font(.footnote)
                         .foregroundStyle(Palette.textDim)
                 }
+                if isLarge, let relation {
+                    Text(relation)
+                        .font(.subheadline)
+                        .foregroundStyle(Palette.textDim)
+                }
             }
-            .lineLimit(1)
+            .lineLimit(isLarge ? nil : 1)
+            .fixedSize(horizontal: false, vertical: isLarge)
             Spacer(minLength: 8)
-            if let relation {
+            if !isLarge, let relation {
                 Text(relation)
                     .font(.subheadline)
                     .foregroundStyle(Palette.textDim)
@@ -310,7 +361,7 @@ struct ContactChip: View {
         .padding(.vertical, 6)
         .padding(.leading, 8)
         .padding(.trailing, 14)
-        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: tall ? 58 : 48, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous).fill(Palette.groundRaised))
         .accessibilityElement(children: .combine)
     }
