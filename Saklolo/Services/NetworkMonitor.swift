@@ -23,8 +23,17 @@ final class NetworkMonitor: ObservableObject, SignalChecking {
     /// alert is never held on a guess.
     @Published private(set) var signal: Bool?
 
-    /// Called when signal comes back after being lost.
+    /// Called when signal comes back after being lost. `AlertQueue` owns this
+    /// one; anything else uses `addSignalReturnObserver`.
     var onSignalReturn: (@MainActor () -> Void)?
+
+    /// Also called on signal return, after `onSignalReturn` (the database
+    /// update check).
+    private var signalReturnObservers: [@MainActor () -> Void] = []
+
+    func addSignalReturnObserver(_ observer: @escaping @MainActor () -> Void) {
+        signalReturnObservers.append(observer)
+    }
 
     private let monitor = NWPathMonitor()
 
@@ -49,6 +58,8 @@ final class NetworkMonitor: ObservableObject, SignalChecking {
     private func update(_ has: Bool) {
         let returned = signal == false && has
         signal = has
-        if returned { onSignalReturn?() }
+        guard returned else { return }
+        onSignalReturn?()
+        signalReturnObservers.forEach { $0() }
     }
 }

@@ -9,41 +9,20 @@ final class ScriptLoaderTests: XCTestCase {
         XCTAssertEqual(ids, ["general", "bleeding", "fall", "head_injury", "unconscious"])
     }
 
-    func testEveryScriptHasStepsAndASource() throws {
-        for script in try ScriptLoader().loadBundledScripts() {
-            XCTAssertFalse(script.steps.isEmpty, "\(script.id) has no steps")
-            XCTAssertFalse(script.source.isEmpty, "\(script.id) has no source")
-        }
+    /// The content rules (3 to 6 steps, IFRC source, no counting, help and
+    /// 911 first) live in the validator, so a downloaded update meets them
+    /// too. The shipped file must pass the same check.
+    func testTheBundledDatabasePassesTheValidator() throws {
+        let result = FirstAidDatabaseValidator.validate(try DatabaseFixtures.bundledData())
+        XCTAssertNoThrow(try result.get(), "\(result)")
     }
 
-    /// FR-S4: the guide opens by making sure help is being called.
-    func testEveryScriptStartsByMakingSureHelpIsOnTheWay() throws {
-        for script in try ScriptLoader().loadBundledScripts() {
-            let first = try XCTUnwrap(script.steps.first, "\(script.id) has no steps")
-            XCTAssertTrue(first.localizedCaseInsensitiveContains("help"), "\(script.id) first step: \(first)")
-            XCTAssertTrue(first.contains("911"), "\(script.id) first step: \(first)")
-        }
-    }
+    func testLoadedScriptsCarryTheFileContent() throws {
+        let file = try DatabaseFixtures.bundled()
+        let scripts = try ScriptLoader().loadBundledScripts()
 
-    func testEverySourceCitesTheIFRCGuidelinesWithoutPlaceholders() throws {
-        for script in try ScriptLoader().loadBundledScripts() {
-            XCTAssertTrue(script.source.contains("IFRC"), "\(script.id) source: \(script.source)")
-            XCTAssertFalse(script.source.localizedCaseInsensitiveContains("TODO"), "\(script.id) source: \(script.source)")
-        }
-    }
-
-    /// The app does not count CPR compressions, so no step may promise it.
-    func testNoStepPromisesCounting() throws {
-        for script in try ScriptLoader().loadBundledScripts() {
-            for step in script.steps {
-                XCTAssertFalse(step.localizedCaseInsensitiveContains("count"), "\(script.id) step: \(step)")
-            }
-        }
-    }
-
-    func testEveryScriptHasThreeToSixSteps() throws {
-        for script in try ScriptLoader().loadBundledScripts() {
-            XCTAssertTrue((3...6).contains(script.steps.count), "\(script.id) has \(script.steps.count) steps")
-        }
+        XCTAssertEqual(scripts.map(\.id), file.scripts.map(\.id))
+        XCTAssertEqual(scripts.map(\.steps), file.scripts.map(\.steps))
+        XCTAssertEqual(scripts.map(\.source), file.scripts.map(\.source))
     }
 }
