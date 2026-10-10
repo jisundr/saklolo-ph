@@ -12,7 +12,7 @@ struct SetupNamePage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.gap) {
-            SetupPageTitle(title: "What's your name?", subtitle: "Used in the text your contacts receive.")
+            SetupPageTitle(title: "What’s your name?", subtitle: "Used in the text your contacts receive.")
 
             TextField("Name", text: $draft, prompt: Text("Your name"))
                 .textContentType(.name)
@@ -55,11 +55,13 @@ struct SetupPageTitle: View {
             Text(title)
                 .font(Typography.title)
                 .foregroundStyle(Palette.text)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
             if let subtitle {
                 Text(subtitle)
                     .font(Typography.body)
                     .foregroundStyle(Palette.textDim)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.top, 8)

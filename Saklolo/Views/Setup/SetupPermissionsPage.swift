@@ -21,24 +21,30 @@ struct SetupPermissionsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.gap) {
-            SetupPageTitle(title: "Allow what we need")
+            // Title and rows scroll so nothing truncates at the largest text sizes;
+            // the readiness line and buttons stay pinned at the bottom.
+            ScrollView {
+                VStack(alignment: .leading, spacing: Metrics.gap) {
+                    SetupPageTitle(title: "Allow what we need")
 
-            PermissionRow(
-                symbol: "mic",
-                title: "Microphone",
-                reason: "To hear what happened.",
-                deniedNote: "Voice won't work. The red button still does.",
-                state: PermissionState(microphone)
-            )
-            PermissionRow(
-                symbol: "location",
-                title: "Location",
-                reason: "To send your GPS to your contacts.",
-                deniedNote: "The text goes without a map link.",
-                state: PermissionState(location.authorizationStatus)
-            )
-
-            Spacer()
+                    PermissionRow(
+                        symbol: "mic",
+                        title: "Microphone",
+                        reason: "To hear what happened.",
+                        deniedNote: "Voice won’t work. The red button still does.",
+                        state: PermissionState(microphone)
+                    )
+                    PermissionRow(
+                        symbol: "mappin.and.ellipse",
+                        title: "Location",
+                        reason: "To send your GPS to your contacts.",
+                        deniedNote: "The text goes without a map link.",
+                        state: PermissionState(location.authorizationStatus)
+                    )
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
 
             if !needsAsking {
                 ReadinessLine(items: readiness)
@@ -62,6 +68,8 @@ struct SetupPermissionsPage: View {
             Text("You can change this later in Settings.")
                 .font(Typography.finePrint)
                 .foregroundStyle(Palette.textDim)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity)
         }
         .onChange(of: scenePhase) { _, phase in

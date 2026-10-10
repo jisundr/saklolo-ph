@@ -30,9 +30,9 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Saklolo includes your GPS location in the emergency SMS so contacts and responders know where you are.</string>
+	<string>To send your GPS to your contacts.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Saklolo listens for "Tulong" and records what happened so it can alert your contacts and guide first aid.</string>
+	<string>To hear what happened.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Saklolo can use motion data to detect a fall and trigger an alert automatically.</string>
 	<key>UIAppFonts</key>
