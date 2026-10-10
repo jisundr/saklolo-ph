@@ -26,7 +26,7 @@ The language model only classifies. It never writes first-aid text: every step c
 Requirements: a Mac with Xcode, [Homebrew](https://brew.sh), and an iPhone for the full flow. The app targets iOS 17.0, iPhone only, Swift 6.
 
 ```sh
-git clone <this repository>
+git clone https://github.com/jisundr/saklolo-ph.git
 cd saklolo-ph
 brew install xcodegen
 xcodegen generate
@@ -44,7 +44,7 @@ Then in Xcode:
 The app can only open a Shortcut, it cannot create one. In the Shortcuts app, create a shortcut named exactly `Saklolo` that:
 
 1. receives the text as its Shortcut Input,
-2. sends that text as a message to your emergency contacts (Send Message, with Show When Run off).
+2. sends that text as a message (Send Message, with Show When Run off) to your emergency contacts. Add the recipients inside the Shortcut: the app passes only the message text, so the numbers entered in the app are used for the call and for the "Send message" fallback button, not for this SMS.
 
 The app then opens `tel://` for contact #1 on its own. The Shortcut reports back to the app through `saklolo://alert/<id>/<sent|failed|cancelled>`.
 
@@ -58,7 +58,7 @@ The speech model is not bundled. It downloads once (about 632 MB, needs network)
 xcodebuild -scheme Saklolo -destination 'platform=iOS Simulator,name=<an iPhone simulator>' test
 ```
 
-122 unit tests passed on the iPhone 15 Pro Max simulator (iOS 27.0).
+The 165 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
 
 ### Simulator versus a real iPhone
 
@@ -87,8 +87,8 @@ Airplane-mode behaviour with a cached model has not been verified (spike 004b is
 
 ## Known limits
 
-- Not verified: that the Shortcut can send the SMS with no taps on a locked phone (spike 003 is open). A tap may be needed.
-- Not verified: Apple Foundation Models on a phone. The measured accuracy comes from a Mac (spike 001); the test phone ran iOS 18.7.3, where the keyword fallback is used (spike 005 is open).
+- Checked on a real iPhone: with the phone unlocked, the Shortcut sent the SMS and reported success back to the app, and the app then showed "I've told ...". Not verified: that it can send with no taps on a locked phone (spike 003 is open). A tap may be needed.
+- Not verified: Apple Foundation Models on a phone. The measured accuracy comes from a Mac (spike 001); whether it is available on the test phone was not checked (spike 005 is open). When it is unavailable or too slow, the keyword rules are used.
 - Not verified: Taglish transcription accuracy across a full set of utterances (only 3 sentences were spoken in spike 004).
 - Medical content is fixed JSON, written once and not generated. The guide screen shows: "This is a guide only. It does not replace a doctor or rescuer."
 - Not built: spoken steps (text-to-speech), a quick trigger outside the app (Lock Screen control, Action Button), CPR mode, escalation after 30 and 60 seconds, shout or fall detection, the contact's reply side, Android, background listening. A Motion permission string exists but fall detection is not built.
