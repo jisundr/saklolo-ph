@@ -1,9 +1,0 @@
-{
-  "version": 1,
-  "scripts": [
-    { "script": "head_injury", "keywords": ["tumama ang ulo", "nauntog", "nabagok", "nabagok ang ulo"] },
-    { "script": "unconscious", "keywords": ["walang malay", "nawalan ng malay", "di gumigising", "hindi gumigising", "hindi humihinga", "di humihinga", "hinimatay", "nahimatay"] },
-    { "script": "bleeding", "keywords": ["dumudugo", "dugo", "sugat", "naputol"] },
-    { "script": "fall", "keywords": ["nahulog", "nadulas", "bumagsak", "di makagalaw", "hindi makagalaw"] }
-  ]
-}

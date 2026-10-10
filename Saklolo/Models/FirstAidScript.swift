@@ -5,9 +5,9 @@ import SwiftData
 /// matches — it never writes medical instructions itself (see brief's
 /// "First-aid scripts (safety rule)").
 ///
-/// MVP ships these bundled from Resources/Scripts/*.json, loaded into the
-/// store on first launch — this model is the on-device copy judges/first-aid
-/// review can point at, not a live editable thing.
+/// Built transient from `database.json` (bundled, or a verified update) each
+/// time a guide opens; nothing inserts these into the store. The `@Model`
+/// stays so the SwiftData schema does not change.
 @Model
 final class FirstAidScript {
     var id: String

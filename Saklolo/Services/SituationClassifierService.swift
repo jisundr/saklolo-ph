@@ -22,8 +22,9 @@ struct SituationClassification: Sendable {
 /// Placeholder: ships the keyword fallback first (fast to build, no model
 /// dependency), LLM path is the 11pm-1am block per the build timeline.
 struct SituationClassifierService {
-    /// Keyword → script lookup, loaded from the bundled `keywords.json`.
-    var keywords: KeywordDatabase = .bundled()
+    /// Keyword → script lookup from the database in use (bundled, or a
+    /// verified update), taken once when the service is made.
+    var keywords: KeywordDatabase = DatabaseStore.shared.active.keywords
 
     func classifyByKeyword(transcript: String) -> SituationClassification {
         let mode: IncidentMode = transcript.lowercased().contains(" ako") ? .alone : .guide
