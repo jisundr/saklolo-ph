@@ -19,7 +19,7 @@ Emergencies happen where there is no data: inside homes with weak signal, during
 5. The alert is sent through an Apple Shortcut named "Saklolo", with the GPS location in the text, and the app then dials contact #1. The app says contacts were told only after the Shortcut reports success. Otherwise it shows a card with a button that opens the system message composer.
 6. Guide mode shows the steps of the matching script one at a time, with Next, Back and Repeat. The steps are not read aloud yet.
 
-The language model only classifies. It never writes first-aid text: every step comes from the bundled JSON scripts in `Saklolo/Resources/Scripts`, which cite Philippine Red Cross basic first aid.
+The language model only classifies. It never writes first-aid text: every step comes from the bundled JSON scripts in `Saklolo/Resources/Scripts`, which cite the IFRC International First Aid, Resuscitation, and Education Guidelines 2020 (Red Cross Red Crescent).
 
 ## Build and run
 
@@ -82,7 +82,7 @@ Airplane-mode behaviour with a cached model has not been verified (spike 004b is
 - Models: Whisper large-v3 turbo (`openai_whisper-large-v3-v20240930_turbo_632MB`) through WhisperKit; Apple Foundation Models (`SystemLanguageModel`) where available.
 - Frameworks: SwiftUI, WhisperKit (argmax-oss-swift 1.1.1), Foundation Models, CoreLocation, Apple Shortcuts (x-callback-url), XcodeGen for project generation.
 - APIs and cloud services: none for the AI. The one network call the app makes is the model download on first launch (fetched by WhisperKit; the host is not documented here). SMS and calls go over the carrier network.
-- Existing code and assets: first-aid content follows Philippine Red Cross basic first aid; Barlow Condensed font (SIL OFL, `Saklolo/Resources/Fonts/OFL.txt`); no pre-starter code is listed in the docs.
+- Existing code and assets: first-aid content follows the IFRC International First Aid, Resuscitation, and Education Guidelines 2020; Barlow Condensed font (SIL OFL, `Saklolo/Resources/Fonts/OFL.txt`); no pre-starter code is listed in the docs.
 - AI development tools: Claude Code.
 
 ## Known limits

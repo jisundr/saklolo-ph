@@ -292,7 +292,7 @@ final class AlertQueueTests: XCTestCase {
 
         queue.resolve(handed.id, .sent)
 
-        XCTAssertEqual(face(.sending), .delivered(at: sentAt))
+        XCTAssertEqual(face(.sending), .delivered)
     }
 
     func testTheSendingCardOffersTheComposerWhenTheShortcutFails() {
@@ -301,17 +301,17 @@ final class AlertQueueTests: XCTestCase {
 
         queue.resolve(handed.id, .failed)
 
-        XCTAssertEqual(face(.sending), .couldNotSend)
+        XCTAssertEqual(face(.sending), .couldNotSend(keepGuiding: true), "the thread has no keep-guiding line for this path")
     }
 
     func testTheCouldNotSendCardTurnsDeliveredAfterTheComposerSends() {
         let failed = outcome(.sendFailed)
         queue.record(failed)
-        XCTAssertEqual(face(.sendFailed), .couldNotSend)
+        XCTAssertEqual(face(.sendFailed), .couldNotSend(keepGuiding: false), "chatMessages already added it")
 
         queue.composerSent(failed.id)
 
-        XCTAssertEqual(face(.sendFailed), .delivered(at: sentAt))
+        XCTAssertEqual(face(.sendFailed), .delivered)
         XCTAssertEqual(face(.composer), .hidden, "no second Send message once it went out")
     }
 
@@ -325,7 +325,7 @@ final class AlertQueueTests: XCTestCase {
         XCTAssertEqual(face(.noSignal), .noSignal, "handed over is not delivered")
         queue.resolve(held.id, .sent)
 
-        XCTAssertEqual(face(.noSignal), .delivered(at: sentAt))
+        XCTAssertEqual(face(.noSignal), .delivered)
     }
 
     func testTheNoSignalCardOffersTheComposerWhenARetryCannotSend() {
@@ -335,7 +335,7 @@ final class AlertQueueTests: XCTestCase {
         signal.hasSignal = true
         queue.retry()
 
-        XCTAssertEqual(face(.noSignal), .couldNotSend)
+        XCTAssertEqual(face(.noSignal), .couldNotSend(keepGuiding: false), "first aid still works line is already there")
     }
 
     func testNoFixAtAllIsAFailurePillAndALastKnownFixIsAPlainOne() {

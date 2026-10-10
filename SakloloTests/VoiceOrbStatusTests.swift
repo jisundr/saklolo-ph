@@ -4,7 +4,8 @@ import XCTest
 final class VoiceOrbStatusTests: XCTestCase {
     func testBeforeTheAlertAQuietMicAsksThePersonToSpeakLouder() {
         XCTAssertEqual(VoiceOrb.statusText(phase: .waiting, quietTooLong: true, alert: nil), "Can't hear you. Speak louder.")
-        XCTAssertEqual(VoiceOrb.statusText(phase: .waiting, quietTooLong: false, alert: nil), "Listening...")
+        XCTAssertEqual(VoiceOrb.statusText(phase: .waiting, quietTooLong: false, alert: nil), "Listening\u{2026}")
+        XCTAssertEqual(VoiceOrb.statusText(phase: .hearing, quietTooLong: false, alert: nil), "Listening\u{2026}")
     }
 
     func testOnceTheAlertIsGoingOutTheOrbNeverSaysItCannotHear() {
@@ -32,6 +33,6 @@ final class VoiceOrbStatusTests: XCTestCase {
     }
 
     func testTranscribingStillSaysUnderstanding() {
-        XCTAssertEqual(VoiceOrb.statusText(phase: .transcribing, quietTooLong: false, alert: .sent), "Understanding...")
+        XCTAssertEqual(VoiceOrb.statusText(phase: .transcribing, quietTooLong: false, alert: .sent), "Understanding\u{2026}")
     }
 }

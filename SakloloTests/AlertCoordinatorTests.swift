@@ -234,6 +234,28 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertTrue(outcome.isGeneral)
     }
 
+    // MARK: - Who needs help
+
+    func testTheTextNamesThePersonFromSetupAndCarriesTheTapTime() async throws {
+        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock, senderName: { "Jayson" })
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        let outcome = try await sent(fall())
+
+        XCTAssertTrue(sender.texts[0].hasPrefix("SAKLOLO: Jayson needs help. Papa fell, his head is bleeding. "))
+        XCTAssertTrue(sender.texts[0].contains(tap.formatted(date: .omitted, time: .shortened)))
+        XCTAssertEqual(outcome.timestamp, tap)
+    }
+
+    func testTheGeneralTextNamesThePersonFromSetup() async throws {
+        coordinator = AlertCoordinator(sender: sender, locator: locator, clock: clock, senderName: { "Jayson" })
+        coordinator.begin(at: tap, recipients: [ben]) { _ in }
+
+        _ = try await sent(nil)
+
+        XCTAssertTrue(sender.texts[0].hasPrefix("SAKLOLO: Jayson needs help. Could not say what happened. "))
+    }
+
     // MARK: - Cancel and hold
 
     func testCancelSendsNothingEver() async throws {

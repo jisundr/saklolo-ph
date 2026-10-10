@@ -13,12 +13,12 @@ struct ChatMessage: Identifiable, Equatable, Sendable {
     enum Kind: Equatable, Sendable {
         /// A plain bubble.
         case text(String)
-        /// The delivered banner (F3): "I've told ..." at the time the text
-        /// was confirmed, the exact text that went out, and a status line
-        /// built only from what the alert recorded. Only for an alert known
-        /// to be sent: the thread swaps the `.fallback` card for this once
-        /// `AlertQueue` confirms it (`AlertOutcome.confirming(_:at:)`).
-        case alert(told: String, sentText: String?, details: String?, at: Date)
+        /// The delivered banner (F3): "I've told ..." at the alert's own
+        /// time (the one in the text), chips built only from what the alert
+        /// recorded, and the exact text that went out. Only for an alert
+        /// known to be sent: the thread swaps the `.fallback` card for this
+        /// once `AlertQueue` confirms it (`AlertOutcome.confirming(_:at:)`).
+        case alert(told: String, sentText: String?, chips: [DeliveryChip], at: Date)
         /// A failure card that keeps the guide visible (T7 renders these).
         case fallback(FallbackKind)
     }
@@ -57,4 +57,24 @@ enum FallbackKind: Equatable, Sendable {
     case noSignal
     /// No fresh location: the last known one is sent, labelled (I4).
     case noLocation
+}
+
+/// One chip under the delivered banner (mockup `.pills`): only what the
+/// alert really recorded.
+enum DeliveryChip: Equatable, Sendable {
+    /// The text went out (the banner is only shown once it did).
+    case textSent
+    /// A live location went with the text. Never for a last known or
+    /// missing fix.
+    case location
+    /// The call to contact #1 was placed (iOS still asks to confirm it).
+    case calling(String)
+
+    var text: String {
+        switch self {
+        case .textSent: "Text sent"
+        case .location: "Location"
+        case .calling(let name): "Calling \(name)"
+        }
+    }
 }

@@ -6,7 +6,7 @@ import FoundationModels
 /// Classification result. The LLM only ever fills these fields from fixed
 /// choices — it never generates first-aid instructions itself (safety rule
 /// in the brief).
-struct SituationClassification {
+struct SituationClassification: Sendable {
     var mode: IncidentMode
     var scriptID: String
     var summary: String
@@ -33,12 +33,15 @@ struct SituationClassifierService {
         return SituationClassification(mode: mode, scriptID: "general", summary: transcript, urgency: "unknown")
     }
 
+    /// The model step, swappable for tests. nil uses the on-device LLM.
+    var model: (@Sendable (String) async -> SituationClassification?)? = nil
+
     /// Runs the on-device LLM when this OS has it; nil otherwise (iOS < 26,
     /// no Apple Intelligence, guardrail block, or any other error).
-    private func llmClassification(transcript: String) async -> SituationClassification? {
+    private static func llmClassification(transcript: String) async -> SituationClassification? {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
-            return try? await classifyWithLLM(transcript: transcript)
+            return try? await SituationClassifierService.classifyWithLLM(transcript: transcript)
         }
         #endif
         return nil
@@ -47,18 +50,16 @@ struct SituationClassifierService {
     /// Entry point for the alert flow. The keyword result is always computed
     /// first and is what we return if the LLM is slow, blocked by the safety
     /// guardrail, or unavailable — the LLM can refine the result but never
-    /// delay or replace it with nothing.
+    /// delay or replace it with nothing. Returns by `timeout` even if the
+    /// model ignores cancellation.
     func classify(transcript: String, timeout: Duration = .seconds(3)) async -> SituationClassification {
         let keyword = classifyByKeyword(transcript: transcript)
         // Nothing heard: no point asking the model.
         guard !transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return keyword }
-        let llm: SituationClassification? = await withTaskGroup(of: SituationClassification?.self) { group in
-            group.addTask { await llmClassification(transcript: transcript) }
-            group.addTask { try? await Task.sleep(for: timeout); return nil }
-            let first = await group.next() ?? nil
-            group.cancelAll()
-            return first
-        }
+        let ask = model ?? { await Self.llmClassification(transcript: $0) }
+        let started = ContinuousClock.now
+        let llm = await firstResult(within: timeout) { await ask(transcript) }
+        print("[classify] \(llm == nil ? "keyword fallback" : "model") after \(ContinuousClock.now - started)")
         guard var result = llm else { return keyword }
         // The model sometimes answers "general" for an utterance the keywords
         // recognise (e.g. "dumudugo"); a specific script is the safer pick.
@@ -105,7 +106,7 @@ extension SituationClassifierService {
         "may sunog sa kapitbahay" -> guide, general
         """
 
-    func classifyWithLLM(transcript: String) async throws -> SituationClassification {
+    static func classifyWithLLM(transcript: String) async throws -> SituationClassification {
         // Permissive guardrails: the default ones reject injury text ("nagsusuka",
         // "dugo") as unsafe, which would block exactly the emergencies we serve.
         let model = SystemLanguageModel(guardrails: .permissiveContentTransformations)

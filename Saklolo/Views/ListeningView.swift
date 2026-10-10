@@ -33,6 +33,11 @@ struct ListeningView: View {
     @State private var awaitingPerson = false
     /// The alert has started going out; Cancel can no longer unsend it.
     @State private var alertFired = false
+    /// What the session classifies: the words heard, else the fallback text.
+    @State private var transcript = ""
+    /// How much of the screen the guide sheet covers, so the thread can
+    /// scroll its last card above it.
+    @State private var guideHeight: CGFloat = 0
 
     private enum Stage: Equatable {
         /// Recording or transcribing; the orb shows.
@@ -64,6 +69,13 @@ struct ListeningView: View {
         .sheet(isPresented: $showGuide) {
             if let script {
                 GuideView(script: script, onDone: endSession)
+                    .background {
+                        GeometryReader { sheet in
+                            Color.clear
+                                .onAppear { guideHeight = sheet.size.height }
+                                .onChange(of: sheet.size.height) { guideHeight = sheet.size.height }
+                        }
+                    }
             }
         }
     }
@@ -95,10 +107,12 @@ struct ListeningView: View {
             alertFired: alertFired
         )
         if headerExit == .done {
+            // Styled like Cancel: a quiet exit, not a call to action.
             Button("Done", action: endSession)
-                .font(.body.bold())
-                .foregroundStyle(Palette.text)
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(Palette.textDim)
                 .frame(minHeight: Metrics.minTarget)
+                .contentShape(Rectangle())
                 .accessibilityHint(headerExit.hint)
         } else {
             // The mockup's quiet "✕ Cancel" (F1).
@@ -142,7 +156,13 @@ struct ListeningView: View {
                 .padding(.horizontal, Metrics.gutter)
                 .padding(.vertical, Metrics.gap)
             }
+            // The guide sheet lets the chat behind it be used; this lets the
+            // last card (I1's Send message) scroll up above the sheet.
+            .contentMargins(.bottom, showGuide ? guideHeight : 0, for: .scrollContent)
             .onChange(of: messages) {
+                withAnimation { proxy.scrollTo(messages.last?.id, anchor: .bottom) }
+            }
+            .onChange(of: showGuide ? guideHeight : 0) {
                 withAnimation { proxy.scrollTo(messages.last?.id, anchor: .bottom) }
             }
         }
@@ -153,7 +173,17 @@ struct ListeningView: View {
         switch stage {
         case .listening(let phase):
             VoiceOrb(phase: phase, level: level, alert: orbAlert)
-                .padding(.bottom, Metrics.gutter)
+            if phase == .transcribing {
+                Spacer().frame(height: Metrics.gutter)
+            } else {
+                // Ends recording now instead of waiting for the silence.
+                Button("Done") {
+                    Task { await SpeechTranscriptionService.shared.stopRecording() }
+                }
+                .buttonStyle(SaklaloActionStyle())
+                .accessibilityHint("Stops listening and moves on.")
+                .padding(Metrics.gutter)
+            }
         case .understanding:
             EmptyView()
         case .done:
@@ -222,10 +252,7 @@ struct ListeningView: View {
     /// The incident when the session ends before understanding finished
     /// (Cancel after the deadline alert): what was heard, if anything.
     private func saveIncidentSoFar() -> Incident {
-        let heard = messages.last { $0.role == .user }.flatMap { message -> String? in
-            if case .text(let text) = message.kind { text } else { nil }
-        }
-        let saved = Incident(trigger: trigger, mode: .guide, transcript: heard ?? "", startedAt: startedAt)
+        let saved = Incident(trigger: trigger, mode: .guide, transcript: transcript, startedAt: startedAt)
         modelContext.insert(saved)
         incident = saved
         if let alertOutcome { record(alertOutcome, on: saved) }
@@ -264,16 +291,16 @@ struct ListeningView: View {
         guard !isStopped else { return }
         print("[004] \(heard.isEmpty ? "canned fallback\(failure)" : "heard") | transcript: \(heard.debugDescription)")
 
-        // Empty or failed: say so, carry on with the fallback text (F5).
-        let transcript: String
+        // Empty, junk or failed: the person's bubble is "…" (F5), Saklolo
+        // says so, and the session carries on with the fallback text. "…"
+        // is only shown, never stored on the incident.
         if heard.isEmpty {
+            messages.append(.user("\u{2026}"))
             messages.append(.saklolo(ChatReplies.couldNotUnderstand))
             transcript = fallbackTranscript
         } else {
+            messages.append(.user(heard))
             transcript = heard
-        }
-        if !transcript.isEmpty {
-            messages.append(.user(transcript))
         }
         stage = .understanding
 
@@ -307,7 +334,12 @@ struct ListeningView: View {
         }
         stage = .done
 
-        for reply in ChatReplies.replies(for: result, dockShown: awaitingPerson) {
+        // F5 already said general help follows; "Got it." would claim the
+        // app understood. Alone mode still needs its check-in for the dock.
+        let replies = heard.isEmpty && result.mode == .guide
+            ? []
+            : ChatReplies.replies(for: result, dockShown: awaitingPerson)
+        for reply in replies {
             try? await Task.sleep(for: .milliseconds(400))
             guard !isStopped else { return }
             messages.append(.saklolo(reply))

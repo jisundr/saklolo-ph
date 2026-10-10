@@ -35,4 +35,45 @@ final class ShortcutMessageTests: XCTestCase {
 
         XCTAssertFalse(text.contains("ocation"))
     }
+
+    // MARK: - Who needs help
+
+    private var time: String { at.formatted(date: .omitted, time: .shortened) }
+
+    func testTheTextNamesThePersonBeforeWhatHappened() {
+        let text = service.buildMessage(summary: "Papa fell", name: "Jayson", timestamp: at, lat: nil, lng: nil)
+
+        XCTAssertEqual(text, "SAKLOLO: Jayson needs help. Papa fell. \(time).")
+    }
+
+    func testTheGeneralTextNamesThePerson() {
+        let text = service.buildMessage(summary: nil, name: "Jayson", timestamp: at, lat: nil, lng: nil, locationNote: "Location unavailable")
+
+        XCTAssertEqual(text, "SAKLOLO: Jayson needs help. Could not say what happened. \(time). Location unavailable.")
+    }
+
+    func testWithNoNameStoredTheGeneralTextKeepsItsWording() {
+        for name in [nil, "", "   "] as [String?] {
+            let text = service.buildMessage(summary: nil, name: name, timestamp: at, lat: nil, lng: nil)
+
+            XCTAssertEqual(text, "SAKLOLO: I need help. I could not say what happened. \(time).", "\(String(describing: name))")
+        }
+    }
+
+    func testWithNoNameStoredTheSummaryLeadsAsBefore() {
+        let text = service.buildMessage(summary: "Papa fell", name: nil, timestamp: at, lat: nil, lng: nil)
+
+        XCTAssertEqual(text, "SAKLOLO: Papa fell. \(time).")
+    }
+
+    func testABlankSummaryIsTheGeneralTextAndAFullStopIsNotDoubled() {
+        XCTAssertEqual(
+            service.buildMessage(summary: "  ", name: " Jayson ", timestamp: at, lat: nil, lng: nil),
+            "SAKLOLO: Jayson needs help. Could not say what happened. \(time)."
+        )
+        XCTAssertEqual(
+            service.buildMessage(summary: "Papa fell.", name: "Jayson", timestamp: at, lat: nil, lng: nil),
+            "SAKLOLO: Jayson needs help. Papa fell. \(time)."
+        )
+    }
 }

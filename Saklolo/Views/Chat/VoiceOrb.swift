@@ -103,11 +103,13 @@ struct VoiceOrb: View {
     }
 
     static let cantHearYou = "Can't hear you. Speak louder."
+    static let listening = "Listening\u{2026}"
+    static let understanding = "Understanding\u{2026}"
 
     /// The line above the orb. Once the alert is going out, "can't hear
     /// you" is never shown: it reads as if help depends on speaking up.
     static func statusText(phase: Phase, quietTooLong: Bool, alert: AlertState?) -> String {
-        if phase == .transcribing { return "Understanding..." }
+        if phase == .transcribing { return understanding }
         switch alert {
         case .sending?: return "Sending the alert. Keep talking if you can."
         case .sent?: return "Alert sent. Keep talking if you can."
@@ -115,9 +117,9 @@ struct VoiceOrb: View {
         case nil: break
         }
         switch phase {
-        case .waiting: return quietTooLong ? cantHearYou : "Listening..."
-        case .hearing: return "I can hear you. Keep talking."
-        case .transcribing: return "Understanding..."
+        case .waiting: return quietTooLong ? cantHearYou : listening
+        case .hearing: return listening
+        case .transcribing: return understanding
         }
     }
 }

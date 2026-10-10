@@ -254,6 +254,12 @@ struct SaklaloButton: View {
                 .font(Typography.signage(46, relativeTo: .largeTitle))
                 .tracking(1.2)
                 .foregroundStyle(.white)
+                // One line, always inside the circle: the label grows with Dynamic Type up to
+                // xxxLarge, then shrinks to fit rather than wrapping ("SAKLO / LO") at AX sizes.
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                .padding(.horizontal, 26)
                 .frame(width: 220, height: 220)
                 .background(Circle().fill(Palette.signalRed))
                 .shadow(color: Palette.signalRed.opacity(0.4), radius: 14, x: 0, y: 8)

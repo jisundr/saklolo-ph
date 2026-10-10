@@ -115,33 +115,70 @@ actor SpeechTranscriptionService {
         case transcribing
     }
 
-    /// Dropping below this (dB) counts as quiet; above it, as speech.
-    private static let speechThreshold: Float = -38
-    /// Stop this long after the person goes quiet.
-    private static let trailingSilence: Duration = .milliseconds(1400)
-    /// Give up if nothing loud enough is heard in this long.
-    private static let noSpeechTimeout: Duration = .seconds(8)
+    /// How long Whisper gets once recording stops. Past it the session
+    /// carries on as "could not understand" (F5) rather than keep waiting.
+    static let transcriptionTimeout: Duration = .seconds(4)
 
-    /// Records until the person stops talking (or `maxDuration`) and returns
-    /// the transcript.
+    /// Set by `stopRecording()`; the recorder checks it every tick.
+    private var stopRequested = false
+
+    /// Ends the current recording now (the Done button), so the session goes
+    /// straight on to transcribing. Harmless if called twice, or after the
+    /// recording has already ended.
+    func stopRecording() {
+        stopRequested = true
+    }
+
+    /// Records until the person stops talking, taps Done, or `maxDuration`,
+    /// and returns what they said: "" when nothing but silence or Whisper's
+    /// non-speech markers came back, when the model is not loaded yet, or
+    /// when Whisper takes longer than `transcriptionTimeout`.
     func transcribe(
         maxDuration: TimeInterval = 15,
         onEvent: (@Sendable (Event) -> Void)? = nil
     ) async throws -> String {
+        stopRequested = false
         guard await AVAudioApplication.requestRecordPermission() else {
             throw TranscriptionError.microphoneDenied
         }
+        let clock = ContinuousClock()
+        let recordingStarted = clock.now
         let url = try await record(upTo: maxDuration, onEvent: onEvent)
         defer { try? FileManager.default.removeItem(at: url) }
+        let recordingEnded = clock.now
+        print("[004] recorded \(recordingEnded - recordingStarted)\(stopRequested ? " (Done)" : "")")
 
         onEvent?(.transcribing)
-        try await prepare()
-        guard let pipe else { return "" }
-        let results = try await pipe.transcribe(
-            audioPath: url.path,
-            decodeOptions: DecodingOptions(language: "tl", detectLanguage: false)
+        // A model still downloading or compiling can take minutes: never
+        // wait on it here. Start it for next time and let F5 take over.
+        guard let pipe else {
+            if loading == nil {
+                Task { try? await self.prepare() }
+            }
+            return ""
+        }
+        let path = url.path
+        let raw = await firstResult(within: Self.transcriptionTimeout) {
+            try? await pipe.transcribe(
+                audioPath: path,
+                decodeOptions: DecodingOptions(language: "tl", detectLanguage: false)
+            ).map(\.text).joined(separator: " ")
+        }
+        print("[004] transcribed in \(clock.now - recordingEnded)\(raw == nil ? " (timed out)" : "")")
+        return Self.speech(in: raw ?? "")
+    }
+
+    /// The words in a Whisper transcript, without its non-speech markers
+    /// ("[BLANK_AUDIO]", "(silence)", "<|endoftext|>"); "" when no letter or
+    /// digit is left ("...", "…", "?!").
+    nonisolated static func speech(in raw: String) -> String {
+        let unmarked = raw.replacingOccurrences(
+            of: #"\[[^\]]*\]|\([^)]*\)|<\|[^|]*\|>"#,
+            with: " ",
+            options: .regularExpression
         )
-        return results.map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = unmarked.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        return text.contains(where: { $0.isLetter || $0.isNumber }) ? text : ""
     }
 
     private func record(upTo maxDuration: TimeInterval, onEvent: (@Sendable (Event) -> Void)?) async throws -> URL {
@@ -163,31 +200,62 @@ actor SpeechTranscriptionService {
         guard recorder.record(forDuration: maxDuration) else { throw TranscriptionError.recordingFailed }
 
         let clock = ContinuousClock()
-        let started = clock.now
-        var spoke = false
-        var quietSince: ContinuousClock.Instant?
-        while recorder.isRecording {
+        var endpoint = EndOfSpeech(startedAt: clock.now)
+        while recorder.isRecording, !stopRequested {
             try await Task.sleep(for: .milliseconds(100))
             recorder.updateMeters()
             let power = recorder.averagePower(forChannel: 0)
             onEvent?(.level(min(max((power + 60) / 60, 0), 1)))
 
-            let now = clock.now
-            if power > Self.speechThreshold {
-                if !spoke {
-                    spoke = true
-                    onEvent?(.speechDetected)
-                }
-                quietSince = nil
-            } else if spoke {
-                let since = quietSince ?? now
-                quietSince = since
-                if now - since >= Self.trailingSilence { break }
-            } else if now - started >= Self.noSpeechTimeout {
-                break
+            switch endpoint.update(power: power, at: clock.now, stopRequested: stopRequested) {
+            case .keepRecording: break
+            case .speechStarted: onEvent?(.speechDetected)
+            case .stop: recorder.stop()
             }
         }
         recorder.stop()
         return url
+    }
+}
+
+/// When to stop recording: on Done, about 1.4 s after the person goes
+/// quiet, or after 8 s with nothing loud enough heard.
+struct EndOfSpeech {
+    enum Decision: Equatable {
+        case keepRecording
+        /// The first loud-enough sound; keep recording.
+        case speechStarted
+        case stop
+    }
+
+    /// Dropping below this (dB) counts as quiet; above it, as speech.
+    static let speechThreshold: Float = -38
+    /// Stop this long after the person goes quiet.
+    static let trailingSilence: Duration = .milliseconds(1400)
+    /// Give up if nothing loud enough is heard in this long.
+    static let noSpeechTimeout: Duration = .seconds(8)
+
+    let startedAt: ContinuousClock.Instant
+    private var spoke = false
+    private var quietSince: ContinuousClock.Instant?
+
+    init(startedAt: ContinuousClock.Instant) {
+        self.startedAt = startedAt
+    }
+
+    mutating func update(power: Float, at now: ContinuousClock.Instant, stopRequested: Bool = false) -> Decision {
+        if stopRequested { return .stop }
+        if power > Self.speechThreshold {
+            quietSince = nil
+            guard !spoke else { return .keepRecording }
+            spoke = true
+            return .speechStarted
+        }
+        if spoke {
+            let since = quietSince ?? now
+            quietSince = since
+            return now - since >= Self.trailingSilence ? .stop : .keepRecording
+        }
+        return now - startedAt >= Self.noSpeechTimeout ? .stop : .keepRecording
     }
 }

@@ -104,4 +104,12 @@ struct ThemeGalleryContent: View {
 #Preview("Components, light") {
     ThemeGallery().preferredColorScheme(.light)
 }
+
+#Preview("Components, accessibility XL") {
+    ThemeGallery().preferredColorScheme(.dark).dynamicTypeSize(.accessibility3)
+}
+
+#Preview("Components, accessibility XXXL") {
+    ThemeGallery().preferredColorScheme(.dark).dynamicTypeSize(.accessibility5)
+}
 #endif
