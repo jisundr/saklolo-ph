@@ -189,18 +189,21 @@ struct HomeView: View {
         menuChoice = nil
     }
 
-    /// The simulator has no microphone, so the chat runs on a fixed transcript.
-    /// DEBUG builds read it from the `cannedTranscript` default (launch argument
-    /// `-cannedTranscript "..."`) so other paths, such as alone mode, can be driven.
-    // TODO: drop the canned transcript once WhisperKit works (spike 004).
+    /// Text the chat falls back to when nothing was heard. Debug builds only: the
+    /// simulator has no microphone, so the chat runs on a fixed transcript, and the
+    /// `cannedTranscript` default (launch argument `-cannedTranscript "..."`) can
+    /// replace it to drive other paths such as alone mode. Release builds return ""
+    /// so a silent or failed transcription takes the general-alert path and never
+    /// tells contacts about an emergency the person did not describe.
     private static var cannedTranscript: String {
-        let fallback = "Tulong! May sunog sa bahay namin"
         #if DEBUG
         if let override = UserDefaults.standard.string(forKey: "cannedTranscript"), !override.isEmpty {
             return override
         }
+        return "Tulong! May sunog sa bahay namin"
+        #else
+        return ""
         #endif
-        return fallback
     }
 }
 
