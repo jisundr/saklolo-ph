@@ -19,6 +19,8 @@ struct GuideView: View {
     /// Peek, half and full on the mockup's 868pt phone: 300, 540 and 760pt.
     static let peek = PresentationDetent.fraction(0.35)
     static let half = PresentationDetent.fraction(0.62)
+    /// Peek at accessibility text sizes: tall enough for the step, both actions and the disclaimer.
+    static let largeTextPeek = PresentationDetent.fraction(0.55)
 
     let script: FirstAidScript
     let onDone: () -> Void
@@ -27,6 +29,7 @@ struct GuideView: View {
     /// Index into `script.steps`; equal to `steps.count` once every step is done (H7).
     @State private var stepIndex: Int
     @State private var callFailed = false
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     init(script: FirstAidScript, onDone: @escaping () -> Void = {}) {
         self.init(script: script, initialDetent: Self.half, onDone: onDone)
@@ -47,10 +50,29 @@ struct GuideView: View {
 
     private var steps: [String] { script.steps }
     private var isFinished: Bool { stepIndex >= steps.count }
-    private var isPeek: Bool { detent == Self.peek }
+    private var isPeek: Bool { detent == Self.peek || detent == Self.largeTextPeek }
     private var isFull: Bool { detent == .large }
+    /// Accessibility text sizes get their own layout (`largeTextBody`); every other size keeps `regularBody`.
+    private var isLargeText: Bool { typeSize.isAccessibilitySize }
+    private var peekDetent: PresentationDetent { isLargeText ? Self.largeTextPeek : Self.peek }
 
     var body: some View {
+        Group {
+            if isLargeText { largeTextBody } else { regularBody }
+        }
+        .foregroundStyle(Palette.text)
+        .saklaloSheet()
+        .presentationDetents([peekDetent, Self.half, .large], selection: $detent)
+        .presentationDragIndicator(.visible)
+        .presentationBackgroundInteraction(.enabled)
+        .interactiveDismissDisabled()
+        .onChange(of: isLargeText) {
+            // Keep the sheet at peek when the text size crosses into (or out of) the accessibility sizes.
+            if isPeek { detent = peekDetent }
+        }
+    }
+
+    private var regularBody: some View {
         GeometryReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -76,12 +98,50 @@ struct GuideView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
-        .foregroundStyle(Palette.text)
-        .saklaloSheet()
-        .presentationDetents([Self.peek, Self.half, .large], selection: $detent)
-        .presentationDragIndicator(.visible)
-        .presentationBackgroundInteraction(.enabled)
-        .interactiveDismissDisabled()
+    }
+
+    /// Accessibility sizes: the step scrolls; the actions and the disclaimer are pinned below it,
+    /// so both stay on screen at every height (GuideCopy.disclaimer).
+    private var largeTextBody: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    header
+                    if isFull {
+                        stepList
+                        if isFinished { endSentence }
+                    } else if isFinished {
+                        endSentence
+                    } else {
+                        currentStep
+                    }
+                    if isFull { callButton }
+                    sourceLine
+                }
+                .padding(.horizontal, Metrics.gutter)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+
+            VStack(spacing: 10) {
+                actions(width: 0)
+                Text(GuideCopy.disclaimer)
+                    .font(Typography.finePrint)
+                    .foregroundStyle(Palette.textDim)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, Metrics.gutter)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
+            // A rule between the scrolling step and the pinned actions shows where the scroll ends.
+            .overlay(alignment: .top) {
+                Rectangle().fill(Palette.line).frame(height: 1)
+            }
+        }
     }
 
     // MARK: Header
@@ -92,18 +152,53 @@ struct GuideView: View {
             : "\(script.title) · Step \(stepIndex + 1) of \(steps.count)"
     }
 
+    /// The step label alone ("Step 1 of 4"), for the accessibility-size header.
+    private var stepLabel: String {
+        isFinished ? GuideCopy.allStepsDone : "Step \(stepIndex + 1) of \(steps.count)"
+    }
+
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(headerLabel)
+            if isLargeText {
+                largeTextHeading
+            } else {
+                regularHeading
+            }
+            if !steps.isEmpty {
+                // Past the last step every segment reads done. The label above says the same for VoiceOver.
+                StepStrand(count: steps.count, current: stepIndex)
+                    .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private var regularHeading: some View {
+        Text(headerLabel)
+            .font(Typography.signage(20, weight: .bold, relativeTo: .headline))
+            .textCase(.uppercase)
+            .tracking(Typography.wordmarkTracking(20))
+            .foregroundStyle(Palette.textDim)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    /// The step label leads; the script title is a smaller line under it at full height only,
+    /// so at peek and half the step itself stays in view.
+    private var largeTextHeading: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(stepLabel)
                 .font(Typography.signage(20, weight: .bold, relativeTo: .headline))
                 .textCase(.uppercase)
                 .tracking(Typography.wordmarkTracking(20))
                 .foregroundStyle(Palette.textDim)
                 .fixedSize(horizontal: false, vertical: true)
+                .accessibilityLabel(headerLabel)
                 .accessibilityAddTraits(.isHeader)
-            if !steps.isEmpty {
-                // Past the last step every segment reads done. The label above says the same for VoiceOver.
-                StepStrand(count: steps.count, current: stepIndex)
+            if isFull {
+                Text(script.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Palette.textDim)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityHidden(true)
             }
         }
@@ -206,7 +301,13 @@ struct GuideView: View {
 
     @ViewBuilder
     private func actions(width: CGFloat) -> some View {
-        if isPeek {
+        if isPeek && isLargeText {
+            // H2 at accessibility sizes: Next, then Repeat under it at full width, so neither label shrinks.
+            VStack(spacing: 10) {
+                primaryButton
+                repeatButton(size: .regular)
+            }
+        } else if isPeek {
             // H2: Repeat and Next (Next 1.6x wide).
             HStack(spacing: 10) {
                 repeatButton(size: .regular)
@@ -292,6 +393,16 @@ struct GuideView: View {
 
     // MARK: Footer
 
+    /// The source alone; at accessibility sizes it scrolls with the step and the disclaimer is pinned.
+    private var sourceLine: some View {
+        Text("Source: \(script.source)")
+            .font(Typography.finePrint)
+            .foregroundStyle(Palette.textDim)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
     private var footer: some View {
         Text("Source: \(script.source) · \(GuideCopy.disclaimer)")
             .font(Typography.finePrint)
@@ -344,3 +455,5 @@ private struct GuidePreviewHost: View {
 #Preview("Full (H3)") { GuidePreviewHost(detent: .large, step: 1) }
 #Preview("General (H6)") { GuidePreviewHost(detent: GuideView.half, general: true) }
 #Preview("End (H7)") { GuidePreviewHost(detent: GuideView.half, step: 4) }
+#Preview("Peek, large text") { GuidePreviewHost(detent: GuideView.largeTextPeek, step: 1).dynamicTypeSize(.accessibility3) }
+#Preview("Half, large text") { GuidePreviewHost(detent: GuideView.half, general: true).dynamicTypeSize(.accessibility3) }

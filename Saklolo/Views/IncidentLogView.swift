@@ -126,6 +126,15 @@ private extension View {
     }
 }
 
+/// What counts as something said. Speech can come back as "..." or "?!"
+/// for silence; that is treated like nothing heard.
+enum SpokenText {
+    /// True when the text has at least one letter or digit.
+    static func hasWords(_ text: String) -> Bool {
+        text.unicodeScalars.contains { CharacterSet.alphanumerics.contains($0) }
+    }
+}
+
 /// Wording shared by the incident log (J1) and detail (J2).
 enum IncidentText {
     /// "Today · 7:42 PM", "Yesterday · 9:15 PM", "Oct 3 · 9:15 PM"; the year is added outside the current one.
@@ -142,7 +151,7 @@ enum IncidentText {
     }
 
     static func summary(_ incident: Incident) -> String {
-        incident.summary.isEmpty ? "No summary" : incident.summary
+        SpokenText.hasWords(incident.summary) ? incident.summary : "No summary"
     }
 
     /// "Guide · Heavy bleeding", "Alone · Fall, can't move"; the mode alone when no script was picked.

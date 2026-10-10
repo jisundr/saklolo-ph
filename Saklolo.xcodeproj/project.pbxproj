@@ -57,6 +57,7 @@
 		956F90E50143419085B65E86 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175032A4F57AB68F0D29CD0D /* RootView.swift */; };
 		9C650671D436FF199B7F2DF7 /* BarlowCondensed-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14861369AB646D66DBE77909 /* BarlowCondensed-SemiBold.ttf */; };
 		9CA889BEE732381920AB45A1 /* SituationClassifierService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */; };
+		9EE2DBB2CDFB5F5089E8FD81 /* SpokenTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA007DD1C36D813EDA924ED5 /* SpokenTextTests.swift */; };
 		A5577E6966F0DD21BBFB4F1C /* AlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1794D8176111E9C002443 /* AlertCoordinator.swift */; };
 		AAC176FD2C8931415B589D24 /* VoiceOrb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D25EDF314277981A0534C5F /* VoiceOrb.swift */; };
 		ACF40DC80CD7A5B1EB1254CB /* MessageComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB473FFBEDCEB318365149D /* MessageComposer.swift */; };
@@ -143,6 +144,7 @@
 		A4D75935ED7DD0B5A7A14BFF /* KeywordDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeywordDatabase.swift; sourceTree = "<group>"; };
 		A64B8818017FE64A06380DF4 /* AlertQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertQueue.swift; sourceTree = "<group>"; };
 		A88E1D62881EB144522EC182 /* ListeningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningView.swift; sourceTree = "<group>"; };
+		AA007DD1C36D813EDA924ED5 /* SpokenTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpokenTextTests.swift; sourceTree = "<group>"; };
 		ABB31197872E49B14F0C9D95 /* HomeStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeStatus.swift; sourceTree = "<group>"; };
 		ABCD2E3944C15032EBD1193E /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		B437C2B35EE0B4EC78D3F015 /* AloneCountdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AloneCountdownTests.swift; sourceTree = "<group>"; };
@@ -204,6 +206,7 @@
 				1421D6CC56D1D9DDFF6B09A4 /* ScriptLoaderTests.swift */,
 				05F026F0CA04D6EB972F9CDA /* SessionExitTests.swift */,
 				475570EBBB4C0AF9520B2777 /* ShortcutMessageTests.swift */,
+				AA007DD1C36D813EDA924ED5 /* SpokenTextTests.swift */,
 				1F1554B937169BB45A23EA45 /* TestClock.swift */,
 				BE164405132473F38B905732 /* VoiceOrbStatusTests.swift */,
 			);
@@ -541,6 +544,7 @@
 				BC4C1FE1FC86CE17753BB4ED /* ScriptLoaderTests.swift in Sources */,
 				743BFAAF528D807B8DC37F09 /* SessionExitTests.swift in Sources */,
 				262E0CBEC3C5B463D2B5BEB9 /* ShortcutMessageTests.swift in Sources */,
+				9EE2DBB2CDFB5F5089E8FD81 /* SpokenTextTests.swift in Sources */,
 				8A9A3EB2E0C5A7E014AC6C58 /* TestClock.swift in Sources */,
 				54489CDF282E6718BA277F00 /* VoiceOrbStatusTests.swift in Sources */,
 			);
