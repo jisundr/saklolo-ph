@@ -11,6 +11,12 @@ DerivedData/
 .build/
 
 
+# macOS
+.DS_Store
+
+# Test results
+*.xcresult
+
 # Database signing key: lives outside the repo (~/.saklolo/), never committed.
 # See docs/DATABASE-UPDATES.md.
 *signing-key*
