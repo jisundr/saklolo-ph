@@ -14,7 +14,7 @@ Emergencies happen where there is no data: inside homes with weak signal, during
 
 1. Tap the red button, then say what happened in Taglish (for example "Tulong! Nahulog si Lola").
 2. WhisperKit transcribes the speech on the phone.
-3. Apple Foundation Models classifies the transcript into one of four scripts (bleeding, fall, head injury, unconscious) or a general one, and chooses alone mode or guide mode. If the model is unavailable or too slow, bundled keyword rules (`keywords.json`) do it instead.
+3. Apple Foundation Models classifies the transcript into one of four scripts (bleeding, fall, head injury, unconscious) or a general one, and chooses alone mode or guide mode. If the model is unavailable or too slow, keyword rules (`database.json`, bundled or a signed update) do it instead.
 4. One alert goes out at the end of understanding, no later than 10 seconds after the tap. If nothing was understood, a general text is sent. Cancelling before it fires sends nothing.
 5. The alert is sent through an Apple Shortcut named "Saklolo", with the GPS location in the text, and the app then dials contact #1. The app says contacts were told only after the Shortcut reports success. Otherwise it shows a card with a button that opens the system message composer.
 6. Guide mode shows the steps of the matching script one at a time, with Next, Back and Repeat. The steps are not read aloud yet.
@@ -60,7 +60,7 @@ The speech model is not bundled. It downloads once (about 632 MB, needs network)
 xcodebuild -scheme Saklolo -destination 'platform=iOS Simulator,name=<an iPhone simulator>' test
 ```
 
-The 170 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
+The 229 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simulator.
 
 ### Simulator versus a real iPhone
 
@@ -73,7 +73,8 @@ The 170 unit tests pass on the iPhone 15 Pro Max (iOS 27) device and on its simu
 | --- | --- | --- |
 | Speech-to-text (WhisperKit) | On the phone | One-time model download on first launch (about 632 MB); none afterwards |
 | Situation classification (Apple Foundation Models, keyword fallback) | On the phone | None |
-| First-aid guidance (bundled JSON scripts) | On the phone | None |
+| First-aid guidance (bundled baseline, replaced by a signed update when one is newer) | On the phone | None |
+| Keyword and first-aid database update (GitHub raw) | On the phone, after the download | A small file, only when there is signal, at most every 6 hours; otherwise none |
 | GPS (CoreLocation) | On the phone | None |
 | SMS and calls | Carrier | Cell network, not data |
 
@@ -83,7 +84,7 @@ Airplane-mode behaviour with a cached model has not been verified (spike 004b is
 
 - Models: Whisper large-v3 turbo (`openai_whisper-large-v3-v20240930_turbo_632MB`) through WhisperKit; Apple Foundation Models (`SystemLanguageModel`) where available.
 - Frameworks: SwiftUI, WhisperKit (argmax-oss-swift 1.1.1), Foundation Models, CoreLocation, Apple Shortcuts (x-callback-url), XcodeGen for project generation.
-- APIs and cloud services: none for the AI. The one network call the app makes is the model download on first launch (fetched by WhisperKit; the host is not documented here). SMS and calls go over the carrier network.
+- APIs and cloud services: none for the AI. The app makes two network calls. The first is the model download on first launch (fetched by WhisperKit; the host is not documented here). The second is the database update check: a GET of two files (`database/database.json` and its `.sig`) from `raw.githubusercontent.com/jisundr/saklolo-ph`, only when there is signal and at most every 6 hours. An update is used only if its signature checks out against the public key in the app. The request sends no contacts, location, transcript or device identifier, though GitHub can see the phone's IP address as with any web request. A failed check is silent, and the bundled database is always the fallback. The check stays off until the public key is added to the app (`Saklolo/Resources/database-public-key.txt`); until then the bundled database is all the app uses. SMS and calls go over the carrier network.
 - Existing code and assets: first-aid content follows the IFRC International First Aid, Resuscitation, and Education Guidelines 2020; Barlow Condensed font (SIL OFL, `Saklolo/Resources/Fonts/OFL.txt`); no pre-starter code is listed in the docs.
 - AI development tools: Claude Code.
 
@@ -92,12 +93,14 @@ Airplane-mode behaviour with a cached model has not been verified (spike 004b is
 - Checked on a real iPhone with the earlier plain-text Shortcut: with the phone unlocked, it sent the SMS and reported success back to the app, and the app then showed "I've told ...". The JSON input (Get Dictionary from Input) has not been re-verified on a device. Not verified: that it can send with no taps on a locked phone (spike 003 is open). A tap may be needed.
 - Not verified: Apple Foundation Models on a phone. The measured accuracy comes from a Mac (spike 001); whether it is available on the test phone was not checked (spike 005 is open). When it is unavailable or too slow, the keyword rules are used.
 - Not verified: Taglish transcription accuracy across a full set of utterances (only 3 sentences were spoken in spike 004).
-- Medical content is fixed JSON, written once and not generated. The guide screen shows: "This is a guide only. It does not replace a doctor or rescuer."
+- Not verified: an airplane-mode launch with a cached update on a real phone, and how long raw.githubusercontent.com takes to serve a newly published file.
+- Medical content is fixed JSON (`database.json`), written by hand and not generated. Updates replace it only with a signed file that passes the same rules. The guide screen shows: "This is a guide only. It does not replace a doctor or rescuer."
 - Not built: spoken steps (text-to-speech), a quick trigger outside the app (Lock Screen control, Action Button), CPR mode, escalation after 30 and 60 seconds, shout or fall detection, the contact's reply side, Android, background listening. A Motion permission string exists but fall detection is not built.
 
 ## Repo map
 
-- `Saklolo/` app source: `Services/` (transcription, classifier, alert, location), `Views/`, `Models/`, `Theme/`, `Resources/` (scripts, `keywords.json`, fonts)
+- `Saklolo/` app source: `Services/` (transcription, classifier, alert, location), `Views/`, `Models/`, `Theme/`, `Services/Database/` (database file, validator, signed updates), `Resources/` (`database.json` with the keywords and scripts, fonts)
+- `tools/dbtool.sh` signs and verifies database updates
 - `SakloloTests/` unit tests
 - `project.yml` XcodeGen project definition
 - `docs/` PRD, project definition, spikes and findings; `DESIGN.md`, `PRODUCT.md` design and product notes

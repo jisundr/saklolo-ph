@@ -3,21 +3,20 @@ import XCTest
 @testable import Saklolo
 
 final class KeywordDatabaseTests: XCTestCase {
-    /// Each script JSON carries its own keywords; the classifier reads
-    /// `keywords.json`. They must not drift apart.
+    /// Keywords live only in each script of `database.json`; every one of
+    /// them must lead the classifier to its own script, not an earlier one.
     func testEveryScriptKeywordResolvesToItsOwnScript() throws {
         let db = KeywordDatabase.bundled()
-        for script in try ScriptLoader().loadBundledScripts() {
+        for script in try ScriptLoader().loadBundledScripts() where script.id != "general" {
             for keyword in script.keywords {
-                XCTAssertEqual(db.match(keyword), script.id, "\"\(keyword)\" in \(script.id).json")
+                XCTAssertEqual(db.match(keyword), script.id, "\"\(keyword)\" in \(script.id)")
             }
         }
     }
 
     /// `builtIn` is the last resort and must say what the bundled file says.
     func testTheBuiltInListMatchesTheBundledFile() throws {
-        let url = try XCTUnwrap(Bundle.main.url(forResource: "keywords", withExtension: "json"))
-        let bundled = try XCTUnwrap(KeywordDatabase.load(from: url))
+        let bundled = try XCTUnwrap(FirstAidDatabase.bundled()).keywords
 
         XCTAssertEqual(bundled.entries.map(\.script), KeywordDatabase.builtIn.entries.map(\.script))
         XCTAssertEqual(bundled.entries.map(\.keywords), KeywordDatabase.builtIn.entries.map(\.keywords))

@@ -401,10 +401,11 @@ struct ListeningView: View {
         incident.lng = outcome.location?.lng
     }
 
-    /// The bundled script for the classifier's pick, else the general one.
+    /// The script for the classifier's pick, else the general one, from the
+    /// database in use. A fresh copy, so an update arriving mid-guide does not
+    /// change the open guide.
     private static func script(id: String) -> FirstAidScript? {
-        let scripts = (try? ScriptLoader().loadBundledScripts()) ?? []
-        return scripts.first { $0.id == id } ?? scripts.first { $0.id == "general" }
+        DatabaseStore.shared.script(id: id)
     }
 }
 

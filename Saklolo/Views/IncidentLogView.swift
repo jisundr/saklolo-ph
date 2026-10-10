@@ -184,14 +184,9 @@ enum IncidentText {
         date.formatted(date: .omitted, time: .shortened)
     }
 
-    /// The bundled script's title (scripts are not kept in the store). Reads `<id>.json` directly:
-    /// the build copies the scripts to the bundle root, not into a `Scripts` folder.
+    /// The script's title in the database in use (scripts are not kept in the store).
     private static func scriptTitle(id: String) -> String? {
-        struct TitleOnly: Decodable { let title: String }
-        let url = Bundle.main.url(forResource: id, withExtension: "json", subdirectory: "Scripts")
-            ?? Bundle.main.url(forResource: id, withExtension: "json")
-        guard let url, let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(TitleOnly.self, from: data).title
+        DatabaseStore.shared.active.title(id: id)
     }
 }
 
