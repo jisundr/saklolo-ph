@@ -168,7 +168,7 @@ final class AlertQueue: ObservableObject {
         for index in entries.indices where entries[index].status == .waiting {
             let id = entries[index].id
             do {
-                try sender.sendText(entries[index].outcome.message, id: id) { [weak self] in
+                try sender.sendText(entries[index].outcome.message, to: entries[index].outcome.recipientPhones, id: id) { [weak self] in
                     self?.resolve(id, .failed)
                 }
                 entries[index].status = .confirming

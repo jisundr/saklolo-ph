@@ -348,6 +348,14 @@ final class AlertCoordinatorTests: XCTestCase {
         XCTAssertEqual(outcome.recipientPhones, [ben.phone, lina.phone])
     }
 
+    func testTheShortcutIsHandedTheSameNumbersInOrder() async throws {
+        coordinator.begin(at: tap, recipients: [lina, ben]) { _ in }
+
+        _ = try await sent(fall())
+
+        XCTAssertEqual(sender.recipients, [[ben.phone, lina.phone]])
+    }
+
     // MARK: - No signal (I3)
 
     func testNoSignalHoldsTheTextInsteadOfSendingIt() async throws {
@@ -402,15 +410,18 @@ final class SignalSwitch: SignalChecking {
 final class RecordingSender: AlertSending {
     struct Failure: Error {}
     var texts: [String] = []
+    /// The numbers each text was handed over with.
+    var recipients: [[String]] = []
     /// The alert id each text was handed over with.
     var ids: [UUID] = []
     var calls: [String] = []
     var textFails = false
     private var notOpened: [@MainActor () -> Void] = []
 
-    func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
+    func sendText(_ message: String, to recipients: [String], id: UUID, notOpened: @escaping @MainActor () -> Void) throws {
         if textFails { throw Failure() }
         texts.append(message)
+        self.recipients.append(recipients)
         ids.append(id)
         self.notOpened.append(notOpened)
     }

@@ -57,6 +57,17 @@ final class AlertQueueTests: XCTestCase {
         XCTAssertEqual(queue.latest?.status, .confirming, "not sent until the Shortcut confirms")
     }
 
+    func testARetryHandsTheShortcutTheStoredNumbers() {
+        var held = outcome(.queued, text: "SAKLOLO: held")
+        held.recipientPhones = ["+639170000001", "+639170000002"]
+        queue.record(held)
+
+        signal.hasSignal = true
+        queue.retry()
+
+        XCTAssertEqual(sender.recipients, [["+639170000001", "+639170000002"]])
+    }
+
     func testTheUnsentRowsAreStampedWhenTheRetryIsConfirmed() {
         let held = outcome(.queued)
         queue.record(held)

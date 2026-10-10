@@ -216,7 +216,7 @@ struct FallbackCardView: View {
 @MainActor
 private enum FallbackPreview {
     struct NoSender: AlertSending {
-        func sendText(_ message: String, id: UUID, notOpened: @escaping @MainActor () -> Void) throws {}
+        func sendText(_ message: String, to recipients: [String], id: UUID, notOpened: @escaping @MainActor () -> Void) throws {}
         func call(phone: String) throws {}
     }
 

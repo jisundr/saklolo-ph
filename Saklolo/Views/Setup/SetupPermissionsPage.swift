@@ -41,6 +41,25 @@ struct SetupPermissionsPage: View {
                         deniedNote: "The text goes without a map link.",
                         state: PermissionState(location.authorizationStatus)
                     )
+
+                    if ShortcutInstaller.isAvailable {
+                        Button { ShortcutInstaller.presentImport() } label: {
+                            Text("Add the Saklolo Shortcut")
+                                .font(.body.weight(.bold))
+                                .foregroundStyle(Palette.text)
+                                .frame(maxWidth: .infinity, minHeight: Metrics.minTarget)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .background(
+                            RoundedRectangle(cornerRadius: Metrics.tileRadius, style: .continuous)
+                                .fill(Palette.groundRaised)
+                        )
+                        Text("Sends your alert text silently. Tap Add, then allow Send Message when asked.")
+                            .font(Typography.finePrint)
+                            .foregroundStyle(Palette.textDim)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
