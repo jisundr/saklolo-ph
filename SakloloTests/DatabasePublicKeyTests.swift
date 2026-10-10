@@ -10,12 +10,12 @@ final class DatabasePublicKeyTests: XCTestCase {
         return url
     }
 
-    /// Until Jayson runs keygen and commits the key, the app has none, so the
-    /// updater is never built and no request is made.
+    /// The app ships with the publisher's public key, so the updater exists
+    /// and checks for signed updates (it still makes no request without signal).
     @MainActor
-    func testTheAppShipsWithoutAKeyForNow() {
-        XCTAssertNil(DatabasePublicKey.bundled())
-        XCTAssertNil(DatabaseUpdater.shared)
+    func testTheAppShipsWithAValidKey() {
+        XCTAssertNotNil(DatabasePublicKey.bundled())
+        XCTAssertNotNil(DatabaseUpdater.shared)
     }
 
     func testAMissingFileGivesNoKey() throws {

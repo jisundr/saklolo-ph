@@ -23,7 +23,7 @@ How to publish an update to the Saklolo on-device database (keywords and first-a
 3. Back it up now, somewhere private and separate from this Mac. Never commit it.
 4. Commit only `Saklolo/Resources/database-public-key.txt`, and ship an app build that includes it.
 
-Until a public key is bundled, the app makes no update request at all and uses the bundle only. As of writing, that file does not exist in the repo yet.
+The public key is bundled (`Saklolo/Resources/database-public-key.txt`), so the app checks for updates. Without that file the app would make no update request at all and use the bundle only. Until you publish a signed `database/database.json`, the check gets a 404 and the bundle stays in use.
 
 ## 3. Publishing an update
 

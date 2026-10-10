@@ -90,6 +90,7 @@
 		D836336F47C77E2A49289ACF /* ContactEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C559F9BC7F6140AD134DD90F /* ContactEntry.swift */; };
 		D88B0C5C08B58605C2D59CC5 /* SakloloApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E646B7C4DEABF92883A14158 /* SakloloApp.swift */; };
 		D9EB48B8E5FC34F749BD08B4 /* DatabaseUpdateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AB72BBDE8D047F0B77DF83 /* DatabaseUpdateConfig.swift */; };
+		DC5D207144701F866781B3A7 /* database-public-key.txt in Resources */ = {isa = PBXBuildFile; fileRef = 997D3C12579B88D18C6A87A7 /* database-public-key.txt */; };
 		E5AE5EA166FD46F91E08571A /* ModelStateTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBC28EB72731C2B0DB3B4BD /* ModelStateTextTests.swift */; };
 		E8AEE9952D5980A31093CDBD /* BarlowCondensed-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */; };
 		EB7F5411641598F76171DDE0 /* AlertQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879792E6B537E6E6044316E0 /* AlertQueueTests.swift */; };
@@ -165,6 +166,7 @@
 		937C57B06A955B89B0671C56 /* ModelState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelState.swift; sourceTree = "<group>"; };
 		95FBB2943638B230047BEBD0 /* BarlowCondensed-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BarlowCondensed-ExtraBold.ttf"; sourceTree = "<group>"; };
 		961C3C2F9EC496BA8C60873A /* SituationClassifierService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SituationClassifierService.swift; sourceTree = "<group>"; };
+		997D3C12579B88D18C6A87A7 /* database-public-key.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "database-public-key.txt"; sourceTree = "<group>"; };
 		9A1A73CCD237B32763903411 /* DatabaseValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseValidatorTests.swift; sourceTree = "<group>"; };
 		9BA1A3C166DBB4BAED919887 /* IncidentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentView.swift; sourceTree = "<group>"; };
 		A2AC0CC31AF41E7ED943E952 /* DatabaseFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseFixtures.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				F1C6BD8F7D9C532DBEBF633D /* Assets.xcassets */,
+				997D3C12579B88D18C6A87A7 /* database-public-key.txt */,
 				B2D731551001C94811052840 /* database.json */,
 				B485FBDB1DC1BE594D5491A1 /* Fonts */,
 			);
@@ -533,6 +536,7 @@
 				E8AEE9952D5980A31093CDBD /* BarlowCondensed-ExtraBold.ttf in Resources */,
 				9C650671D436FF199B7F2DF7 /* BarlowCondensed-SemiBold.ttf in Resources */,
 				CFA35069439C3A4216474913 /* OFL.txt in Resources */,
+				DC5D207144701F866781B3A7 /* database-public-key.txt in Resources */,
 				0819F19575191CF72EE6630C /* database.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
